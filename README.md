@@ -15,6 +15,8 @@ go get ./..
 go run ./cmd
 ```
 
+Locally bot's artficats can be seen in `cmd/testdata`
+
 ### Overarching design principles
 - `Clarity`: The code’s purpose and rationale is clear to the reader.
 - `Simplicity`: The code accomplishes its goal in the simplest way possible.
