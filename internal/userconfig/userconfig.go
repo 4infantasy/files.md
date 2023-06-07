@@ -15,17 +15,17 @@ type Config struct {
 	MoveToConfigButtons []string `json:"moveToButtons"`
 }
 
-var fullConfig = Config{
+var DefaultConfig = Config{
 	Home:                "today",
 	MoveToConfigButtons: []string{"tomorrow", "later", "day", "note", "checklist", "doc", "recent", "journal"},
 }
 
-var tasksOnlyConfig = Config{
+var TasksOnlyConfig = Config{
 	Home:                "today",
 	MoveToConfigButtons: []string{"tomorrow", "later", "day"},
 }
 
-var notesOnlyConfig = Config{
+var NotesOnlyConfig = Config{
 	Home:                "notes",
 	MoveToConfigButtons: []string{"##NOTE_DIRS##"},
 }
