@@ -941,7 +941,12 @@ func (b *Bot) moveToJournal(params []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to move to journal: can't add note: %w", err)
 	}
-	return b.fs.Del(dir, filename)
+
+	err = b.fs.Del(dir, filename)
+	if err != nil {
+		return fmt.Errorf("failed to move to journal: can't delete note: %w", err)
+	}
+	return b.showList(nil)
 }
 
 func (b *Bot) complete(params []string) error {
