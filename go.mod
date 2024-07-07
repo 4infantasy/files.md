@@ -23,6 +23,7 @@ require (
 	github.com/lmittmann/tint v0.3.4 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rivo/uniseg v0.4.7
 	github.com/yuin/gopher-lua v1.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

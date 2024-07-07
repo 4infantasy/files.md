@@ -34,6 +34,7 @@ const (
 	DirInbox     = "inbox"
 	DirImg       = "img"
 	DirJournal   = "journal"
+	DirInsights  = "insights"
 	DirRead      = "-read-"
 	DirWatch     = "-watch-"
 	DirShop      = "-shop-"
@@ -110,6 +111,7 @@ func (fs FS) Exists(dir, filename string) (bool, error) {
 	return exists, nil
 }
 
+// TODO refactor to read
 func (fs FS) Content(dir, filename string) (string, error) {
 	path := fs.Path(dir, filename)
 	if !fs.isSafe(path) {
