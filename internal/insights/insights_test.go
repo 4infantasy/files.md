@@ -23,9 +23,17 @@ func TestRead(t *testing.T) {
 	habits, err := Read(botFS, 1970)
 	r.NoError(err)
 
-	r.Len(habits, 7)
+	r.Len(habits, 6)
 	year, ok := habits["Went to gym"]
 	r.True(ok)
 
 	r.Len(year, 31)
+
+	completed, ok := year[1]
+	r.True(ok)
+	r.Equal(false, completed)
+
+	completed, ok = year[31]
+	r.True(ok)
+	r.Equal(true, completed)
 }
