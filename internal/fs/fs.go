@@ -317,6 +317,7 @@ func (fs FS) IsMultiline(dir, filename string) (bool, error) {
 	return stat.Size() > 0, nil
 }
 
+// TODO del?
 // RestoreContent restores original user's message text by given file
 func (fs FS) RestoreContent(dir, filename string) (string, error) {
 	path := fs.Path(dir, filename)

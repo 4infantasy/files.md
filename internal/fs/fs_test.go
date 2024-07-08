@@ -115,54 +115,6 @@ func TestGetFilesInDir(t *testing.T) {
 	r.Equal("First task.md", files[0].Name)
 }
 
-func TestRestoreMsgTextFromFilename(t *testing.T) {
-	r := require.New(t)
-
-	fs, _ := NewFS("/", afero.NewMemMapFs())
-	err := fs.Write("", "File.md", "")
-	r.NoError(err)
-
-	msg, err := fs.RestoreContent("", "File.md")
-	r.NoError(err)
-	r.Equal("File", msg)
-}
-
-func TestRestoreMsgTextFromFilenameAndContent(t *testing.T) {
-	r := require.New(t)
-
-	fs, _ := NewFS("/", afero.NewMemMapFs())
-	err := fs.Write("", "Title.md", "Content")
-	r.NoError(err)
-
-	msg, err := fs.RestoreContent("", "Title.md")
-	r.NoError(err)
-	r.Equal("Title\nContent", msg)
-}
-
-func TestRestoreMsgTextFromLongFilenameAndContent(t *testing.T) {
-	r := require.New(t)
-
-	fs, _ := NewFS("/", afero.NewMemMapFs())
-	err := fs.Write("", "Title....md", "Title and Content")
-	r.NoError(err)
-
-	msg, err := fs.RestoreContent("", "Title....md")
-	r.NoError(err)
-	r.Equal("Title and Content", msg)
-}
-
-func TestRestoreMsgTextFromFilenameWithSpaces(t *testing.T) {
-	r := require.New(t)
-
-	fs, _ := NewFS("/", afero.NewMemMapFs())
-	err := fs.Write("", " File.md ", "")
-	r.NoError(err)
-
-	msg, err := fs.RestoreContent("", " File.md ")
-	r.NoError(err)
-	r.Equal("File", msg)
-}
-
 func TestCreateBaseDirs(t *testing.T) {
 	r := require.New(t)
 

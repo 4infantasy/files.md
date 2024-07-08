@@ -68,11 +68,11 @@ func TestAddMultilineTaskToToday(t *testing.T) {
 
 	r.Len(tasks, 1)
 	r.Equal("New task.md", tasks[0].Name)
-	r.Equal(true, tasks[0].IsMultiline)
+	r.True(tasks[0].IsMultiline)
 
 	content, err := bot.fs.Read("today", "New task.md")
 	r.NoError(err)
-	r.Equal("Content", content)
+	r.Equal("New task\nContent", content)
 }
 
 func TestAddTaskWithSpecCharsToToday(t *testing.T) {
@@ -96,11 +96,11 @@ func TestAddTaskWithSpecCharsToToday(t *testing.T) {
 
 	r.Len(tasks, 1)
 	r.Equal("New task.md", tasks[0].Name)
-	r.Equal(true, tasks[0].IsMultiline)
+	r.True(tasks[0].IsMultiline)
 
 	content, err := bot.fs.Read("today", "New task.md")
 	r.NoError(err)
-	r.Equal("Url! http://g.com (Also\\_text] ##header\n-item1\n-item2\n1+1=2", content)
+	r.Equal("New task\nUrl! http://g.com (Also\\_text] ##header\n-item1\n-item2\n1+1=2", content)
 }
 
 func TestAddTaskToLater(t *testing.T) {
@@ -382,7 +382,7 @@ func TestAddMultipleItemsToChecklist(t *testing.T) {
 	r.NoError(err)
 	err = fsys.MakeDir("-checklist1-")
 	r.NoError(err)
-	err = fsys.Write("today", "Item.md", "item2\nitem3\n\n")
+	err = fsys.Write("today", "Item.md", "item\nitem2\nitem3\n\n")
 	r.NoError(err)
 
 	redis, err := miniredis.Run()

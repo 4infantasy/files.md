@@ -345,12 +345,14 @@ func (b *Bot) extractTitleAndContent(msg string) (string, string, error) {
 	}
 
 	parts := strings.SplitN(msg, "\n", 2)
-
 	title := txt.Ucfirst(strings.TrimSpace(parts[0]))
 	content := ""
-	if len(parts) > 1 {
-		content = strings.TrimSpace(parts[1])
+
+	isMultiline := len(parts) > 1
+	if isMultiline {
+		content = strings.TrimSpace(msg)
 	}
+
 	if len(title) > maxTitleLength {
 		if len(content) == 0 {
 			content = title
@@ -886,9 +888,9 @@ func (b *Bot) moveToDoc(params []string) error {
 		return fmt.Errorf("move to doc: can't unhash doc '%s' in today: %w", filenameHash, err)
 	}
 
-	fileContent, err := b.fs.RestoreContent(fs.DirToday, filename)
+	fileContent, err := b.fs.Read(fs.DirToday, filename)
 	if err != nil {
-		return fmt.Errorf("move to dc: can't restore file content of '%s': %w", filename, err)
+		return fmt.Errorf("move to dc: can't read content of '%s': %w", filename, err)
 	}
 
 	// We can tolerate this
@@ -932,7 +934,7 @@ func (b *Bot) moveToChecklist(params []string) error {
 	}
 
 	if isMultiline && shouldSplitChecklist(checklist) {
-		content, err := b.fs.RestoreContent(fs.DirToday, filename)
+		content, err := b.fs.Read(fs.DirToday, filename)
 		if err != nil {
 			return fmt.Errorf("move to checklist: %w", err)
 		}
