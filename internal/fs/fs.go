@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -122,7 +123,6 @@ func (fs FS) Read(dir, filename string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("fs read: can't check if the file is safe to access '%s': %w", path, err)
 	}
-
 	if !isSafe {
 		return "", fmt.Errorf("fs read: unsafe path '%s': %w", path, errUnsafePath)
 	}
@@ -185,12 +185,12 @@ func (fs FS) Del(dir, filename string) error {
 		return fmt.Errorf("fs del: check if file is safe to access '%s': %w", path, err)
 	}
 	if !isSafe {
-		return fmt.Errorf("delete file: unsafe path '%s': %w", path, errUnsafePath)
+		return fmt.Errorf("fs del file: unsafe path '%s': %w", path, errUnsafePath)
 	}
 
 	err = fs.backend.Remove(path)
 	if err != nil {
-		return fmt.Errorf("delete file: can't remove '%s': %w", path, err)
+		return fmt.Errorf("fs file: can't remove '%s': %w", path, err)
 	}
 
 	return nil
@@ -261,7 +261,7 @@ func (fs FS) Unhash(dir, filenameHash string) (string, error) {
 
 func (fs FS) FilesAndDirs(dir string) ([]File, error) {
 	userPath := fs.Path(dir, "")
-	isSafe, err := fs.isSafe(userPath) 
+	isSafe, err := fs.isSafe(userPath)
 	if err != nil {
 		return nil, fmt.Errorf("exists: check if file is safe to access '%s': %w", userPath, err)
 	}
@@ -335,11 +335,22 @@ func (fs FS) isSafe(path string) (bool, error) {
 		return false, err
 	}
 	if exists {
-		fileInfo, err := fs.backend.Stat(path)
-		if err != nil {
+		lstater, ok := fs.backend.(afero.Lstater)
+		if !ok {
+			slog.Error("CAN'T STAT")
+			// TODO return new error
 			return false, err
 		}
-		if fileInfo.Mode()&os.ModeSymlink != 0 {
+
+		stat, _, err := lstater.LstatIfPossible(path)
+		if err != nil {
+			slog.Error("CAN'T STAT 2")
+			// TODO return new error
+			// TODO wrap err
+			return false, err
+		}
+		slog.Error("FILE INFO", "info", stat)
+		if stat.Mode()&os.ModeSymlink != 0 {
 			return false, nil
 		}
 	}
