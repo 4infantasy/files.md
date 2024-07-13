@@ -14,8 +14,8 @@ import (
 
 var now = time.Now
 
-func TodayReport(fsys *fs.FS, db *db.DB, userID int64) (string, error) {
-	files, err := DoneToday(fsys, db, userID)
+func TodayReport(userFS *fs.FS, db *db.DB, userID int64) (string, error) {
+	files, err := DoneToday(userFS, db, userID)
 	if err != nil {
 		return "", fmt.Errorf("stats.TodayReport: %w", err)
 	}
@@ -26,7 +26,7 @@ func TodayReport(fsys *fs.FS, db *db.DB, userID int64) (string, error) {
 		stats = append(stats, fmt.Sprintf("%s <b>%s</b>", ico, fs.Title(file)))
 	}
 
-	trashedFiles, err := fsys.FilesAndDirs(fs.DirArchive)
+	trashedFiles, err := userFS.FilesAndDirs(fs.DirArchive)
 	if err != nil {
 		return "", fmt.Errorf("stats.TodayReport: can't get trashed files: %w", err)
 	}
@@ -56,16 +56,16 @@ func icon(filename string) string {
 	return "✅"
 }
 
-func DoneToday(fsys *fs.FS, db *db.DB, userID int64) ([]string, error) {
-	return doneToday(fsys, db, userID, false)
+func DoneToday(userFS *fs.FS, db *db.DB, userID int64) ([]string, error) {
+	return doneToday(userFS, db, userID, false)
 }
 
-func DoneTodayScheduled(fsys *fs.FS, db *db.DB, userID int64) ([]string, error) {
-	return doneToday(fsys, db, userID, true)
+func DoneTodayScheduled(userFS *fs.FS, db *db.DB, userID int64) ([]string, error) {
+	return doneToday(userFS, db, userID, true)
 }
 
-func doneToday(fsys *fs.FS, db *db.DB, userID int64, withScheduled bool) ([]string, error) {
-	files, err := fsys.FilesAndDirs(fs.DirArchive)
+func doneToday(userFS *fs.FS, db *db.DB, userID int64, withScheduled bool) ([]string, error) {
+	files, err := userFS.FilesAndDirs(fs.DirArchive)
 	if err != nil {
 		return nil, fmt.Errorf("stats.DoneTasks: %w", err)
 	}

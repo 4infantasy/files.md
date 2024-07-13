@@ -21,20 +21,20 @@ func main() {
 	// [dir][note] => links referring to our note (backlinks)
 	backlinks := make(map[string]map[string][]string)
 
-	fsys, err := fs.NewFS(".", afero.NewOsFs())
+	userFS, err := fs.NewFS(".", afero.NewOsFs())
 	if err != nil {
 		fmt.Printf("Can't create FS: %s", err)
 		return
 	}
 
-	files, err := fsys.FilesAndDirs("")
+	files, err := userFS.FilesAndDirs("")
 	if err != nil {
 		fmt.Printf("Can't get files and dirs: %s", err)
 		return
 	}
 	dirs := fs.OnlyNoteDirs(fs.OnlyDirs(files))
 	for _, dir := range dirs {
-		notes, err := fsys.FilesAndDirs(dir.Name)
+		notes, err := userFS.FilesAndDirs(dir.Name)
 		if err != nil {
 			fmt.Printf("Can't get notes: %s", err)
 		}
@@ -45,7 +45,7 @@ func main() {
 				continue
 			}
 
-			content, err := fsys.Read(dir.Name, note.Name)
+			content, err := userFS.Read(dir.Name, note.Name)
 			if err != nil {
 				fmt.Printf("Can't get content: %s", err)
 				return
@@ -91,7 +91,7 @@ func main() {
 	for dir, notes := range backlinks {
 		for note, links := range notes {
 			for _, link := range links {
-				content, err := fsys.Read(dir, note+".md")
+				content, err := userFS.Read(dir, note+".md")
 				if err != nil {
 					fmt.Printf("Can't get target note content: %s, backlinks: %v", err, links)
 					return
@@ -110,7 +110,7 @@ func main() {
 					continue
 				}
 
-				err = fsys.Write(dir, note+".md", fmt.Sprintf("%s\n[[%s]]", strings.TrimSpace(content), link))
+				err = userFS.Write(dir, note+".md", fmt.Sprintf("%s\n[[%s]]", strings.TrimSpace(content), link))
 				if err != nil {
 					fmt.Printf("Can't put to file: %s", err)
 					return
