@@ -80,6 +80,7 @@ func Habits(userFS *fs.FS, year int) (map[string]Year, error) {
 		if strings.Contains(habit, moodsMarker) {
 			gr := uniseg.NewGraphemes(days)
 			dayOffset := 0
+			habits[mood] = make(Year)
 			for gr.Next() {
 				power := slices.Index(moodEmojis, gr.Str())
 				habits[mood][dayOfTheYear+dayOffset] = power
@@ -88,19 +89,19 @@ func Habits(userFS *fs.FS, year int) (map[string]Year, error) {
 			continue
 		}
 
+		// Skip gibberish
 		habitsMarker := fmt.Sprintf("%s%s%s", habitSkipped, habitCompletedAtWeekend, habitCompleted)
 		if !strings.ContainsAny(days, habitsMarker) {
 			continue
 		}
 
-		// At this point we are on habits line, which is
+		// Habits line
 		// [⚪️🟢... Habit name] i.e. completion status
 		// for every day of the above found month
 		habitName := strings.TrimSpace(habit)
 		if _, ok := habits[habitName]; !ok {
 			habits[habitName] = make(Year)
 		}
-
 
 		// See README.md ADRs
 		gr := uniseg.NewGraphemes(days)
