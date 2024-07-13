@@ -14,7 +14,7 @@ import (
 	"zakirullin/stuffbot/internal/fs"
 )
 
-//go:embed testdata/month_habits.md
+//go:embed testdata/month_habits_gibberish.md
 var monthMD string
 
 //go:embed testdata/last_month_habits.md
