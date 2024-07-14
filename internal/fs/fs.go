@@ -632,6 +632,7 @@ func Exists(path string) (bool, error) {
 	return afero.Exists(DefaultBackend, path)
 }
 
-func WriteFile(filename string, data []byte, perm os.FileMode) error {
-	return afero.WriteFile(DefaultBackend, filename, data, perm)
+// TODO fix permissions?
+func WriteFile(filename string, data []byte) error {
+	return afero.WriteFile(DefaultBackend, filename, data, 0o644)
 }

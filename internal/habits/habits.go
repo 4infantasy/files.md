@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,9 +32,10 @@ var (
 	now                   = time.Now
 )
 
+// What if there's no file? Create empty from ./habits
 func Habits(userFS *fs.FS, year int) (map[string]Year, error) {
-	filename := "%d Habits.md"
-	habitsStr, err := userFS.Read(fs.DirInsights, fmt.Sprintf(filename, year))
+	filename := fmt.Sprintf("%d Habits.md", year)
+	habitsStr, err := userFS.Read(fs.DirInsights, filename)
 	if err != nil {
 		return nil, fmt.Errorf("read %s error: %w", filename, err)
 	}
@@ -144,6 +147,61 @@ func LastWeekHabits(userFS *fs.FS) (map[string]Year, error) {
 	return habits, nil
 }
 
-// func Write(userFS *fs.FS, habits []Habit) error {
-// 	return nil
+func Write(userFS *fs.FS, year int, habits map[string]Year) error {
+	habitKeys := make([]string, 0)
+	for k, _ := range habits {
+		if k == mood {
+			continue
+		}
+		habitKeys = append(habitKeys, k)
+	}
+	sort.Strings(habitKeys)
+	if _, ok := habits[mood]; ok {
+		habitKeys = append(habitKeys, mood)
+	}
+
+	for _, k := range habitKeys {
+		fmt.Println(k, habits[k])
+	}
+
+	content := ""
+	day := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
+	for day.Year() < year+1 {
+		habitsForMonth := ""
+		for _, habitKey := range habitKeys {
+			dayOfMonth := day
+			month := dayOfMonth.Month()
+			statuses := ""
+			atLeastOneCompletion := false
+			for dayOfMonth.Month() < month+1 {
+				if status, ok := habits[habitKey][dayOfMonth.YearDay()]; ok {
+					statuses += strconv.Itoa(status)
+					atLeastOneCompletion = true
+				} else {
+					statuses += habitSkipped
+				}
+			}
+			if atLeastOneCompletion {
+				habitsForMonth += fmt.Sprintf("%s %s\n", statuses, habitKey)
+			}
+		}
+
+		if len(habitsForMonth) != 0 {
+			content += fmt.Sprintf("### %s\n%s\n", day.Month(), habitsForMonth)
+		}
+	}
+
+	filename := fmt.Sprintf("%d Habits.md", year)
+	err := userFS.Write(fs.DirInsights, filename, content)
+	if err != nil {
+		return fmt.Errorf("can't write habits: %w", err)
+	}
+
+	return nil
+}
+
+// func dayOfYearToTime(dayOfYear int, year int) time.Time {
+// 	startOfYear := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+// 	return startOfYear.AddDate(0, 0, dayOfYear-1)
 // }
