@@ -139,7 +139,6 @@
 
             var habit = event.target.dataset;
             fetch(`{{.host}}/{{.userID}}/habits/${habit.habit}/${habit.day}`, {method: "POST"});
-            console.log(`{{.host}}/{{.userID}}/habits/${habit.habit}/${habit.day}`);
 
             setTimeout(function() {window.Telegram.WebApp.close();}, 1500);
         });

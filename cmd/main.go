@@ -120,20 +120,33 @@ func main() {
 			w.Write(str)
 		})
 
-		router.HandleFunc("POST /{userID}/habits/{habitName}/{day}", func(w http.ResponseWriter, r *http.Request) {
-			// userID, err := strconv.ParseInt(r.PathValue("userID"), 10, 64)
-			// if err != nil {
-			// 	// TODO
-			// 	w.Write([]byte("err"))
-			// }
+		router.HandleFunc("POST /{userID}/habits/{habitName}/{yearDay}", func(w http.ResponseWriter, r *http.Request) {
+			userID, err := strconv.ParseInt(r.PathValue("userID"), 10, 64)
+			if err != nil {
+				w.Write([]byte("can't parse userID"))
+			}
+			yearDay, err := strconv.ParseInt(r.PathValue("yearDay"), 10, 32)
+			if err != nil {
+				w.Write([]byte("can't parse yearDay"))
+			}
+			habitName := r.PathValue("habitName")
 
-			// userPath := path.Join(internal.Config.StoragePath, txt.I64(userID))
-			// userFS, err := fs.NewFS(userPath, afero.NewOsFs())
-			// if err != nil {
-			// 	// TODO
-			// 	w.Write([]byte("can't init user fs"))
-			// }
+			userPath := path.Join(internal.Config.StoragePath, txt.I64(userID))
+			userFS, err := fs.NewFS(userPath, afero.NewOsFs())
+			if err != nil {
+				w.Write([]byte("can't init user fs"))
+			}
 
+			userHabits, err := habits.Habits(userFS, time.Now().Year())
+			if err != nil {
+				w.Write([]byte("can't read habits"))
+			}
+
+			userHabits[habitName][int(yearDay)] = 1
+			err = habits.Write(userFS, time.Now().Year(), userHabits)
+			if err != nil {
+				w.Write([]byte("can't write habits"))
+			}
 		})
 
 		http.ListenAndServe(":80", router)
