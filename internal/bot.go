@@ -24,7 +24,10 @@ import (
 	"zakirullin/stuffbot/pkg/txt"
 )
 
-var botPlugins []BotPluginInterface
+var (
+	botPlugins []BotPluginInterface
+	errUnknownCommand = errors.New("unknown command")
+)
 
 const (
 	maxTitleLength         = 100
@@ -104,8 +107,7 @@ func (b *Bot) Answer(u UpdInterface) error {
 
 		handler, ok := b.handlers()[cmd.Name]
 		if !ok {
-			// TODO create error
-			return errors.New(fmt.Sprintf("no such command %s", cmd.Name))
+			return fmt.Errorf("no such command %s: %w", cmd.Name, errUnknownCommand)
 		}
 		slog.Debug("Command is called", "command", cmd.Name, "params", cmd.Params)
 		err = handler(cmd.Params)
@@ -157,7 +159,6 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		constants.CmdShowStart:          b.showStart,
 		constants.CmdShowToday:          b.showToday,
 		constants.CmdShowLater:          b.showLater,
-		constants.CmdShowNotes:          b.showNotes,
 		constants.CmdShowFiles:          b.showFiles,
 		constants.CmdShowChecklists:     b.showChecklists,
 		constants.CmdShowPostpone:       b.showPostpone,
@@ -235,7 +236,6 @@ func (b *Bot) allowedTextCmds() []string {
 		constants.CmdShowStart,
 		constants.CmdShowToday,
 		constants.CmdShowLater,
-		constants.CmdShowNotes,
 		constants.CmdShowPostpone,
 		constants.CmdShowFiles,
 		constants.CmdShowRename,
@@ -548,31 +548,6 @@ func (b *Bot) todayLabel() string {
 	}
 
 	return statusBar + fmt.Sprintf(i18n.Tr("<b>%d</b> left"), len(todayTasks))
-}
-
-func (b *Bot) showNotes(params []string) error {
-	dirs, err := b.fs.FilesAndDirs(fs.DirRoot)
-	if err != nil {
-		return fmt.Errorf("show notes: can't get dirs: %w", err)
-	}
-	dirs = fs.OnlyNoteDirs(fs.OnlyDirs(dirs))
-
-	var kb tg.Keyboard
-	for _, dir := range dirs {
-		cmd := tg.NewCmd(constants.CmdComplete, []string{dir.Name, fs.Hash(dir.Name)})
-		btn := tg.NewBtn(dir.Title, cmd)
-
-		kb.AddRow(btn)
-	}
-
-	kb.AddRow(tg.NewBtn(fs.DirToday, tg.NewCmd(fs.DirToday, nil)))
-
-	err = b.show("notes:", &kb, tg.MarkupHTML)
-	if err != nil {
-		return fmt.Errorf("show notes: %w", err)
-	}
-
-	return nil
 }
 
 func (b *Bot) showFiles(params []string) error {
@@ -949,21 +924,20 @@ func (b *Bot) moveToNewDir(params []string) error {
 func (b *Bot) moveToFile(params []string) error {
 	// TODO Remove input expectations if dir is not list
 	filenameHash := params[0]
-	existingFileHash := params[1]
+	existingFilenameHash := params[1]
+
+	if filenameHash == existingFilenameHash {
+		return b.showToday(nil)
+	}
 
 	filename, err := b.fs.Unhash(fs.DirRoot, filenameHash)
 	if err != nil {
 		return fmt.Errorf("move to file: can't unhash new filename '%s': %w", filenameHash, err)
 	}
 
-	// TODO when existing and new are the same files
-	existingFilename, err := b.fs.Unhash(fs.DirRoot, existingFileHash)
+	existingFilename, err := b.fs.Unhash(fs.DirRoot, existingFilenameHash)
 	if err != nil {
 		return fmt.Errorf("move to file: can't unhash doc '%s' in today: %w", filenameHash, err)
-	}
-
-	if filename == existingFilename {
-		return b.showToday(nil)
 	}
 
 	fileContent, err := b.fs.Read(fs.DirRoot, filename)
