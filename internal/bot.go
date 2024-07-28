@@ -585,7 +585,7 @@ func (b *Bot) showFiles(params []string) error {
 	var dirBtns []tg.Btn
 	for _, dir := range dirs {
 		cmd := tg.NewCustomCmd("", []string{dir.Name}, tg.CmdTypeInlineQueryCurrentChat)
-		btn := tg.NewBtn(fmt.Sprintf("📂 %s", dir.Title), cmd)
+		btn := tg.NewBtn(fmt.Sprintf("%s %s", i18n.Emoji("dir"), dir.Title), cmd)
 		dirBtns = append(dirBtns, btn)
 	}
 
@@ -957,9 +957,13 @@ func (b *Bot) moveToFile(params []string) error {
 	}
 
 	// TODO when existing and new are the same files
-	existingFile, err := b.fs.Unhash(fs.DirRoot, existingFileHash)
+	existingFilename, err := b.fs.Unhash(fs.DirRoot, existingFileHash)
 	if err != nil {
 		return fmt.Errorf("move to file: can't unhash doc '%s' in today: %w", filenameHash, err)
+	}
+
+	if filename == existingFilename {
+		return b.showToday(nil)
 	}
 
 	fileContent, err := b.fs.Read(fs.DirRoot, filename)
@@ -971,9 +975,9 @@ func (b *Bot) moveToFile(params []string) error {
 		fileContent = fs.Title(filename)
 	}
 
-	existingContent, err := b.fs.Read(fs.DirRoot, existingFile)
+	existingContent, err := b.fs.Read(fs.DirRoot, existingFilename)
 	if err != nil {
-		return fmt.Errorf("move to file: can't get doc content of '%s': %w", existingFile, err)
+		return fmt.Errorf("move to file: can't get doc content of '%s': %w", existingFilename, err)
 	}
 
 	// We can tolerate this
@@ -985,7 +989,7 @@ func (b *Bot) moveToFile(params []string) error {
 	}
 	existingContent += fileContent
 
-	err = b.fs.Write(fs.DirRoot, existingFile, existingContent)
+	err = b.fs.Write(fs.DirRoot, existingFilename, existingContent)
 	if err != nil {
 		return fmt.Errorf("move to file: can't save file: %w", err)
 	}
@@ -1288,8 +1292,9 @@ func (b *Bot) toFileKeyboardButtons(filenameHash string) ([]tg.Btn, error) {
 	}
 
 	var buttons []tg.Btn
-	newBtn := func(title, docHash string) tg.Btn {
-		return tg.NewBtn(title, tg.NewCmd(constants.CmdMoveToFile, []string{filenameHash, docHash}))
+	newBtn := func(title, fileHash string) tg.Btn {
+		title = fmt.Sprintf("%s %s", i18n.Emoji("file"), title)
+		return tg.NewBtn(title, tg.NewCmd(constants.CmdMoveToFile, []string{filenameHash, fileHash}))
 	}
 	for _, file := range files {
 		buttons = append(buttons, newBtn(file.Title, file.Hash))
@@ -1300,7 +1305,8 @@ func (b *Bot) toFileKeyboardButtons(filenameHash string) ([]tg.Btn, error) {
 
 func (b *Bot) toDirKeyboardButtons(filenameHash string) ([]tg.Btn, error) {
 	newBtn := func(dir string) tg.Btn {
-		return tg.NewBtn(dir, tg.NewCmd(constants.CmdMove, []string{fs.DirRoot, filenameHash, dir}))
+		emojifiedDir := fmt.Sprintf("%s %s", i18n.Emoji("dir"), dir)
+		return tg.NewBtn(emojifiedDir, tg.NewCmd(constants.CmdMove, []string{fs.DirRoot, filenameHash, dir}))
 	}
 
 	dirs, err := b.fs.FilesAndDirs(fs.DirRoot)

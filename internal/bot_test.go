@@ -850,7 +850,7 @@ func TestShowToFileNoDirs(t *testing.T) {
 	r.NoError(err)
 
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewRow(tg.NewBtn("Note", tg.NewCmd("mv_to_file", []string{"345fbd7ab08", "345fbd7ab08"}))),
+		tg.NewRow(tg.NewBtn("📄 Note", tg.NewCmd("mv_to_file", []string{"345fbd7ab08", "345fbd7ab08"}))),
 	},
 	), tgram.SentKeyboard)
 }
@@ -876,9 +876,9 @@ func TestShowToFile(t *testing.T) {
 	r.NoError(err)
 
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewRow(tg.NewBtn("dir", tg.NewCmd("mv", []string{"", "345fbd7ab08", "dir"}))),
+		tg.NewRow(tg.NewBtn("🗂️ dir", tg.NewCmd("mv", []string{"", "345fbd7ab08", "dir"}))),
 		tg.NewBtn("Or choose a file:", tg.NewCmd("nothing", nil)),
-		tg.NewRow(tg.NewBtn("Note", tg.NewCmd("mv_to_file", []string{"345fbd7ab08", "345fbd7ab08"}))),
+		tg.NewRow(tg.NewBtn("📄 Note", tg.NewCmd("mv_to_file", []string{"345fbd7ab08", "345fbd7ab08"}))),
 	},
 	), tgram.SentKeyboard)
 }
