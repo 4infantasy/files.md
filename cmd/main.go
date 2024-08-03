@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/afero"
 	"golang.org/x/exp/slog"
 
+	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/i18n"
 	"zakirullin/stuffbot/internal"
 	"zakirullin/stuffbot/internal/db"
@@ -36,7 +37,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("Error loading .env file: %s\n", err))
 	}
-	err = internal.LoadConfig()
+	err = config.LoadConfig()
 	if err != nil {
 		panic(fmt.Sprintf("Error loading conf: %s\n", err))
 	}
@@ -47,7 +48,7 @@ func main() {
 		panic(fmt.Sprintf("Error loading i18n: %s\n", err))
 	}
 
-	api, err := tgbotapi.NewBotAPI(internal.Config.BotAPIToken)
+	api, err := tgbotapi.NewBotAPI(config.Config.BotAPIToken)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create TG api: %s\n", err))
 	}
@@ -76,7 +77,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				err := worker.MoveDueTasksToToday(internal.Config.StoragePath, internal.Config.ConfigFilename, fsBackend)
+				err := worker.MoveDueTasksToToday(config.Config.StoragePath, config.Config.ConfigFilename, fsBackend)
 				if err != nil {
 					fmt.Printf("Worker's error: %s\n", err)
 				}
@@ -118,7 +119,7 @@ func main() {
 			userLocker.Lock(userID, string(updJSON))
 			defer userLocker.Unlock(userID)
 
-			userPath := path.Join(internal.Config.StoragePath, txt.I64(userID))
+			userPath := path.Join(config.Config.StoragePath, txt.I64(userID))
 			userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 			if err != nil {
 				slog.Error("Bot error: can't create fs", "err", err)
@@ -131,7 +132,7 @@ func main() {
 			}
 
 			userconf := userconfig.NewConfig()
-			userconfPath := userFS.Path("", internal.Config.ConfigFilename)
+			userconfPath := userFS.Path("", config.Config.ConfigFilename)
 			err = userconf.LoadOrCreate(userconfPath)
 			if err != nil {
 				slog.Error("Bot error: can't get or create conf", "err", err)

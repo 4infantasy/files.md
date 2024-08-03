@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	"zakirullin/stuffbot/internal"
+	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/internal/fs"
 	"zakirullin/stuffbot/internal/habits"
 	"zakirullin/stuffbot/pkg/txt"
@@ -24,7 +24,7 @@ func habitsServer() {
 			w.Write([]byte("can't parse userID"))
 		}
 
-		userPath := path.Join(internal.Config.StoragePath, txt.I64(userID))
+		userPath := path.Join(config.Config.StoragePath, txt.I64(userID))
 		userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 		if err != nil {
 			w.Write([]byte("can't init userFS"))
@@ -55,7 +55,7 @@ func habitsServer() {
 
 		habitName := r.PathValue("habitName")
 
-		userPath := path.Join(internal.Config.StoragePath, txt.I64(userID))
+		userPath := path.Join(config.Config.StoragePath, txt.I64(userID))
 		userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 		if err != nil {
 			w.Write([]byte("can't init user fs"))

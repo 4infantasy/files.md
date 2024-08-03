@@ -12,6 +12,10 @@ import (
 
 func TestAddRecord(t *testing.T) {
 	r := require.New(t)
+	savedNow := now
+	defer func() {
+		now = savedNow
+	}()
 	now = func() time.Time {
 		return time.Date(2023, 0o5, 30, 10, 0o4, 36, 0, time.UTC)
 	}
@@ -71,4 +75,98 @@ func TestAddRecord(t *testing.T) {
 			r.Equal(test.want, md)
 		})
 	}
+}
+
+func TestAddEmojiNewFile(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+
+	savedNow := now
+	defer func() {
+		now = savedNow
+	}()
+	now = func() time.Time {
+		return time.Date(2024, time.January, 1, 1, 0, 0, 0, time.UTC)
+	}
+
+	err = AddEmoji(userFS, "🙂")
+	r.NoError(err)
+
+	content, err := userFS.Read("journal", "2024 January.md")
+	r.NoError(err)
+
+	r.Equal("#### 1, Monday 🙂", content)
+}
+
+func TestAddEmojiExistingFile(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	md := "#### 0, Sunday\nSome Note\n#### 1, Monday\nSome Note"
+	userFS.Write("journal", "2024 January.md", md)
+
+	savedNow := now
+	defer func() {
+		now = savedNow
+	}()
+	now = func() time.Time {
+		return time.Date(2024, time.January, 1, 1, 0, 0, 0, time.UTC)
+	}
+
+	err = AddEmoji(userFS, "🙂")
+	r.NoError(err)
+
+	content, err := userFS.Read("journal", "2024 January.md")
+	r.NoError(err)
+
+	r.Equal("#### 0, Sunday\nSome Note\n#### 1, Monday 🙂\nSome Note", content)
+}
+
+func TestAddMoodEmojiExistingFileExistingEmojis(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	md := "#### 0, Sunday\nSome Note\n#### 1, Monday 🌱📵\nSome Note"
+	userFS.Write("journal", "2024 January.md", md)
+
+	savedNow := now
+	defer func() {
+		now = savedNow
+	}()
+	now = func() time.Time {
+		return time.Date(2024, time.January, 1, 1, 0, 0, 0, time.UTC)
+	}
+
+	err = AddEmoji(userFS, "🙂")
+	r.NoError(err)
+
+	content, err := userFS.Read("journal", "2024 January.md")
+	r.NoError(err)
+
+	r.Equal("#### 0, Sunday\nSome Note\n#### 1, Monday 🙂🌱📵\nSome Note", content)
+}
+
+func TestAddRegularEmojiExistingFileExistingEmojis(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	md := "#### 0, Sunday\nSome Note\n#### 1, Monday 🌱📵\nSome Note"
+	userFS.Write("journal", "2024 January.md", md)
+
+	savedNow := now
+	defer func() {
+		now = savedNow
+	}()
+	now = func() time.Time {
+		return time.Date(2024, time.January, 1, 1, 0, 0, 0, time.UTC)
+	}
+
+	err = AddEmoji(userFS, "🎃")
+	r.NoError(err)
+
+	content, err := userFS.Read("journal", "2024 January.md")
+	r.NoError(err)
+
+	r.Equal("#### 0, Sunday\nSome Note\n#### 1, Monday 🌱📵🎃\nSome Note", content)
 }

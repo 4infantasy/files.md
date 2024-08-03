@@ -26,12 +26,12 @@ const (
 )
 
 var (
-	moodEmojis            = []string{"⚪️", "🤕", "😔", "😐", "🙂", "😊"}
+	MoodEmojis            = []string{"⚪️", "🤕", "😔", "😐", "🙂", "😊"}
 	errMalformedMonthLine = errors.New("malformed month line")
 	now                   = time.Now
 )
 
-// Habit name => [day1 => 1, day2 => 0, ..., day365 => 0]
+// Habits returns Habit name => [day1 => 1, day2 => 0, ..., day365 => 0]
 func Habits(userFS *fs.FS, year int) (map[string]Year, error) {
 	filename := fmt.Sprintf("%d Habits.md", year)
 
@@ -104,7 +104,7 @@ func Habits(userFS *fs.FS, year int) (map[string]Year, error) {
 			dayOffset := 0
 			habits[moodHabit] = make(Year)
 			for gr.Next() {
-				power := slices.Index(moodEmojis, gr.Str())
+				power := slices.Index(MoodEmojis, gr.Str())
 				habits[moodHabit][dayOfTheYear+dayOffset] = power
 				dayOfTheYear++
 			}
@@ -229,8 +229,8 @@ func Write(userFS *fs.FS, year int, habits map[string]Year) error {
 
 func emojiForStatus(habitName string, day time.Time, status int) string {
 	if habitName == moodHabit {
-		if status < len(moodEmojis) {
-			return moodEmojis[status]
+		if status < len(MoodEmojis) {
+			return MoodEmojis[status]
 		}
 
 		return habitSkipped

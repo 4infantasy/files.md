@@ -12,6 +12,7 @@ A telegram bot for your personal stuff.
 2) Copy your bot token to `.env` file (see `.env.example`)
 
 ```bash
+```
 $ make install && make run
 ```
 or

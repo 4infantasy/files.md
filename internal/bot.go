@@ -10,6 +10,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"golang.org/x/exp/slog"
 
+	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/i18n"
 	"zakirullin/stuffbot/internal/constants"
 	"zakirullin/stuffbot/internal/db"
@@ -135,8 +136,7 @@ func (b *Bot) Answer(u UpdInterface) error {
 			dir = dirAndFilename[0]
 			filename = dirAndFilename[1]
 		} else {
-			// TODO err?
-			return fmt.Errorf("answer: can't parse file path from sent via bot msg")
+			return nil
 		}
 
 		b.delAllKeyboards()
@@ -460,7 +460,7 @@ func (b *Bot) quickPanelRow() []tg.Btn {
 		if b.conf.HasQuickPanelCmd(btn.Cmd) {
 			params := []string{}
 			if btn.Cmd == constants.CmdWebAppHabits {
-				habitsUrl := fmt.Sprintf("%s/%d/habits", Config.Host, b.userID)
+				habitsUrl := fmt.Sprintf("%s/%d/habits", config.Config.Host, b.userID)
 				params = []string{habitsUrl}
 			}
 
@@ -990,7 +990,7 @@ func (b *Bot) moveToChecklist(params []string) error {
 		return fmt.Errorf("move to checklist: %w", err)
 	}
 
-	if isMultiline && shouldSplitChecklist(checklist) {
+	if isMultiline && config.ShouldSplitChecklist(checklist) {
 		content, err := b.fs.Read(fs.DirToday, filename)
 		if err != nil {
 			return fmt.Errorf("move to checklist: %w", err)
@@ -1512,3 +1512,9 @@ func (b *Bot) showRecurringKeyBoard(params []string) error {
 
 	return nil
 }
+
+// func (b *Bot) getAngerEmoji(file fs.File) string {
+// 	anger := string[]{"","🙄", "😕","😢","😭","🤬️"}
+// 	index =
+
+// }

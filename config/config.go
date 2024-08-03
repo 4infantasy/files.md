@@ -1,4 +1,4 @@
-package internal
+package config
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func LoadConfig() error {
 	return nil
 }
 
-func shouldSplitChecklist(checklist string) bool {
+func ShouldSplitChecklist(checklist string) bool {
 	for _, unsplittableChecklist := range []string{fs.DirRead, fs.DirWatch} {
 		if checklist == unsplittableChecklist {
 			return false

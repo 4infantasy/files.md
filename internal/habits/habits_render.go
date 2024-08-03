@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"time"
 
-	"zakirullin/stuffbot/internal"
+	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/internal/fs"
 )
 
@@ -34,8 +34,8 @@ func Render(userID int64, userFS *fs.FS) ([]byte, error) {
 	err = tmpl.Execute(&out, map[string]any{
 		"habits":     habits,
 		"moods":      moods,
-		"moodEmojis": moodEmojis,
-		"host":       internal.Config.Host,
+		"MoodEmojis": MoodEmojis,
+		"host":       config.Config.Host,
 		"userID":     userID,
 		"currentDay": time.Now().YearDay(),
 	})
