@@ -460,8 +460,8 @@ func (b *Bot) extractTitleAndContent(msg string) (string, string, error) {
 	content := ""
 
 	if len(title) > maxTitleLength {
-		title = txt.Substr(title, 0, maxTitleLength) + "..."
 		content = strings.TrimSpace(title)
+		title = txt.Substr(title, 0, maxTitleLength) + "..."
 	}
 
 	isMultiline := len(parts) > 1
