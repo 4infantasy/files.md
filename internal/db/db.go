@@ -12,6 +12,8 @@ var filenameByMsgID sync.Map
 var dirByMsgID sync.Map
 var lastKeyboardMsgIDs sync.Map
 var inputExpectations sync.Map
+var quickCommands sync.Map
+var quickCommandTargets sync.Map
 
 // DB Do we need a type at all?
 type DB struct {
@@ -80,6 +82,32 @@ func (db *DB) DirByMsgID(userID int64, msgID int) string {
 	}
 
 	return filename.(string)
+}
+
+func (db *DB) SetQuickCommand(userID int64, cmd string) {
+	quickCommands.Store(userID, cmd)
+}
+
+func (db *DB) QuickCommand(userID int64) (string, bool) {
+	cmd, ok := quickCommands.Load(userID)
+	if !ok {
+		return "", false
+	}
+
+	return cmd.(string), true
+}
+
+func (db *DB) SetQuickCommandTarget(userID int64, target string) {
+	quickCommandTargets.Store(userID, target)
+}
+
+func (db *DB) QuickCommandTarget(userID int64) (string, bool) {
+	target, ok := quickCommandTargets.Load(userID)
+	if !ok {
+		return "", false
+	}
+
+	return target.(string), true
 }
 
 func lastKeyboardMsgIDKey(userID int64) string {
