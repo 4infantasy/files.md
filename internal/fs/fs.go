@@ -458,7 +458,7 @@ func (fs FS) SearchNotes(query string) ([]File, error) {
 	for _, dir := range searchInDirs {
 		// We can tolerate incomplete search
 		files, _ := fs.FilesAndDirs(dir)
-		files = OnlyFiles(files)
+		files = OnlyMDFiles(files)
 		notes = append(notes, files...)
 	}
 	notes = SortByCtimeDesc(notes)
@@ -632,10 +632,14 @@ func OnlyChecklists(dirs []File) []File {
 	return dirsWithChecklists
 }
 
-func OnlyFiles(entries []File) []File {
+func OnlyMDFiles(entries []File) []File {
 	var files []File
 	for _, file := range entries {
 		if file.IsDir {
+			continue
+		}
+
+		if filepath.Ext(file.Name) != ".md" {
 			continue
 		}
 

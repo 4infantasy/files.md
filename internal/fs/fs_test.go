@@ -192,7 +192,7 @@ func TestOnlyFiles(t *testing.T) {
 	entries, err := fs.FilesAndDirs("")
 	r.NoError(err)
 
-	dirs := OnlyFiles(entries)
+	dirs := OnlyMDFiles(entries)
 	r.Len(dirs, 1)
 	r.Equal("a.md", dirs[0].Name)
 }

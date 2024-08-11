@@ -388,7 +388,7 @@ func TestToday(t *testing.T) {
 	r.NoError(err)
 	err = userFS.Write("today", "First task.md", "")
 	r.NoError(err)
-	err = userFS.Write("today", "Second task", "")
+	err = userFS.Write("today", "Second task.md", "")
 	r.NoError(err)
 
 	tgram := fake.NewTG()
@@ -400,7 +400,7 @@ func TestToday(t *testing.T) {
 	r.Equal("<b>2</b> left"+wideSpacer, tgram.LastSentText)
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		tg.NewBtn("First task", tg.NewCmd("c", []string{"today", "0824149b387"})),
-		tg.NewBtn("🥈 Second task", tg.NewCmd("c", []string{"today", "2940ad40402"})),
+		tg.NewBtn("🥈 Second task", tg.NewCmd("c", []string{"today", "4eb62f93b3e"})),
 	},
 	), tgram.SentKeyboard)
 }
@@ -457,7 +457,7 @@ func TestTodayWithMultilineTasks(t *testing.T) {
 	r.NoError(err)
 	err = userFS.Write("today", "First task.md", "content")
 	r.NoError(err)
-	err = userFS.Write("today", "Second task", "")
+	err = userFS.Write("today", "Second task.md", "")
 	r.NoError(err)
 
 	tgram := fake.NewTG()
@@ -470,7 +470,7 @@ func TestTodayWithMultilineTasks(t *testing.T) {
 	r.Equal("<b>2</b> left"+wideSpacer, tgram.LastSentText)
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		tg.NewBtn("👀 First task", tg.NewCmd("task", []string{"today", "0824149b387"})),
-		tg.NewBtn("🥈 Second task", tg.NewCmd("c", []string{"today", "2940ad40402"})),
+		tg.NewBtn("🥈 Second task", tg.NewCmd("c", []string{"today", "4eb62f93b3e"})),
 	},
 	), tgram.SentKeyboard)
 }

@@ -39,7 +39,7 @@ func main() {
 			fmt.Printf("Can't get notes: %s", err)
 		}
 
-		notes = fs.OnlyFiles(notes)
+		notes = fs.OnlyMDFiles(notes)
 		for _, note := range notes {
 			if filepath.Ext(note.Name) != ".md" {
 				continue

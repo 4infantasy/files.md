@@ -369,7 +369,7 @@ func (b *Bot) saveFromForward(u UpdInterface) error {
 		return fmt.Errorf("save forward: %w", err)
 	}
 
-	files = fs.SortByCtimeDesc(fs.OnlyFiles(files))
+	files = fs.SortByCtimeDesc(fs.OnlyMDFiles(files))
 	// TODO do we need that reverse?
 	slices.Reverse(files)
 	if len(files) > 0 {
@@ -644,7 +644,7 @@ func (b *Bot) todayLabel() string {
 	}
 
 	filesAndDirs, _ := b.fs.FilesAndDirs(fs.DirToday)
-	todayTasks := fs.ExcludePomodoro(fs.OnlyFiles(filesAndDirs))
+	todayTasks := fs.ExcludePomodoro(fs.OnlyMDFiles(filesAndDirs))
 	if len(todayTasks) == 0 {
 		statusBar += i18n.Emoji("palm")
 	}
@@ -684,7 +684,7 @@ func (b *Bot) showFiles(params []string) error {
 		kb.AddRow(tg.NewBtn("-", tg.NewCmd(constants.CmdDoNothing, nil)))
 	}
 
-	files = fs.ExcludeConfig(fs.OnlyFiles(files))
+	files = fs.ExcludeConfig(fs.OnlyMDFiles(files))
 	var fileBtns []tg.Btn
 	for _, file := range files {
 		cmd := tg.NewCmd(constants.CmdShowFile, []string{fs.DirRoot, fs.Hash(file.Name)})
@@ -1389,7 +1389,7 @@ func (b *Bot) toFileKeyboardButtons(filenameHash string) ([]tg.Btn, error) {
 	if err != nil {
 		return nil, fmt.Errorf("to doc keyboard: %w", err)
 	}
-	files = fs.OnlyFiles(files)
+	files = fs.OnlyMDFiles(files)
 	if len(files) == 0 {
 		return nil, nil
 	}
