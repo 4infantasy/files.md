@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+
+	"zakirullin/stuffbot/internal/userconfig"
 )
 
 var now = func() time.Time {
@@ -41,4 +43,35 @@ func Next(crn string) int64 {
 	}
 
 	return sched.Next(now().UTC()).Unix()
+}
+
+func ScheduleReport(conf *userconfig.Config) string {
+	var report string
+	scheduledTasks := conf.Schedules()
+	for _, task := range scheduledTasks {
+		report += fmt.Sprintf("%s: %s\n", formatTaskDate(time.Unix(task.ScheduledAt, 0)), task.Filename)
+	}
+
+	return report
+}
+
+func formatTaskDate(taskTime time.Time) string {
+	// Truncate times to only compare dates, ignoring the time of day.
+	today := now().Truncate(24 * time.Hour)
+	taskDate := taskTime.Truncate(24 * time.Hour)
+
+	diffDays := int(taskDate.Sub(today).Hours() / 24)
+
+	switch {
+	case diffDays == 0:
+		return "Today"
+	case diffDays == 1:
+		return "Tomorrow"
+	case diffDays > 1 && diffDays <= 6 && taskDate.Weekday() > today.Weekday():
+		return taskDate.Weekday().String()
+	case diffDays >= 7 && diffDays <= 13 && taskDate.Weekday() == today.Weekday():
+		return "Next " + taskDate.Weekday().String()
+	default:
+		return taskDate.Format("02 January")
+	}
 }

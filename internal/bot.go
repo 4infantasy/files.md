@@ -238,6 +238,7 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		consts.CmdDelFromQuickBtns:       b.delFromQuickBtns,
 		consts.CmdAddToMoveToBtns:        b.addToMoveToBtns,
 		consts.CmdDelFromMoveToBtns:      b.delFromMoveToBtns,
+		consts.CmdShowSchedule:           b.showSchedule,
 		// Used for button-like separators
 		consts.CmdDoNothing: func(s []string) error { return nil },
 	}
@@ -551,9 +552,9 @@ func (b *Bot) showMoveTo(params []string) error {
 		targetFilename := args[0]
 		unhashedTarget, err := b.fs.Unhash(fs.DirRoot, targetFilename)
 		if err == nil {
-			icon := i18n.Emojify("file")
+			icon := i18n.Emoji("file")
 			if recentCmd == consts.CmdMoveToDir {
-				icon = i18n.Emojify("dir")
+				icon = i18n.Emoji("dir")
 			}
 			name := fmt.Sprintf("%s %s", icon, fs.Title(unhashedTarget))
 			userMoveToBtns = append(userMoveToBtns, tg.NewBtn(name, tg.NewCmd(recentCmd, args)))
@@ -854,6 +855,18 @@ func (b *Bot) showStats(params []string) error {
 
 	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil))})
 	err = b.show(report, kb, tg.MarkupHTML)
+	if err != nil {
+		return fmt.Errorf("show stats: %w", err)
+	}
+
+	return nil
+}
+
+func (b *Bot) showSchedule(params []string) error {
+	schedule := sched.ScheduleReport(b.conf)
+
+	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil))})
+	err := b.show(schedule, kb, tg.MarkupHTML)
 	if err != nil {
 		return fmt.Errorf("show stats: %w", err)
 	}

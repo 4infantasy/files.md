@@ -40,10 +40,10 @@ type Config struct {
 }
 
 type Schedule struct {
-	Filename   string
-	ScheduleAt int64
-	Cron       string
-	Cmd        string // For future use
+	Filename    string
+	ScheduledAt int64
+	Cron        string
+	Cmd         string // For future use
 }
 
 type raw struct {

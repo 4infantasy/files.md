@@ -48,6 +48,7 @@ const (
 	CmdShowReadChecklist      = "read"
 	CmdShowWatchChecklist     = "watch"
 	CmdShowShopChecklist      = "shop"
+	CmdShowSchedule           = "schedule"
 
 	CmdInlineQuerySearchEveryWhere = "search"
 	CmdInlineQuerySearchInDir      = "search_dir"

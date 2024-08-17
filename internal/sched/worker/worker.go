@@ -54,7 +54,7 @@ func MoveDueTasksToToday(
 		}
 
 		for _, schedule := range userconf.Schedules() {
-			if time.Now().Unix() < schedule.ScheduleAt {
+			if time.Now().Unix() < schedule.ScheduledAt {
 				continue
 			}
 			err = moveTaskToToday(schedule.Filename, userFS)
