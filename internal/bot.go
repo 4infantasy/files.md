@@ -225,6 +225,7 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		consts.CmdMoveToShop:             b.moveToShop,
 		consts.CmdMoveToNewChecklist:     b.moveToNewChecklist,
 		consts.CmdMoveToJournal:          b.moveToJournal,
+		consts.CmdMoveToLater:            b.moveToLater,
 		consts.CmdSchedule:               b.schedule,
 		consts.CmdScheduleForTmrw:        b.scheduleForTmrw,
 		consts.CmdComplete:               b.complete,
@@ -1236,6 +1237,12 @@ func (b *Bot) moveToJournal(params []string) error {
 		return fmt.Errorf("failed to move to journal: can't delete note: %w", err)
 	}
 	return b.ShowTodayTasks(nil)
+}
+
+func (b *Bot) moveToLater(params []string) error {
+	filenameHash := params[0]
+
+	return b.([]string{filenameHash, fs.Hash(fs.DirShop)})
 }
 
 func (b *Bot) complete(params []string) error {

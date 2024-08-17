@@ -32,6 +32,7 @@ const (
 	CmdMoveToShop             = "mv_to_shop"
 	CmdMoveToNewChecklist     = "mv_to_new_chk"
 	CmdMoveToJournal          = "mv_to_journal"
+	CmdMoveToLater            = "mv_later"
 	CmdShowScheduleForDay     = "sc_day"
 	CmdSchedule               = "sc"
 	CmdScheduleForTmrw        = "sc_tmrw"
