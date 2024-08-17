@@ -1269,12 +1269,11 @@ func (b *Bot) complete(params []string) error {
 		b.conf.AddToSchedule(filename, time.Now().Unix()+int64(b.conf.PomodoroDuration().Seconds()), "")
 	}
 
-	err = b.ShowTodayTasks(nil)
-	if err != nil {
-		return fmt.Errorf("copmlete: %w", err)
+	if dir == fs.DirLater {
+		return b.showLaterTasks(nil)
 	}
 
-	return nil
+	return b.ShowTodayTasks(nil)
 }
 
 func (b *Bot) completeChecklistItem(params []string) error {
