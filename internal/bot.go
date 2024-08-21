@@ -209,17 +209,21 @@ func (b *Bot) Answer(u UpdInterface) error {
 func (b *Bot) handlers() map[string]func([]string) error {
 	return map[string]func([]string) error{
 		// Direct user commands
-		consts.CmdShowStart:          b.showStart,
-		consts.CmdShowToday:          b.ShowTodayTasks,
-		consts.CmdShowLater:          b.showLaterTasks,
-		consts.CmdShowFiles:          b.showFiles,
-		consts.CmdShowChecklists:     b.showChecklists,
-		consts.CmdShowPostpone:       b.showPostpone,
-		consts.CmdShowRename:         b.showRename,
-		consts.CmdShowStats:          b.showStats,
-		consts.CmdShowReadChecklist:  b.showRead,
-		consts.CmdShowWatchChecklist: b.showWatch,
-		consts.CmdShowShopChecklist:  b.showShop,
+		consts.CmdShowStart:              b.showStart,
+		consts.CmdShowToday:              b.ShowTodayTasks,
+		consts.CmdShowLater:              b.showLaterTasks,
+		consts.CmdShowFiles:              b.showFiles,
+		consts.CmdShowChecklists:         b.showChecklists,
+		consts.CmdShowPostpone:           b.showPostpone,
+		consts.CmdShowRename:             b.showRename,
+		consts.CmdShowStats:              b.showStats,
+		consts.CmdShowReadChecklist:      b.showRead,
+		consts.CmdShowWatchChecklist:     b.showWatch,
+		consts.CmdShowShopChecklist:      b.showShop,
+		consts.CmdShowSchedule:           b.showSchedule,
+		consts.CmdAddToJournalShortcut:   b.addToJournalFromShortcut,
+		consts.CmdAddToJournalShortcutRu: b.addToJournalFromShortcut,
+		consts.CmdShowSettings:           b.showSettings,
 		// Button's commands (callbacks)
 		consts.CmdRenameFile:             b.showRenameFile,
 		consts.CmdShowMultilineTask:      b.showMultilineTask,
@@ -247,16 +251,12 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		consts.CmdPostpone:               b.postpone,
 		consts.CmdPomodoro:               b.togglePomodoro,
 		consts.CmdShowRecurringKB:        b.showRecurringKeyboard,
-		consts.CmdShowSettings:           b.showSettings,
 		consts.CmdShowQuickBtnsSettings:  b.showQuickBtnsSettings,
 		consts.CmdShowMoveToBtnsSettings: b.showMoveToBtnsSettings,
 		consts.CmdAddToQuickBtns:         b.addToQuickBtns,
 		consts.CmdDelFromQuickBtns:       b.delFromQuickBtns,
 		consts.CmdAddToMoveToBtns:        b.addToMoveToBtns,
 		consts.CmdDelFromMoveToBtns:      b.delFromMoveToBtns,
-		consts.CmdShowSchedule:           b.showSchedule,
-		consts.CmdAddToJournalShortcut:   b.addToJournalFromShortcut,
-		consts.CmdAddToJournalShortcutRu: b.addToJournalFromShortcut,
 		// Used for button-like separators
 		consts.CmdDoNothing: func(s []string) error { return nil },
 	}
@@ -264,7 +264,6 @@ func (b *Bot) handlers() map[string]func([]string) error {
 
 func (b *Bot) extractCmd(u UpdInterface) (*tg.Cmd, error) {
 	cmd := u.Cmd()
-	fmt.Printf("%v\n", cmd)
 	if cmd != nil {
 		b.db.DelInputExpectation(b.userID)
 
@@ -287,8 +286,6 @@ func (b *Bot) extractCmd(u UpdInterface) (*tg.Cmd, error) {
 	}
 
 	for _, shortcutCmd := range b.AllowedShortcutCmds() {
-		// Compile the regular expression to match `/t` as a whole word with spaces around it
-		fmt.Printf("%v\n", u.MsgText())
 		re := regexp.MustCompile(fmt.Sprintf(`/%s$|/%s\s+`, shortcutCmd, shortcutCmd))
 
 		if !re.MatchString(u.MsgText()) {
@@ -319,9 +316,6 @@ func (b *Bot) allowedTextCmds() []string {
 		consts.CmdAddToJournalShortcut,
 		consts.CmdAddToLaterShortcut,
 		consts.CmdAddToTomorrowShortcut,
-		consts.CmdAddToJournalShortcutRu,
-		consts.CmdAddToLaterShortcutRu,
-		consts.CmdAddToTomorrowShortcutRu,
 		//"help" TODO,
 		//"err" TODO,
 	}
