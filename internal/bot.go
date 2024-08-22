@@ -34,14 +34,14 @@ var (
 
 const (
 	maxTitleLength         = 100
-	inlineResultsCacheTime = 15 // seconds
+	inlineResultsCacheTime = 15 // In seconds
 	btnsPerRow             = 3
 	quickBtnsPerRow        = 4
 	maxBtns                = 50
 	maxInlineResults       = 50
-	maxMsgLength           = 4096 // UTF-8 characters
-	maxMsgsToSendAtOnce    = 5
-	wideSpacer             = "<code>            ⁠</code>" // On mobile phones, buttons shrink to msg width
+	maxMsgLength           = 4096                         // In UTF-8 characters, skin-tone emojis count as 2
+	maxMsgsToSendAtOnce    = 5                            // For lengthy messages
+	wideSpacer             = "<code>            ⁠</code>" // Buttons shrink to the msg width, so we make the msg wider
 )
 
 // UpdInterface represents incoming user updates
