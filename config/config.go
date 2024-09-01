@@ -10,8 +10,8 @@ type Configuration struct {
 	StoragePath     string `required:"true" envconfig:"STORAGE_PATH"`
 	BotAPIToken     string `required:"true" envconfig:"BOT_API_TOKEN"`
 	ConfigFilename  string `default:"config.json"`
-	HabitsHost      string `default:""`
-	HabitsCertsPath string `default:"/tmp"`
+	HabitsHost      string `default:"" envconfig:"HABITS_HOST"`
+	HabitsCertsPath string `default:"/tmp" envconfig:"HABITS_CERTS_PATH"`
 }
 
 var Config Configuration
