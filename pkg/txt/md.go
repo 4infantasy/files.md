@@ -192,7 +192,7 @@ func MDtoHTML(md string) string {
 
 	// Convert ### Header to <b>Header</b>
 	// TODO add tests here
-	reHeader := regexp.MustCompile(`^#+\s*(.+)`)
+	reHeader := regexp.MustCompile(`(?m)^#+\s*(.+)`)
 	mdWithCode = reHeader.ReplaceAllString(mdWithCode, "<b>$1</b>")
 
 	return mdWithCode

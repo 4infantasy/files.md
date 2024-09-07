@@ -153,3 +153,12 @@ func TestMarkdownToHtmlEscapeHtml(t *testing.T) {
 
 	r.Equal("&lt;a&gt; &amp;b", html)
 }
+
+func TestMDToHTMLHeader(t *testing.T) {
+	r := require.New(t)
+
+	md := "Multiline\n# Header"
+	html := MDtoHTML(md)
+
+	r.Equal("Multiline\n<b>Header</b>", html)
+}
