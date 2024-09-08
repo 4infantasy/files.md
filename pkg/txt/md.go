@@ -51,8 +51,10 @@ func MarkdownToHTML(md string) string {
 	// for the cases when our markdown has some html tags.
 	// We try to convert as much markdown as possible to Telegram HTML.
 
-	// We split by \n\n, because markdown context is broken by \n\n (excluding code inside ```)
-	segments := strings.Split(mdWithoutCode, "\n\n")
+	// We split by \n\n+, because markdown context is broken by \n\n (excluding code inside ```)
+	// TODO test splitting by \n\n+
+	reNewLines := regexp.MustCompile(`\n{2,}`)
+	segments := reNewLines.Split(mdWithoutCode, -1)
 	processedSegments := make([]string, len(segments))
 	for i, segment := range segments {
 		// Process each segment separately
