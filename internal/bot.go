@@ -136,51 +136,7 @@ func (b *Bot) Answer(u UpdInterface) error {
 
 	// Handle inline query file requests
 	if u.IsSentViaBot() {
-		if strings.Contains(u.MsgText(), "../") || strings.Contains(u.MsgText(), "/..") {
-			return fmt.Errorf("insecure input '%s': %w", u.MsgText(), errIvalidRequestFromInline)
-		}
-
-		dirAndFilename := strings.Split(u.MsgText(), "/")
-		var dir, filename string
-		if len(dirAndFilename) == 1 {
-			dir = fs.DirRoot
-			filename = strings.TrimSpace(dirAndFilename[0])
-		} else if len(dirAndFilename) == 2 {
-			dir = strings.TrimSpace(dirAndFilename[0])
-			filename = strings.TrimSpace(dirAndFilename[1])
-		} else {
-			return fmt.Errorf("invalid inline query '%s': %w", u.MsgText(), errIvalidRequestFromInline)
-		}
-
-		b.delAllKeyboards()
-
-		c := b.db.InputExpectation(b.userID)
-		if c != nil {
-			b.db.DelInputExpectation(b.userID)
-			newFilenameHash := c.Params[0]
-			newFilename, err := b.fs.Unhash(fs.DirRoot, newFilenameHash)
-			if err != nil {
-				return fmt.Errorf("inline query: can't unhash filename %s: %w", newFilenameHash, err)
-			}
-			content, err := b.fs.Read(fs.DirRoot, newFilename)
-			if err != nil {
-				return fmt.Errorf("inline query: can't read file %s: %w", newFilename, err)
-			}
-			content = strings.TrimSpace(content)
-			if len(content) == 0 {
-				content = fs.Title(filename)
-			}
-
-			err = b.addToFile(filename, content)
-			if err != nil {
-				return fmt.Errorf("inline query: can't add to file %s: %w", filename, err)
-			}
-			_ = b.showHTML(fmt.Sprintf(i18n.Tr("Saved to %s"), fs.Title(filename)), nil)
-
-			return b.ShowToday(nil)
-		}
-
-		return b.showFile([]string{dir, filename})
+		b.answerFileRequest(u.MsgText())
 	}
 
 	// Handle commands
@@ -534,6 +490,54 @@ func (b *Bot) answerSearch(u UpdInterface) error {
 	}
 
 	return nil
+}
+
+func (b *Bot) answerFileRequest(msg string) error {
+	if strings.Contains(msg, "../") || strings.Contains(msg, "/..") {
+		return fmt.Errorf("insecure input '%s': %w", u.MsgText(), errIvalidRequestFromInline)
+	}
+
+	dirAndFilename := strings.Split(msg, "/")
+	var dir, filename string
+	if len(dirAndFilename) == 1 {
+		dir = fs.DirRoot
+		filename = strings.TrimSpace(dirAndFilename[0])
+	} else if len(dirAndFilename) == 2 {
+		dir = strings.TrimSpace(dirAndFilename[0])
+		filename = strings.TrimSpace(dirAndFilename[1])
+	} else {
+		return fmt.Errorf("invalid inline query '%s': %w", msg, errIvalidRequestFromInline)
+	}
+
+	b.delAllKeyboards()
+
+	c := b.db.InputExpectation(b.userID)
+	if c != nil {
+		b.db.DelInputExpectation(b.userID)
+		newFilenameHash := c.Params[0]
+		newFilename, err := b.fs.Unhash(fs.DirRoot, newFilenameHash)
+		if err != nil {
+			return fmt.Errorf("inline query: can't unhash filename %s: %w", newFilenameHash, err)
+		}
+		content, err := b.fs.Read(fs.DirRoot, newFilename)
+		if err != nil {
+			return fmt.Errorf("inline query: can't read file %s: %w", newFilename, err)
+		}
+		content = strings.TrimSpace(content)
+		if len(content) == 0 {
+			content = fs.Title(filename)
+		}
+
+		err = b.addToFile(dir, filename, content)
+		if err != nil {
+			return fmt.Errorf("inline query: can't add to file %s: %w", filename, err)
+		}
+		_ = b.showHTML(fmt.Sprintf(i18n.Tr("Saved to %s"), fs.Title(filename)), nil)
+
+		return b.ShowToday(nil)
+	}
+
+	return b.showFile([]string{dir, filename})
 }
 
 func (b *Bot) createOrAdd(dir, filename, content string) error {
@@ -1286,7 +1290,7 @@ func (b *Bot) moveToExistingFile(params []string) error {
 	// We can tolerate this
 	_ = b.fs.Del(fromDir, newFilename)
 
-	err = b.addToFile(existingFilename, content)
+	err = b.addToFile(fs.DirRoot, existingFilename, content)
 	if err != nil {
 		return fmt.Errorf("move to file: can't add to existing file: %w", err)
 	}
@@ -1470,7 +1474,7 @@ func (b *Bot) addToRecentFileFromShortcut(params []string) error {
 		return fmt.Errorf("failed to move to recent file: can't unhash filename: %w", err)
 	}
 
-	err = b.addToFile(existingFilename, content)
+	err = b.addToFile(fs.DirRoot, existingFilename, content)
 	if err != nil {
 		return fmt.Errorf("failed to move to recent file: can't add note: %w", err)
 	}
@@ -1941,8 +1945,8 @@ func (b *Bot) showToADayRecurring(params []string) error {
 	return nil
 }
 
-func (b *Bot) addToFile(filename, content string) error {
-	existingContent, err := b.fs.Read(fs.DirRoot, filename)
+func (b *Bot) addToFile(dir, filename, content string) error {
+	existingContent, err := b.fs.Read(dir, filename)
 	if err != nil {
 		return fmt.Errorf("add to file: can't get doc content of '%s': %w", filename, err)
 	}
@@ -1950,7 +1954,7 @@ func (b *Bot) addToFile(filename, content string) error {
 	header := fmt.Sprintf("#### %d %s, %s", now().Day(), now().Format("January"), now().Weekday())
 	newContent := txt.InsertTextAfterHeader(existingContent, header, content)
 
-	err = b.fs.Write(fs.DirRoot, filename, newContent)
+	err = b.fs.Write(dir, filename, newContent)
 	if err != nil {
 		return fmt.Errorf("add to file: can't save file: %w", err)
 	}
