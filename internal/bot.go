@@ -330,7 +330,6 @@ func (b *Bot) saveFromRegularMsg(u UpdInterface) error {
 	}
 
 	sanitizedTitle := fs.SanitizeFilename(title)
-
 	// If title is the same as content, we don't need to save it
 	if sanitizedTitle == content {
 		content = ""
@@ -392,20 +391,27 @@ func (b *Bot) saveFromPhoto(u UpdInterface) error {
 	return b.showMoveTo([]string{fs.Hash(filename)})
 }
 
+// TODO Add tests
 func (b *Bot) saveFromForward(u UpdInterface) error {
 	content := extractPlainText(u)
-	title, err := b.extractTitle(content)
+	sanitizedTitle, err := b.extractTitle(content)
 	if err != nil {
 		return fmt.Errorf("save forward: %w", err)
 	}
+
 	// TODO what if sanitized content different same in
 	// case of regular save, we should save it in the body
-	title = fs.SanitizeFilename(title)
-	filename := fs.Filename(title)
+	sanitizedTitle = fs.SanitizeFilename(sanitizedTitle)
+	filename := fs.Filename(sanitizedTitle)
 
-	// When a user forwards message + title we receive 2 updates from FakeTG.
-	// First we receive title, then the message itself. We must add our
-	// forwarded message to previously saved task (by title).
+	// If sanitizedTitle is the same as content, we don't need to duplicate content
+	if sanitizedTitle == content {
+		content = ""
+	}
+
+	// When a user forwards message + sanitizedTitle we receive 2 updates from FakeTG.
+	// First we receive sanitizedTitle, then the message itself. We must add our
+	// forwarded message to previously saved task (by sanitizedTitle).
 	// We do sleep here because previous file might not be saved.
 	// We may consider locks here, but the updates can come out of order
 	time.Sleep(300 * time.Millisecond)
