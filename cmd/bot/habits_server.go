@@ -74,6 +74,7 @@ func habitsServer(habitsHost, certDir, logFilename string) {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
+		ErrorLog:     logger,
 	}
 
 	err = srv.ListenAndServeTLS("", "") // Key and cert provided automatically by autocert
