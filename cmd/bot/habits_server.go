@@ -5,7 +5,9 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"time"
@@ -23,12 +25,19 @@ import (
 )
 
 // TODO release graceful shutdown etc
-func habitsServer(habitsHost, habitsCertsPath string) {
+func habitsServer(habitsHost, certDir, logFilename string) {
 	autocertManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(habitsHost),
-		Cache:      autocert.DirCache(habitsCertsPath),
+		Cache:      autocert.DirCache(certDir),
 	}
+
+	logFile, err := os.OpenFile(logFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	defer logFile.Close()
+	logger := log.New(logFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Listen for HTTP requests on port 80 in a new goroutine. Use
 	// autocertManager.HTTPHandler(nil) as the handler. This will send ACME
@@ -41,6 +50,7 @@ func habitsServer(habitsHost, habitsCertsPath string) {
 			IdleTimeout:  time.Minute,
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
+			ErrorLog:     logger,
 		}
 
 		err := srv.ListenAndServe()
@@ -66,7 +76,7 @@ func habitsServer(habitsHost, habitsCertsPath string) {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	err := srv.ListenAndServeTLS("", "") // Key and cert provided automatically by autocert
+	err = srv.ListenAndServeTLS("", "") // Key and cert provided automatically by autocert
 	if err != nil {
 		panic(err)
 	}
@@ -86,7 +96,7 @@ func setupRouter(router *http.ServeMux) {
 			w.Write([]byte("can't parse userID"))
 		}
 
-		userPath := path.Join(config.BotCfg.StoragePath, txt.I64(userID))
+		userPath := path.Join(config.BotCfg.StorageDir, txt.I64(userID))
 		userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 		if err != nil {
 			w.Write([]byte("can't init userFS"))
@@ -117,7 +127,7 @@ func setupRouter(router *http.ServeMux) {
 
 		habitName := r.PathValue("habitName")
 
-		userPath := path.Join(config.BotCfg.StoragePath, txt.I64(userID))
+		userPath := path.Join(config.BotCfg.StorageDir, txt.I64(userID))
 		userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 		if err != nil {
 			w.Write([]byte("can't init user fs"))

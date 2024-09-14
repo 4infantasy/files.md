@@ -7,12 +7,12 @@ import (
 )
 
 type BotConfig struct {
-	StoragePath    string `required:"true" envconfig:"STORAGE_PATH"`
+	StorageDir     string `required:"true" envconfig:"STORAGE_DIR"`
 	BotAPIToken    string `required:"true" envconfig:"BOT_API_TOKEN"`
 	ConfigFilename string `default:"config.json"`
 	HabitsHost     string `default:"" envconfig:"HABITS_HOST"`
-	ServerCertPath string `default:"/tmp" envconfig:"SERVER_CERT_PATH"`
-	ServerLogsPath string `default:"/tmp" envconfig:"SERVER_LOGS_PATH"`
+	ServerCertDir  string `default:"/tmp" envconfig:"SERVER_CERT_DIR"`
+	ServerLogFile  string `default:"/tmp/server.log" envconfig:"SERVER_LOG_FILE"`
 }
 
 var BotCfg BotConfig

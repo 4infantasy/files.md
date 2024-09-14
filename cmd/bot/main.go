@@ -58,7 +58,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				err := worker.MoveDueTasks(config.BotCfg.StoragePath, config.BotCfg.ConfigFilename, fsBackend, telegram)
+				err := worker.MoveDueTasks(config.BotCfg.StorageDir, config.BotCfg.ConfigFilename, fsBackend, telegram)
 				if err != nil {
 					fmt.Printf("Worker's error: %s\n", err)
 				}
@@ -71,7 +71,7 @@ func main() {
 
 	// Launch habits server if needed
 	if config.BotCfg.HabitsHost != "" {
-		go habitsServer(config.BotCfg.HabitsHost, config.BotCfg.ServerCertPath)
+		go habitsServer(config.BotCfg.HabitsHost, config.BotCfg.ServerCertDir, config.BotCfg.ServerLogFile)
 	}
 
 	infolog := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -97,7 +97,7 @@ func main() {
 			updJSON, _ = json.Marshal(upd)
 			infolog.Info("Bot update: ", "upd", string(updJSON))
 
-			userPath := path.Join(config.BotCfg.StoragePath, txt.I64(userID))
+			userPath := path.Join(config.BotCfg.StorageDir, txt.I64(userID))
 			userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 			if err != nil {
 				slog.Error("Bot error: can't create fs", "err", err)
