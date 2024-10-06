@@ -2332,7 +2332,7 @@ func TestSaveToExistingFileIntegration(t *testing.T) {
 	err = bot.Answer(tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"7595e", "", "23200"})))
 	r.NoError(err)
 
-	r.Empty(tgram.LastEditedKeyboard.Btns)
+	r.Nil(tgram.LastEditedKeyboard)
 
 	content, err := userFS.Read("", "File.md")
 	r.NoError(err)
@@ -2341,9 +2341,8 @@ func TestSaveToExistingFileIntegration(t *testing.T) {
 	r.Nil(database.InputExpectation(-1))
 	keybdMsgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
-	r.Equal(1, keybdMsgID)
-	r.Equal(2, tgram.LastSentMessageID)
-	//r.Equal("test", tgram.LastSentText)
+	r.Equal(3, keybdMsgID)
+	r.Equal(3, tgram.LastSentMessageID)
 }
 
 func TestSaveToNewFileIntegration(t *testing.T) {
@@ -2494,7 +2493,7 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	err = bot.Answer(tg.NewUpd(-1, "My dir"))
 	r.NoError(err)
 
-	r.Equal("🗂️ Moved to <b>My dir</b>", tgram.LastSentText)
+	r.Equal("🌴 You don't have any tasks!", tgram.LastSentText)
 
 	content, err := userFS.Read("my dir", "Text.md")
 	r.NoError(err)
@@ -2503,8 +2502,8 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	r.Nil(database.InputExpectation(-1))
 	msgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
-	r.Equal(1, msgID)
-	r.Equal(2, tgram.LastSentMessageID)
+	r.Equal(3, msgID)
+	r.Equal(3, tgram.LastSentMessageID)
 }
 
 func TestSaveToNewMultilineFileIntegration(t *testing.T) {
@@ -2727,7 +2726,8 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 	err = bot.Answer(tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"23200", "", "72e56"})))
 	r.NoError(err)
 
-	r.Empty(tgram.LastEditedKeyboard.Btns)
+	r.Empty(tgram.LastEditedKeyboard)
+
 	content, err := userFS.Read("", "Text.md")
 	r.NoError(err)
 	r.Equal("#### 1 January, Thursday\nNew text\nText", content)
@@ -2760,7 +2760,7 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 	r.Nil(database.InputExpectation(-1))
 	msgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
-	r.Equal(3, msgID)
+	r.Equal(4, msgID)
 	r.Equal(msgID, tgram.LastSentMessageID)
 }
 

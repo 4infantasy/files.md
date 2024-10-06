@@ -1346,7 +1346,9 @@ func (b *Bot) moveToDir(params []string) error {
 		b.db.SetRecentCommandParams(b.userID, []string{toDirHash, fs.Hash(fs.DirToday)})
 	}
 
+	b.delAllKeyboards()
 	msg := txt.Emoji(i18n.Emoji("dir"), fmt.Sprintf(i18n.Tr("Moved to <b>%s</b>"), fs.Title(toDir)))
+	// Just an informative messages
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
@@ -1431,7 +1433,9 @@ func (b *Bot) moveToExistingFile(params []string) error {
 	b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
 	b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(existingFilename), fs.ShortHash(fs.DirToday)})
 
+	b.delAllKeyboards()
 	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(toFilename)))
+	// Just an informative messages
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
