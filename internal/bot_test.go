@@ -2339,10 +2339,11 @@ func TestSaveToExistingFileIntegration(t *testing.T) {
 	r.Equal("#### 1 January, Thursday\nText\nFile content", content)
 
 	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	keybdMsgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
-	r.Equal(1, msgID)
-	r.Equal(msgID, tgram.LastSentMessageID)
+	r.Equal(1, keybdMsgID)
+	r.Equal(2, tgram.LastSentMessageID)
+	//r.Equal("test", tgram.LastSentText)
 }
 
 func TestSaveToNewFileIntegration(t *testing.T) {
@@ -2493,7 +2494,7 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	err = bot.Answer(tg.NewUpd(-1, "My dir"))
 	r.NoError(err)
 
-	r.Equal("New dir <b>my dir</b> is created and your note is saved!", tgram.LastSentText)
+	r.Equal("🗂️ Moved to <b>My dir</b>", tgram.LastSentText)
 
 	content, err := userFS.Read("my dir", "Text.md")
 	r.NoError(err)
@@ -2657,7 +2658,7 @@ func TestSaveToNewCustomFileIntegration(t *testing.T) {
 	msgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
 	r.Equal(1, msgID)
-	r.Equal(msgID, tgram.LastSentMessageID)
+	r.Equal(2, tgram.LastSentMessageID)
 }
 
 func TestSaveToRecentFileIntegration(t *testing.T) {
@@ -2759,7 +2760,7 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 	r.Nil(database.InputExpectation(-1))
 	msgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
-	r.Equal(2, msgID)
+	r.Equal(3, msgID)
 	r.Equal(msgID, tgram.LastSentMessageID)
 }
 

@@ -1327,24 +1327,27 @@ func (b *Bot) moveToDir(params []string) error {
 		newFilename = params[3]
 	}
 
-	newDir, err := b.fs.Unhash(fs.DirRoot, toDirHash)
+	toDir, err := b.fs.Unhash(fs.DirRoot, toDirHash)
 	if err != nil {
-		return fmt.Errorf("move: can't unhash new dir %s: %w", newDir, err)
+		return fmt.Errorf("move: can't unhash new dir %s: %w", toDir, err)
 	}
 
 	// TODO touch
 	// TODO multiline ?
-	err = b.fs.Rename(oldDir, filename, newDir, newFilename)
+	err = b.fs.Rename(oldDir, filename, toDir, newFilename)
 	if err != nil {
 		return fmt.Errorf("move: can't move: %w", err)
 	}
 
-	if newDir != fs.DirLater {
+	if toDir != fs.DirLater {
 		b.db.SetRecentCommand(b.userID, consts.CmdMoveToDir)
 		// Move from dir is today, because quick command
 		// appears when file is in today dir
 		b.db.SetRecentCommandParams(b.userID, []string{toDirHash, fs.Hash(fs.DirToday)})
 	}
+
+	msg := txt.Emoji(i18n.Emoji("dir"), fmt.Sprintf(i18n.Tr("Moved to <b>%s</b>"), fs.Title(toDir)))
+	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
 }
@@ -1379,10 +1382,6 @@ func (b *Bot) moveToNewDir(params []string) error {
 		return fmt.Errorf("move to new dir: %w", err)
 	}
 
-	msg := fmt.Sprintf(i18n.Tr("New dir <b>%s</b> is created and your note is saved!"), dir)
-	// An informative message, we can ingore
-	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
-
 	return b.moveToDir([]string{dir, fs.DirRoot, filenameHash})
 }
 
@@ -1390,39 +1389,39 @@ func (b *Bot) moveToExistingFile(params []string) error {
 	// TODO Remove input expectations if dir is not today (?)
 	existingFilenameHash := params[0]
 	fromDirHash := params[1]
-	newFilenameHash := params[2]
+	toFilenameHash := params[2]
 
 	// TODO add test for adding to same file, it seems it is broken (after we added short hash)
-	if newFilenameHash == existingFilenameHash {
+	if toFilenameHash == existingFilenameHash {
 		return b.ShowToday(nil)
 	}
 
 	existingFilename, err := b.fs.Unhash(fs.DirRoot, existingFilenameHash)
 	if err != nil {
-		return fmt.Errorf("move to file: can't unhash existing file '%s': %w", newFilenameHash, err)
+		return fmt.Errorf("move to file: can't unhash existing file '%s': %w", toFilenameHash, err)
 	}
 
 	fromDir, err := b.fs.Unhash(fs.DirRoot, fromDirHash)
 	if err != nil {
-		return fmt.Errorf("move to file: can't unhash from dir '%s': %w", newFilenameHash, err)
+		return fmt.Errorf("move to file: can't unhash from dir '%s': %w", toFilenameHash, err)
 	}
 
-	newFilename, err := b.fs.Unhash(fromDir, newFilenameHash)
+	toFilename, err := b.fs.Unhash(fromDir, toFilenameHash)
 	if err != nil {
-		return fmt.Errorf("move to file: can't unhash new filename '%s': %w", newFilenameHash, err)
+		return fmt.Errorf("move to file: can't unhash new filename '%s': %w", toFilenameHash, err)
 	}
 
-	content, err := b.fs.Read(fromDir, newFilename)
+	content, err := b.fs.Read(fromDir, toFilename)
 	if err != nil {
-		return fmt.Errorf("move to file: can't read content of '%s': %w", newFilename, err)
+		return fmt.Errorf("move to file: can't read content of '%s': %w", toFilename, err)
 	}
 	content = strings.TrimSpace(content)
 	if len(content) == 0 {
-		content = fs.Title(newFilename)
+		content = fs.Title(toFilename)
 	}
 
 	// We can tolerate this
-	_ = b.fs.Del(fromDir, newFilename)
+	_ = b.fs.Del(fromDir, toFilename)
 
 	err = b.addToFile(fs.DirRoot, existingFilename, content)
 	if err != nil {
@@ -1431,6 +1430,9 @@ func (b *Bot) moveToExistingFile(params []string) error {
 
 	b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
 	b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(existingFilename), fs.ShortHash(fs.DirToday)})
+
+	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(toFilename)))
+	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
 }
@@ -1577,6 +1579,9 @@ func (b *Bot) moveToNewFile(params []string) error {
 	// TODO test
 	b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
 	b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(newFilenameFromUserInput), fs.ShortHash(fs.DirToday)})
+
+	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(newFilenameFromUserInput)))
+	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
 }
