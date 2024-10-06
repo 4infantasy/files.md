@@ -103,8 +103,8 @@ func ExtractTextImgsLinks(text string) (string, []string, map[string]string) {
 	links := make(map[string]string)
 
 	// Regular expressions
+	imgRegexp := regexp.MustCompile(`!\[\[(.+?)\]\]`)
 	linkRegexp := regexp.MustCompile(`\[\[(.+?)\|(.+?)\]\]`)
-	imageRegexp := regexp.MustCompile(`!\[\[(.+?)\]\]`)
 
 	// Eat bottom links
 	text = NormNewLines(text)
@@ -124,23 +124,24 @@ func ExtractTextImgsLinks(text string) (string, []string, map[string]string) {
 	}
 	text = strings.Join(processedLines, "\n")
 
-	// Process inline links
-	text = linkRegexp.ReplaceAllStringFunc(text, func(match string) string {
-		matches := linkRegexp.FindStringSubmatch(match)
-		if len(matches) == 3 {
-			links[matches[2]] = matches[1]
-			return "`" + matches[2] + "`"
-		}
-		return match
-	})
-
 	// Process images
-	text = imageRegexp.ReplaceAllStringFunc(text, func(match string) string {
-		matches := imageRegexp.FindStringSubmatch(match)
+	text = imgRegexp.ReplaceAllStringFunc(text, func(match string) string {
+		matches := imgRegexp.FindStringSubmatch(match)
 		if len(matches) == 2 {
 			fmt.Printf("%v\n", matches)
 			images = append(images, matches[1])
 			return "🖼"
+		}
+		return match
+	})
+
+	// Process inline links
+	text = linkRegexp.ReplaceAllStringFunc(text, func(match string) string {
+		matches := linkRegexp.FindStringSubmatch(match)
+		fmt.Printf("%v\n", matches)
+		if len(matches) == 3 {
+			links[matches[2]] = matches[1]
+			return "`" + matches[2] + "`"
 		}
 		return match
 	})

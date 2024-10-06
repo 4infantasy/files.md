@@ -164,27 +164,33 @@ func TestExtractTextImgsLinks(t *testing.T) {
 		expectedLinks  map[string]string
 	}{
 		{
-			name: "Test with inline links, images, and bottom links",
+			name: "Test with inline links, images and bottom links",
 			input: `Text
 ![[img/Pasted image 20240802153905.png]]
-Other text, some [[management/link|link]]
+Other text
 
 [[management/test2|test2]]
 [[management/test1|test1]]`,
 			expectedText: `Text
 🖼
-Other text, some <code>link<code>`,
+Other text`,
 			expectedImages: []string{"img/Pasted image 20240802153905.png"},
 			expectedLinks: map[string]string{
-				"link":  "management/link",
 				"test1": "management/test1",
 				"test2": "management/test2",
 			},
 		},
 		{
+			name:           "Test centered images",
+			input:          `![[img/Pasted image.png|center|300]]`,
+			expectedText:   "🖼",
+			expectedImages: []string{"img/Pasted image.png|center|300"},
+			expectedLinks:  map[string]string{},
+		},
+		{
 			name:           "Test with no images and only inline links",
-			input:          `This is a sample text with a link: [[docs/page1|Page1]]`,
-			expectedText:   `This is a sample text with a link: <code>Page1<code>`,
+			input:          "This is a sample text with a link: [[docs/page1|Page1]]",
+			expectedText:   "This is a sample text with a link: `Page1`",
 			expectedImages: []string{},
 			expectedLinks: map[string]string{
 				"Page1": "docs/page1",
