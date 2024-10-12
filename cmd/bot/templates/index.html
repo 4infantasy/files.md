@@ -6,28 +6,15 @@
     <link rel="icon" href="https://files.md/favicon.ico" sizes="32x32">
     <title>Files.md</title>
     <style>
-        html {
-            box-sizing: border-box;
-            width: 100%;
-            height: 100%;
-            font-size: 62.5%
-        }
-
-        body {
-            margin: 0;
-            background-color: #FFFCF0; // flexoki
-            color: #100F0F;
-            font-size: calc(1.4rem + 0.25vw);
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
-            --color-selection:
-        }
-
-        :root {
+        :root { /* Fleroki theme */
+            --color-tx: #100F0F;
+            --color-tx-faint: #B7B5AC;
+            --color-tx-muted: #6F6E69;
+            --color-tx-sel: rgba(187, 220, 206, 0.3);
+            --color-bg: #FFFCF0; /* Paper color */
             --font-normal: calc(1.5rem + 0.25vw);
             --wrap-wide: 1000px;
-            --wrap-normal: 37em;
+            --wrap-normal: 38em;
             --line-height: 1.5;
         }
 
@@ -36,6 +23,23 @@
                 --wrap-normal: 88vw;
                 --wrap-wide: 100vw;
             }
+        }
+
+        html {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            font-size: 64%
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--color-bg);
+            color: var(--color-tx);
+            font-size: calc(1.4rem + 0.25vw);
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
 
@@ -58,21 +62,15 @@
 
         p {
             font-size: var(--font-normal);
-            max-width: var(--wrap-normal);
             line-height: var(--line-height);
         }
 
-        ul {
-            padding: 0.5rem 0 1rem 1em;
-            margin: 0 0 0 0.5em
-        }
-
         ul>li {
-            padding: 0.15rem 0
+            padding: 0.30rem 0
         }
 
         ul>li::marker {
-            color: #B7B5AC;
+            color: var(--color-tx-faint);
         }
 
         ul>li::marker {
@@ -80,15 +78,15 @@
         }
 
         .muted {
-            color: #6F6E69;
+            color: var(--color-tx-muted);
         }
 
         ::selection {
-            background: rgba(187, 220, 206, 0.3);
+            background: var(--color-tx-sel);
         }
 
         ::-moz-selection {
-            background: rgba(187, 220, 206, 0.3);
+            background: var(--color-tx-sel);
         }
     </style>
 </head>
