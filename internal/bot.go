@@ -1149,6 +1149,8 @@ func (b *Bot) showMultilineTask(params []string) error {
 	if err != nil {
 		return fmt.Errorf("show task: %w", err)
 	}
+	// Show MD?
+	content = fmt.Sprintf("**%s**\n%s", fs.Title(filename), content)
 	content = txt.MarkdownToHTML(content)
 
 	var moveToBtn tg.Btn
