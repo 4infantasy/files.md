@@ -22,12 +22,13 @@
 package internal
 
 import (
+	"fmt"
 	"sync"
 )
 
 var (
-	firstMsgs     sync.Map
-	firstMsgTimes sync.Map
+	firstMsgFilenames sync.Map
+	firstMsgTimes     sync.Map
 )
 
 func firstMsgTime(userID int64) (int, bool) {
@@ -43,8 +44,8 @@ func setFirstMsgTime(userID int64, time int) {
 	firstMsgTimes.Store(userID, time)
 }
 
-func firstMsg(userID int64) (string, bool) {
-	msg, ok := firstMsgs.Load(userID)
+func firstMsgFilename(userID int64) (string, bool) {
+	msg, ok := firstMsgFilenames.Load(userID)
 	if !ok {
 		return "", false
 	}
@@ -52,7 +53,7 @@ func firstMsg(userID int64) (string, bool) {
 	return msg.(string), true
 }
 
-func setFirstMsg(userID int64, msg string, time int) {
+func setFirstMsgFilename(userID int64, filename string, time int) {
 	firstTime, ok := firstMsgTime(userID)
 	if ok {
 		diff := time - firstTime
@@ -62,19 +63,21 @@ func setFirstMsg(userID int64, msg string, time int) {
 		}
 	}
 
-	firstMsgs.Store(userID, msg)
+	firstMsgFilenames.Store(userID, filename)
 }
 
 func collapseToMsg(userID int64, time int) (string, bool) {
 	firstTime, ok := firstMsgTime(userID)
+	fmt.Println(firstTime)
 	if !ok {
 		return "", false
 	}
 
 	diff := time - firstTime
+	fmt.Println(diff)
 	// Sent in exactly same second or second after
 	if diff == 0 || diff == 1 {
-		return firstMsg(userID)
+		return firstMsgFilename(userID)
 	}
 
 	return "", false

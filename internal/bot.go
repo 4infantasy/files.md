@@ -361,7 +361,7 @@ func (b *Bot) saveFromRegularMsg(u Update) error {
 	}
 
 	if updateHasTime {
-		setFirstMsg(b.userID, filename, msgTime)
+		setFirstMsgFilename(b.userID, filename, msgTime)
 		setFirstMsgTime(b.userID, msgTime)
 	}
 
