@@ -59,7 +59,6 @@ type Update interface {
 	Cmd() *tg.Cmd
 	MsgEntities() []tgbotapi.MessageEntity
 	CaptionEntities() []tgbotapi.MessageEntity
-	IsForwarded() bool
 	CallbackQueryID() (string, bool)
 	InlineQueryID() (string, bool)
 	InlineQuery() (string, bool)
@@ -179,11 +178,6 @@ func (b *Bot) Answer(u Update) error {
 
 		return nil
 	}
-
-	//// Handle forwards
-	//if u.IsForwarded() {
-	//	return b.saveFromForward(u)
-	//}
 
 	// Handle photos
 	if _, hasPhoto := u.PhotoOrImageID(); hasPhoto {
@@ -414,51 +408,6 @@ func (b *Bot) saveFromPhoto(u Update) error {
 	err = b.createOrAdd(fs.DirToday, filename, content)
 	if err != nil {
 		return fmt.Errorf("save: %w", err)
-	}
-
-	return b.showMoveTo([]string{fs.Hash(filename)})
-}
-
-// TODO Add tests
-func (b *Bot) saveFromForward(u Update) error {
-	content := extractMarkdown(u)
-	sanitizedTitle, err := b.extractTitle(content)
-	if err != nil {
-		return fmt.Errorf("save forward: %w", err)
-	}
-
-	sanitizedTitle = fs.SanitizeFilename(sanitizedTitle)
-	filename := fs.Filename(sanitizedTitle)
-
-	// If sanitizedTitle is the same as content, we don't need to duplicate content
-	if sanitizedTitle == content {
-		content = ""
-	}
-
-	// When a user forwards message + sanitizedTitle we receive 2 updates from TG.
-	// First we receive sanitizedTitle, then the message itself. We must add our
-	// forwarded message to previously saved task (by sanitizedTitle).
-	// We do sleep here because previous file might not be saved.
-	// We may consider locks here, but the updates can come out of order
-	time.Sleep(300 * time.Millisecond)
-	files, err := b.fs.FilesAndDirs(fs.DirToday)
-	if err != nil {
-		return fmt.Errorf("save forward: %w", err)
-	}
-
-	files = fs.SortByCtimeDesc(fs.OnlyMDFiles(files))
-	slices.Reverse(files)
-	if len(files) > 0 {
-		file := files[len(files)-1]
-		fileWasCreatedRecently := (now().Unix() - file.Ctime) <= 2
-		if fileWasCreatedRecently {
-			filename = file.Name
-		}
-	}
-
-	err = b.createOrAdd(fs.DirToday, filename, content)
-	if err != nil {
-		return fmt.Errorf("save forward: %w", err)
 	}
 
 	return b.showMoveTo([]string{fs.Hash(filename)})
