@@ -1374,8 +1374,6 @@ func (b *Bot) moveToNewDir(params []string) error {
 	if err != nil {
 		return fmt.Errorf("move to new dir: %w", err)
 	}
-	// Just an informative message
-	_, _ = b.tg.Send(b.userID, fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(dir)), nil, tg.MarkupHTML)
 
 	return b.moveToDir([]string{dir, fs.DirRoot, filenameHash})
 }
@@ -1606,8 +1604,6 @@ func (b *Bot) moveToNewChecklist(params []string) error {
 	if err != nil {
 		return fmt.Errorf("move to new checklist: %w", err)
 	}
-	// Just an informative message
-	_, _ = b.tg.Send(b.userID, fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(supposedName)), nil, tg.MarkupHTML)
 
 	return b.moveToDir([]string{dir, fs.DirToday, filenameHash})
 }

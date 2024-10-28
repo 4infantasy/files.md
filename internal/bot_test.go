@@ -2507,8 +2507,8 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	r.Nil(database.InputExpectation(-1))
 	msgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
-	r.Equal(4, msgID)
-	r.Equal(4, tgram.LastSentMessageID)
+	r.Equal(3, msgID)
+	r.Equal(3, tgram.LastSentMessageID)
 }
 
 func TestSaveToNewMultilineFileIntegration(t *testing.T) {
