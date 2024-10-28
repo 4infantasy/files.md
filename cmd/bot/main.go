@@ -127,7 +127,7 @@ func main() {
 
 		userCh, exists := userChannels[userID]
 		if !exists {
-			userCh = make(chan tgbotapi.Update)
+			userCh = make(chan tgbotapi.Update, 100)
 			userChannels[userID] = userCh
 			// Start per-user worker if none is running
 			go func() {
