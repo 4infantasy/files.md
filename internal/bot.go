@@ -41,7 +41,7 @@ const (
 	btnsPerRow             = 3
 	quickBtnsPerRow        = 4
 	maxBtns                = 50
-	maxBtnsInChecklist     = 5 // For -read- and -watch- checklists, so we're less likely to be overwhelmed :)
+	maxBtnsInChecklist     = 5 // For _read_ and _watch_ checklists, so we're less likely to be overwhelmed :)
 	maxBtnsInMoveTo        = 6
 	maxInlineResults       = 50
 	maxMsgLength           = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2

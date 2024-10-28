@@ -61,7 +61,7 @@ func TestMD5(t *testing.T) {
 func TestExcludeChecklists(t *testing.T) {
 	r := require.New(t)
 
-	noChecklists := ExcludeChecklists([]File{{Name: "not-a-checklist"}, {Name: "-checklist-"}})
+	noChecklists := ExcludeChecklists([]File{{Name: "not-a-checklist"}, {Name: "_checklist_"}})
 
 	r.Equal([]File{{Name: "not-a-checklist"}}, noChecklists)
 }
@@ -136,7 +136,7 @@ func TestCreateBaseDirs(t *testing.T) {
 	dirs = OnlyDirs(dirs)
 	dirNames := OnlyFilenames(dirs)
 
-	r.ElementsMatch([]string{"later", "today", "archive", "-read-", "-shop-", "-watch-", "img", "habits", "journal", "insights"}, dirNames)
+	r.ElementsMatch([]string{"later", "today", "archive", "_read_", "_shop_", "_watch_", "img", "habits", "journal", "insights"}, dirNames)
 }
 
 func TestSortByCtimeDesc(t *testing.T) {

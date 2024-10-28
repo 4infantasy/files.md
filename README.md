@@ -41,7 +41,7 @@ We differentiate the following types of files (with `/` denoting your root folde
 - Tasks: `/today/Pay the bills.md` (`/today/*.md`, `/later/*.md`)
 - Notes: `/brain/Brain is the most complex object.md` (`/*/*.md`)
 - Files: `/My project.md` (`/*.md`)
-- Checklists: `/-read-/How to Take Smart Notes.md` (`/-[read|watch|shop]-/*.md`)
+- Checklists: `/_read_/How to Take Smart Notes.md` (`/_[read|watch|shop]_/*.md`)
 - Journal: `/Journal/2024.08 August.md` (`/journal/<YEAR>.<MONTH> <MONTH NAME>.md`)
 - Habits: `/habits/2 minute morning workout.md` (`/habits/*.md`)
 - Insights: `/insights/2024 Habits.md` (`/insights/<YEAR> Habits.md`)

@@ -37,9 +37,9 @@ const (
 	DirJournal  = "journal"
 	DirHabits   = "habits"
 	DirInsights = "insights"
-	DirRead     = "-read-"
-	DirWatch    = "-watch-"
-	DirShop     = "-shop-"
+	DirRead     = "_read_"
+	DirWatch    = "_watch_"
+	DirShop     = "_shop_"
 
 	FilePomodoro = "Finished a break.md"
 	FileConfig   = "config.json"
@@ -539,7 +539,7 @@ func ShortHash(filename string) string {
 func ExcludeChecklists(dirs []File) []File {
 	var newDirs []File
 	for _, dir := range dirs {
-		isChecklist := strings.HasPrefix(dir.Name, "-") && strings.HasSuffix(dir.Name, "-")
+		isChecklist := strings.HasPrefix(dir.Name, "_") && strings.HasSuffix(dir.Name, "_")
 		if isChecklist {
 			continue
 		}
