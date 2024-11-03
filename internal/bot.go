@@ -102,9 +102,7 @@ type Database interface {
 	DelPhotoMsgIDs(userID int64)
 }
 
-// Bot provides commands that can be invoked by a user so to query
-// server files and database. A user can also send all sort of things
-// to bot (texts, photos) - in that case we'd save everything.
+// Bot provides an interface over files on the filesystem
 type Bot struct {
 	userID int64
 	tg     Chat
