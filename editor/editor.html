@@ -67,7 +67,8 @@
     })
     editor.hmdReadLink = function(path, t) {
         path = path.replace('[', '').replace(']', '');
-        editor.getDoc().setValue(zettel['arch'][path + '.md']);
+        let parts = path.split('/');
+        editor.getDoc().setValue(zettel[parts[0]][parts[1] + '.md']);
         setTimeout(function () {
             editor.focus();
             editor.setCursor(editor.lineCount(), 0);
