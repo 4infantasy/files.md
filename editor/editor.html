@@ -66,12 +66,10 @@
     })
     editor.hmdReadLink = function(path) {
         path = path.replace('[', '').replace(']', '');
-        console.log(path);
         let parts = path.split('/');
         editor.getDoc().setValue(zettel[parts[0]][parts[1] + '.md'].content);
         setTimeout(function () {
             editor.focus();
-            editor.setCursor(editor.lineCount(), 0);
         }, 0);
     }
 
@@ -86,7 +84,6 @@
                     editor.currentFolder = node.parent.toString();
                     editor.currentFile = node.toString();
                     editor.focus();
-                    editor.setCursor(editor.lineCount(), 0);
                 });
                 dirNode.addChild(fileNode);
             }
@@ -185,7 +182,7 @@
             } else if (entry.kind === 'file' && entry.name.endsWith('.md')) {
                 const header = entry.name.replace('.md', '').replace(/^\w/, (c) => c.toUpperCase());
                 let fileContent = await readFile(entry);
-                fileContent = `# ${header}\n\n${fileContent}`;
+                fileContent = `# ${header}\n${fileContent}`;
                 fileContent = fileContent.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
                 const folder = path.split('/').filter(Boolean).join('/');
                 if (!zettel[folder]) zettel[folder] = {};
