@@ -60,6 +60,7 @@ body {
     background: var(--color-bg-alt);
     color: #878787;
     border-right: 1px solid #E6E4DA;
+    font-size: calc(1.3rem + 0.2vw);
 }
 
 #editor-content {
