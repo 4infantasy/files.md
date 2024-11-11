@@ -103,6 +103,46 @@
         }
     });
     editor.setOption("viewportMargin", Infinity); // All content should be searchable
+    editor.on("paste", async (_, event) => {
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (const item of items) {
+            if (item.kind === "file" && item.type.startsWith("image/")) {
+                const file = item.getAsFile();
+                const fileName = `${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+                await saveImageToDirectory(file, fileName);
+
+                const markdownImageSyntax = `![Image](img/${fileName})`;
+                editor.replaceSelection(markdownImageSyntax);
+                // if (fileHandle) {
+                //     // Insert the Markdown image syntax into the editor
+                //     const markdownImageSyntax = `![[${fileName}]]`;
+                //     editor.replaceSelection(markdownImageSyntax);
+                //     console.log(`Image saved as: ${fileName}`);
+                // } else {
+                //     console.error("Failed to save the image.");
+                // }
+            }
+        }
+    });
+
+    async function saveImageToDirectory(file, fileName) {
+        try {
+            let imgDirHandle = await getSavedDirectoryHandle();
+            if (!imgDirHandle) return null;
+
+            // Create a file handle for the image file
+            const fileHandle = await imgDirHandle.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(file);
+            await writable.close();
+
+            console.log("Image saved");
+            return fileHandle;
+        } catch (error) {
+            console.error("Error saving image:", error);
+            return null;
+        }
+    }
 
     async function getImageUrl(fileHandle) {
         const file = await fileHandle.getFile();
@@ -351,11 +391,11 @@
             openSearchModal();
         }
 
-        // if (event.metaKey && event.key === 'k') {
-        //     event.preventDefault();
-        //     document.getElementById('goToFileInput').value = ''
-        //     openSearchModal();
-        // }
+        if (event.metaKey && event.key === 'k') {
+            event.preventDefault();
+            document.getElementById('goToFileInput').value = ''
+            openSearchModal();
+        }
     });
 
     function closeSearchModal() {
