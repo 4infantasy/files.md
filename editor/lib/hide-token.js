@@ -133,6 +133,7 @@
              * @returns if there are Span Nodes changed
              */
             function changeVisibilityForSpan(span, shallHideTokens, iNodeHint) {
+                console.log(span, shallHideTokens, iNodeHint);
                 var changed = false;
                 iNodeHint = iNodeHint || 0;
                 // iterate the map
@@ -146,6 +147,7 @@
                             // good. this token can be changed
                             var domParent = domNode.parentElement;
                             if (shallHideTokens ? addClass(domParent, hideClassName) : rmClass(domParent, hideClassName)) {
+                                console.log(hideClassName);
                                 // if (DEBUG) console.log("HEAD DOM CHANGED")
                                 changed = true;
                             }
@@ -251,13 +253,7 @@
                 if (caretLineChanged) {
                     if (DEBUG)
                         console.log("caretLineChanged");
-                    // Save the current cursor position and scroll position
-                    const cursorPos = cm.getCursor();
-                    const scrollPos = cm.getScrollInfo();
-
-                    // Refresh the editor
-                    cm.refreshCursor(); // CUSTOMIZED
-
+                    cm.refreshCursor();
                     // legacy unstable way to update display and caret position:
                     // updateCursorDisplay(cm, true)
                     // if (cm.hmd.TableAlign && cm.hmd.TableAlign.enabled) cm.hmd.TableAlign.updateStyle()
