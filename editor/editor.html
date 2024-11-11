@@ -372,11 +372,13 @@
     document.addEventListener('keydown', (event) => {
         if (event.metaKey && event.key === 'p') {
             event.preventDefault();
+            document.getElementById('goToFileInput').value = ''
             openSearchModal();
         }
 
         if (event.metaKey && event.key === 'k') {
             event.preventDefault();
+            document.getElementById('goToFileInput').value = ''
             openSearchModal();
         }
     });

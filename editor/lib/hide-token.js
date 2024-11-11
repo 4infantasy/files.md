@@ -251,7 +251,13 @@
                 if (caretLineChanged) {
                     if (DEBUG)
                         console.log("caretLineChanged");
-                    cm.refresh();
+                    // Save the current cursor position and scroll position
+                    const cursorPos = cm.getCursor();
+                    const scrollPos = cm.getScrollInfo();
+
+                    // Refresh the editor
+                    cm.refreshCursor(); // CUSTOMIZED
+
                     // legacy unstable way to update display and caret position:
                     // updateCursorDisplay(cm, true)
                     // if (cm.hmd.TableAlign && cm.hmd.TableAlign.enabled) cm.hmd.TableAlign.updateStyle()

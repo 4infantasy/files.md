@@ -8662,6 +8662,10 @@
         signal(this, "refresh", this);
       }),
 
+      refreshCursor: methodOp(function() { // CUSTOMIZED
+        regChange(this);
+      }),
+
       swapDoc: methodOp(function(doc) {
         var old = this.doc;
         old.cm = null;
