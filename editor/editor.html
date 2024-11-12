@@ -74,7 +74,7 @@
         mode: "hypermd",
         lineNumbers: false,
         extraKeys: {
-            "Shift-Space": "autocomplete",
+            // "Shift-Space": "autocomplete",
             'Cmd-[': false,
             'Cmd-]': false,
         },
@@ -316,7 +316,6 @@
         editor.currentFile = filename;
         if (saveToHistory) {
             const state = { folder: folder, file: filename};
-            console.log(state);
             history.pushState(state, '');
         }
 
