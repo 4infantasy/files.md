@@ -78,7 +78,8 @@
         },
         hintOptions: {
             hint: CompleteEmoji.createHintFunc(),
-            closeCharacters: /$^/
+            closeCharacters: /$^/,
+            closeOnUnfocus: false
         },
         hmdFoldEmoji: {
             myEmoji: createAutocompleteDict
@@ -122,7 +123,10 @@
     };
     editor.on("inputRead", async function (cm, change) {
         if (change.text.length === 1 && change.text[0] === '[') {
-            editor.showHint({completeSingle: false})
+            editor.showHint({
+                completeSingle: false,
+                updateOnCursorActivity: true,
+            })
         }
     })
 
