@@ -315,7 +315,9 @@
         editor.getDoc().setValue(content);
         editor.clearHistory();
 
-        // We need to execute this code after some rendering loop
+        // Set cursor at the end of the page.
+        // We need to execute this code after some rendering loop. If we don't do that,
+        // Images and other heavy stuff won't be loaded
         setTimeout(() => {
             const lastLine = editor.lastLine();
             let targetLine = lastLine;
@@ -387,7 +389,11 @@
 
     async function init() {
         const savedDirectoryHandle = await getSavedDirectoryHandle();
-        if (savedDirectoryHandle) {
+        if (savedDirectoryHandle instanceof FileSystemDirectoryHandle) {
+            const permission = await savedDirectoryHandle.queryPermission({ mode: 'read' });
+            if (permission !== 'granted') {
+                document.getElementById('welcome').style.display = 'flex';
+            }
             zettel = {};
             await loadDirectory(savedDirectoryHandle);
             await showRandomFile();

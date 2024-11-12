@@ -50,7 +50,6 @@
                     replacedWith: img,
                 });
                 img.addEventListener('load', function () {
-                    console.log("IMAGE LOAD");
                     img.classList.remove("hmd-image-loading");
                     marker.changed();
                 }, false);
