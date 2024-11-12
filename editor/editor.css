@@ -61,7 +61,7 @@ body {
     background: var(--color-bg-alt);
     color: #878787;
     border-right: 1px solid var(--color-border);
-    font-size: calc(1.3rem + 0.2vw);
+    font-size: calc(1.5rem);
     padding-left: 5px;
 }
 
