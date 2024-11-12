@@ -1,12 +1,12 @@
 (function (mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     mod(
-      exports,
-      require('codemirror'),
-      require('hypermd/addon/fold-emoji'),
+        exports,
+        require('codemirror'),
+        require('hypermd/addon/fold-emoji'),
 
-      require('codemirror/addon/hint/show-hint'),
-      require('codemirror/addon/hint/show-hint.css')
+        require('codemirror/addon/hint/show-hint'),
+        require('codemirror/addon/hint/show-hint.css')
     );
   else if (typeof define == "function" && define.amd) // AMD
     define([
@@ -19,9 +19,9 @@
     ], mod);
   else // Plain browser env
     mod(
-      (this.CompleteEmoji = {}),
-      CodeMirror,
-      HyperMD.FoldEmoji
+        (this.CompleteEmoji = {}),
+        CodeMirror,
+        HyperMD.FoldEmoji
     );
 })(function (exports, CodeMirror, FoldEmoji) {
   /**
@@ -33,6 +33,7 @@
   exports.createHintFunc = function () {
     var editor = null
     var defaultDict = FoldEmoji.defaultDict
+    console.log(defaultDict);
 
     var previewShown = false
     var previewContainer = document.createElement('div')
@@ -45,17 +46,11 @@
       var start = cursor.ch, end = cursor.ch
       while (start && /[-\w:]/.test(line.charAt(start - 1)))--start
       while (end < line.length && /[-\w:]/.test(line.charAt(end)))++end
-      var result = {
-        list: [{text: "[link1]]", displayText: "s"}, {text: "[link2]]", displayText: "link2"}],
-        from: CodeMirror.Pos(cursor.line, start),
-        to: CodeMirror.Pos(cursor.line, end)
-      }
-      return result;
 
-      if (start === end) {
-        hidePreview()
-        return null
-      }
+      // if (start === end) {
+      //   hidePreview()
+      //   return null
+      // }
 
       var word = line.slice(start, cursor.ch).toLowerCase()
       var wordEmpty = word.length === 0
@@ -63,10 +58,10 @@
       /** @type {Array<Record<string,string>>} */
       var dicts = [defaultDict]
       var myEmojiDict = (editor.getOption('hmdFoldEmoji') || {}).myEmoji
-      if (myEmojiDict) dicts.push(myEmojiDict)
+      if (myEmojiDict) dicts.push(myEmojiDict())
 
       var result = {
-        list: ['tests', 'three'],
+        list: [],
         from: CodeMirror.Pos(cursor.line, start),
         to: CodeMirror.Pos(cursor.line, end)
       }
@@ -74,12 +69,12 @@
       var list = result.list
       for (var i = 0; i < dicts.length; i++) {
         var dict = dicts[i]
-        // if (!dict) continue
-        // for (var key in dict) {
-        //   if (wordEmpty || key.slice(0, word.length) === word) {
-        //     list.push()
-          // }
-        // }
+        if (!dict) continue
+        for (var key in dict) {
+          if (wordEmpty || key.slice(0, word.length) === word || key.toLowerCase().includes(word.toLowerCase())) {
+            list.push({text: dict[key], displayText: key})
+          }
+        }
       }
 
       CodeMirror.on(result, "select", showPreview)
@@ -101,14 +96,16 @@
      * @param {HTMLElement} element
      */
     function showPreview(completion, element) {
+      return;
+
       var foldEmoji = FoldEmoji.getAddon(editor)
 
       /** @type {Node} */
       var newNode =
-        ((completion in foldEmoji.myEmoji) && foldEmoji.myEmoji[completion](completion))
-        || foldEmoji.emojiRenderer(completion)
-        || document.createTextNode(defaultDict[completion])
-        || null
+          ((completion in foldEmoji.myEmoji) && foldEmoji.myEmoji[completion](completion))
+          || foldEmoji.emojiRenderer(completion)
+          || document.createTextNode(defaultDict[completion])
+          || null
 
       if (newNode) { // yes, this is a emoji
         if (!previewShown) {

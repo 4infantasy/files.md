@@ -11,6 +11,7 @@
     --color-code-op: #BC5215;
     --color-bg-code: #f2f0e5;
     --color-ui: #E6E4D9;
+    --color-border: #E6E4DA;
     --font-smaller: 1.3rem;
     --font: -apple-system, BlinkMacSystemFont, 'Inter', 'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -59,7 +60,7 @@ body {
     height: 100%;
     background: var(--color-bg-alt);
     color: #878787;
-    border-right: 1px solid #E6E4DA;
+    border-right: 1px solid var(--color-border);
     font-size: calc(1.3rem + 0.2vw);
     padding-left: 5px;
 }
@@ -211,4 +212,22 @@ a:hover {
 
 .CodeMirror-selected {
     background: var(--color-tx-sel) !important;
+}
+
+.CodeMirror-hints {
+    background-color: var(--color-bg) !important;
+    color: var(--color-tx) !important;
+    border: 1px solid var(--color-border) !important;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.CodeMirror-hint {
+    padding: 5px 10px !important;
+    cursor: pointer;
+}
+
+.CodeMirror-hint-active {
+    background-color: var(--color-bg-alt) !important;
+    color: var(--color-tx-muted) !important;
 }

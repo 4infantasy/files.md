@@ -52,15 +52,35 @@
 </div>
 
 <script>
+    // We use it as links autocopmlete
+    function createAutocompleteDict() {
+        const emojiDict = {};
+
+        Object.keys(zettel).forEach(folder => {
+            Object.keys(zettel[folder]).forEach(filename => {
+                const emojiKey = `${filename.replace(/\.[^/.]+$/, "")}`;
+                const filePath = `[${filename}](${folder}/${filename})`;
+                emojiDict[emojiKey] = filePath;
+            });
+        });
+
+        console.log(emojiDict);
+
+        return emojiDict;
+    }
+
     var editor = HyperMD.fromTextArea(document.getElementById("editor-textarea"), {
         mode: "hypermd",
         lineNumbers: false,
         extraKeys: {
-            "Ctrl-Space": "autocomplete",
+            "Shift-Space": "autocomplete",
         },
         hintOptions: {
             hint: CompleteEmoji.createHintFunc()
         },
+        hmdFoldEmoji: {
+            myEmoji: createAutocompleteDict
+        }
     });
     editor.setSize(null, "100%");
     editor.hmdResolveURL = function (path) {
@@ -99,8 +119,11 @@
         await showFile(parts[0], parts[1] + '.md');
     };
     editor.on("inputRead", async function (cm, change) {
-        if (change.text.length === 1 && change.text[0] === '[') editor.showHint()
+        if (change.text.length === 1 && change.text[0] === '[') {
+            editor.showHint()
+        }
     })
+
     editor.on("change", async function (cm, changeObj) {
         // Save on user input only
         if (changeObj.origin && changeObj.origin !== "setValue") {
