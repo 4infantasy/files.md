@@ -193,7 +193,7 @@
 
             var dirNode = new TreeNode(dir, {expanded: false});
             for (let file in zettel[dir]) {
-                let fileNode = new TreeNode(file, {expanded: false});
+                let fileNode = new TreeNode(file.replace(/\.md$/, ''), {expanded: false});
                 fileNode.on('click', async function (n, node) {
                     await showFile(node.parent.toString(), node.toString());
                 });
@@ -205,7 +205,7 @@
         if (zettel['']) {
             // Adding root files after folders
             for (let file in zettel[""]) {
-                let fileNode = new TreeNode(file, {expanded: false});
+                let fileNode = new TreeNode(file.replace(/\.md$/, ''), {expanded: false});
                 fileNode.on('click', async function (n, node) {
                     await showFile("", node.toString());
                 });
