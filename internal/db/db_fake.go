@@ -19,7 +19,7 @@ func NewFakeDB() *FakeDB {
 	return &FakeDB{LastKeyboardMID: -1}
 }
 
-func (db *FakeDB) LastKeyboardMsgID(userID int64) (int, bool) {
+func (db *FakeDB) LastKeyboardMsgID() (int, bool) {
 	if db.LastKeyboardMID == -1 {
 		return 0, false
 	}
@@ -27,64 +27,64 @@ func (db *FakeDB) LastKeyboardMsgID(userID int64) (int, bool) {
 	return db.LastKeyboardMID, true
 }
 
-func (db *FakeDB) SetLastKeyboardMsgID(userID int64, msgID int) {
+func (db *FakeDB) SetLastKeyboardMsgID(msgID int) {
 	db.LastKeyboardMID = msgID
 }
 
-func (db *FakeDB) DelLastKeyboardMsgID(userID int64) {
+func (db *FakeDB) DelLastKeyboardMsgID() {
 	db.LastKeyboardMID = -1
 }
 
-func (db *FakeDB) InputExpectation(userID int64) *tg.Cmd {
+func (db *FakeDB) InputExpectation() *tg.Cmd {
 	return db.InputExpectationCMD
 }
 
-func (db *FakeDB) SetInputExpectation(userID int64, cmd tg.Cmd) {
+func (db *FakeDB) SetInputExpectation(cmd tg.Cmd) {
 	db.InputExpectationCMD = &cmd
 }
 
-func (db *FakeDB) DelInputExpectation(userID int64) {
+func (db *FakeDB) DelInputExpectation() {
 	db.InputExpectationCMD = nil
 }
 
-func (db *FakeDB) SetFilenameByMsgID(userID int64, msgID int, filename string) {
+func (db *FakeDB) SetFilenameByMsgID(msgID int, filename string) {
 	db.FilenameByMessageID = filename
 }
 
-func (db *FakeDB) FilenameByMsgID(userID int64, msgID int) (string, bool) {
+func (db *FakeDB) FilenameByMsgID(msgID int) (string, bool) {
 	return db.FilenameByMessageID, db.FilenameByMessageID != ""
 }
 
-func (db *FakeDB) DirByMsgID(userID int64, msgID int) (string, bool) {
+func (db *FakeDB) DirByMsgID(msgID int) (string, bool) {
 	return db.DirByMessageID, db.DirByMessageID != ""
 }
 
-func (db *FakeDB) SetDirByMsgID(userID int64, msgID int, dir string) {
-	db.DirByMessageID = dir
+func (db *FakeDB) SetDirByMsgID(msgID int, filename string) {
+	db.DirByMessageID = filename
 }
 
-func (db *FakeDB) RecentCommand(_ int64) (string, bool) {
+func (db *FakeDB) RecentCommand() (string, bool) {
 	return db.RecentCMD, db.RecentCMD != ""
 }
 
-func (db *FakeDB) SetRecentCommand(_ int64, cmd string) {
+func (db *FakeDB) SetRecentCommand(cmd string) {
 	db.RecentCMD = cmd
 }
 
-func (db *FakeDB) RecentCommandParams(_ int64) ([]string, bool) {
+func (db *FakeDB) RecentCommandParams() ([]string, bool) {
 	return db.RecentCMDParams, len(db.RecentCMDParams) > 0
 }
 
-func (db *FakeDB) SetRecentCommandParams(_ int64, params []string) {
+func (db *FakeDB) SetRecentCommandParams(params []string) {
 	db.RecentCMDParams = params
 }
 
-func (db *FakeDB) AddImgMsgID(userID int64, msgID int) {
+func (db *FakeDB) AddImgMsgID(msgID int) {
 }
 
-func (db *FakeDB) ImgMsgID(userID int64) ([]int, bool) {
+func (db *FakeDB) ImgMsgID() ([]int, bool) {
 	return nil, false
 }
 
-func (db *FakeDB) DelImgMsgID(userID int64) {
+func (db *FakeDB) DelImgMsgID() {
 }

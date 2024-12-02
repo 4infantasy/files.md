@@ -125,7 +125,7 @@ func initBot() {
 		if chat == nil {
 			chat = tg.NewFakeTG()
 		}
-		bot := internal.NewBot(userID, chat, userFS, db.NewDB(), userconf)
+		bot := internal.NewBot(userID, chat, userFS, db.NewDB(userID), userconf)
 		if err := bot.Answer(u); err != nil {
 			slog.Error("Bot error", "err", err)
 		}

@@ -273,8 +273,8 @@ func TestSaveFromRegularReply(t *testing.T) {
 
 	tgram := tg.NewFakeTG()
 	database := db.NewFakeDB()
-	database.SetDirByMsgID(-1, 255, "today")
-	database.SetFilenameByMsgID(-1, 255, "Existing file.md")
+	database.SetDirByMsgID(255, "today")
+	database.SetFilenameByMsgID(255, "Existing file.md")
 	bot := NewBot(-1, tgram, userFS, database, fakeConfig())
 
 	upd := tg.NewUpd(-1, "Line")
@@ -418,8 +418,8 @@ func TestSaveFromReplyPhotoWithCaption(t *testing.T) {
 	tgram := tg.NewFakeTG()
 
 	database := db.NewFakeDB()
-	database.SetDirByMsgID(-1, 255, "today")
-	database.SetFilenameByMsgID(-1, 255, "Existing file.md")
+	database.SetDirByMsgID(255, "today")
+	database.SetFilenameByMsgID(255, "Existing file.md")
 	bot := NewBot(-1, tgram, userFS, database, fakeConfig())
 
 	upd := tg.NewUpd(-1, "")
@@ -2263,8 +2263,8 @@ func TestSaveToNewTaskIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Equal("", content)
 
-	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	msgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(1, msgID)
 	r.Equal(msgID, tgram.LastSentMessageID)
@@ -2343,8 +2343,8 @@ func TestSaveToExistingFileIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Equal("#### 1 January, Thursday\nText\nFile content", content)
 
-	r.Nil(database.InputExpectation(-1))
-	keybdMsgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	keybdMsgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(3, keybdMsgID)
 	r.Equal(3, tgram.LastSentMessageID)
@@ -2420,8 +2420,8 @@ func TestSaveToNewFileIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Equal("", content)
 
-	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	msgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(3, msgID)
 	r.Equal(msgID, tgram.LastSentMessageID)
@@ -2493,7 +2493,7 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 
 	r.Equal("OK. Send me the name for your new dir", tgram.LastEditedText)
 	r.Nil(tgram.LastEditedKeyboard)
-	r.Equal(tg.NewCmd("mv_to_new_dir", []string{"232004794e5", "%s"}), *database.InputExpectation(-1))
+	r.Equal(tg.NewCmd("mv_to_new_dir", []string{"232004794e5", "%s"}), *database.InputExpectation())
 
 	err = bot.Answer(tg.NewUpd(-1, "My dir"))
 	r.NoError(err)
@@ -2504,8 +2504,8 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Empty(content)
 
-	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	msgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(3, msgID)
 	r.Equal(3, tgram.LastSentMessageID)
@@ -2581,8 +2581,8 @@ func TestSaveToNewMultilineFileIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Equal("Multiline", content)
 
-	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	msgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(3, msgID)
 	r.Equal(msgID, tgram.LastSentMessageID)
@@ -2658,8 +2658,8 @@ func TestSaveToNewCustomFileIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Equal("Text", content)
 
-	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	msgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(1, msgID)
 	r.Equal(2, tgram.LastSentMessageID)
@@ -2737,7 +2737,7 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 	r.NoError(err)
 	r.Equal("#### 1 January, Thursday\nNew text\nText", content)
 
-	recentCMD, ok := database.RecentCommand(-1)
+	recentCMD, ok := database.RecentCommand()
 	r.Equal("mf", recentCMD)
 	r.True(ok)
 
@@ -2762,8 +2762,8 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 	})
 	r.Equal(kb, tgram.LastSentKeyboard)
 
-	r.Nil(database.InputExpectation(-1))
-	msgID, ok := database.LastKeyboardMsgID(-1)
+	r.Nil(database.InputExpectation())
+	msgID, ok := database.LastKeyboardMsgID()
 	r.True(ok)
 	r.Equal(4, msgID)
 	r.Equal(msgID, tgram.LastSentMessageID)
@@ -3131,8 +3131,8 @@ func TestSaveFromImage_ReplyToExistingFile(t *testing.T) {
 
 	tgram := tg.NewFakeTG()
 	database := db.NewFakeDB()
-	database.SetDirByMsgID(-1, 255, "today")
-	database.SetFilenameByMsgID(-1, 255, "Existing file.md")
+	database.SetDirByMsgID(255, "today")
+	database.SetFilenameByMsgID(255, "Existing file.md")
 	bot := NewBot(-1, tgram, userFS, database, fakeConfig())
 
 	upd := tg.NewUpd(-1, "")

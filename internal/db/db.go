@@ -21,15 +21,17 @@ var (
 )
 
 // DB Do we need a type at all?
-type DB struct{}
+type DB struct {
+	UserID int64
+}
 
-func NewDB() *DB {
-	return &DB{}
+func NewDB(userID int64) *DB {
+	return &DB{UserID: userID}
 }
 
 // TODO add locks
-func (db *DB) LastKeyboardMsgID(userID int64) (int, bool) {
-	msgIDStr, err := os.ReadFile(tmpFilePath(userID, "msgid"))
+func (db *DB) LastKeyboardMsgID() (int, bool) {
+	msgIDStr, err := os.ReadFile(tmpFilePath(db.UserID, "msgid"))
 	if err != nil {
 		return 0, false
 	}
@@ -42,16 +44,16 @@ func (db *DB) LastKeyboardMsgID(userID int64) (int, bool) {
 	return msgID, true
 }
 
-func (db *DB) SetLastKeyboardMsgID(userID int64, ID int) {
-	_ = os.WriteFile(tmpFilePath(userID, "msgid"), []byte(strconv.Itoa(ID)), 0o644)
+func (db *DB) SetLastKeyboardMsgID(ID int) {
+	_ = os.WriteFile(tmpFilePath(db.UserID, "msgid"), []byte(strconv.Itoa(ID)), 0o644)
 }
 
-func (db *DB) DelLastKeyboardMsgID(userID int64) {
-	_ = os.Remove(tmpFilePath(userID, "msgid"))
+func (db *DB) DelLastKeyboardMsgID() {
+	_ = os.Remove(tmpFilePath(db.UserID, "msgid"))
 }
 
-func (db *DB) InputExpectation(userID int64) *tg.Cmd {
-	val, ok := inputExpectations.Load(inputExpectationKey(userID))
+func (db *DB) InputExpectation() *tg.Cmd {
+	val, ok := inputExpectations.Load(inputExpectationKey(db.UserID))
 	if !ok {
 		return nil
 	}
@@ -60,16 +62,16 @@ func (db *DB) InputExpectation(userID int64) *tg.Cmd {
 	return &cmd
 }
 
-func (db *DB) SetInputExpectation(userID int64, cmd tg.Cmd) {
-	inputExpectations.Store(inputExpectationKey(userID), cmd)
+func (db *DB) SetInputExpectation(cmd tg.Cmd) {
+	inputExpectations.Store(inputExpectationKey(db.UserID), cmd)
 }
 
-func (db *DB) DelInputExpectation(userID int64) {
-	inputExpectations.Delete(inputExpectationKey(userID))
+func (db *DB) DelInputExpectation() {
+	inputExpectations.Delete(inputExpectationKey(db.UserID))
 }
 
-func (db *DB) FilenameByMsgID(userID int64, msgID int) (string, bool) {
-	filename, ok := filenameByMsgID.Load(filenameByMsgIDKey(userID, msgID))
+func (db *DB) FilenameByMsgID(msgID int) (string, bool) {
+	filename, ok := filenameByMsgID.Load(filenameByMsgIDKey(db.UserID, msgID))
 	if !ok {
 		return "", false
 	}
@@ -77,8 +79,8 @@ func (db *DB) FilenameByMsgID(userID int64, msgID int) (string, bool) {
 	return filename.(string), true
 }
 
-func (db *DB) DirByMsgID(userID int64, msgID int) (string, bool) {
-	filename, ok := dirByMsgID.Load(dirByMsgIDKey(userID, msgID))
+func (db *DB) DirByMsgID(msgID int) (string, bool) {
+	filename, ok := dirByMsgID.Load(dirByMsgIDKey(db.UserID, msgID))
 	if !ok {
 		return "", false
 	}
@@ -86,16 +88,16 @@ func (db *DB) DirByMsgID(userID int64, msgID int) (string, bool) {
 	return filename.(string), true
 }
 
-func (db *DB) SetFilenameByMsgID(userID int64, msgID int, filename string) {
-	filenameByMsgID.Store(filenameByMsgIDKey(userID, msgID), filename)
+func (db *DB) SetFilenameByMsgID(msgID int, filename string) {
+	filenameByMsgID.Store(filenameByMsgIDKey(db.UserID, msgID), filename)
 }
 
-func (db *DB) SetDirByMsgID(userID int64, msgID int, filename string) {
-	dirByMsgID.Store(dirByMsgIDKey(userID, msgID), filename)
+func (db *DB) SetDirByMsgID(msgID int, filename string) {
+	dirByMsgID.Store(dirByMsgIDKey(db.UserID, msgID), filename)
 }
 
-func (db *DB) RecentCommand(userID int64) (string, bool) {
-	cmd, ok := recentCommands.Load(userID)
+func (db *DB) RecentCommand() (string, bool) {
+	cmd, ok := recentCommands.Load(db.UserID)
 	if !ok {
 		return "", false
 	}
@@ -103,12 +105,12 @@ func (db *DB) RecentCommand(userID int64) (string, bool) {
 	return cmd.(string), true
 }
 
-func (db *DB) SetRecentCommand(userID int64, cmd string) {
-	recentCommands.Store(userID, cmd)
+func (db *DB) SetRecentCommand(cmd string) {
+	recentCommands.Store(db.UserID, cmd)
 }
 
-func (db *DB) RecentCommandParams(userID int64) ([]string, bool) {
-	params, ok := recentCommandsTargets.Load(userID)
+func (db *DB) RecentCommandParams() ([]string, bool) {
+	params, ok := recentCommandsTargets.Load(db.UserID)
 	if !ok {
 		return nil, false
 	}
@@ -116,8 +118,38 @@ func (db *DB) RecentCommandParams(userID int64) ([]string, bool) {
 	return params.([]string), true
 }
 
-func (db *DB) SetRecentCommandParams(userID int64, params []string) {
-	recentCommandsTargets.Store(userID, params)
+func (db *DB) SetRecentCommandParams(params []string) {
+	recentCommandsTargets.Store(db.UserID, params)
+}
+
+func (db *DB) AddImgMsgID(msgID int) {
+	key := photoMsgIDKey(db.UserID)
+	if val, ok := sentPhotoMsgIDs.Load(key); ok {
+		ids := val.([]int)
+		sentPhotoMsgIDs.Store(key, append(ids, msgID))
+	} else {
+		sentPhotoMsgIDs.Store(key, []int{msgID})
+	}
+}
+
+func (db *DB) ImgMsgID() ([]int, bool) {
+	key := photoMsgIDKey(db.UserID)
+	val, ok := sentPhotoMsgIDs.Load(key)
+	if !ok {
+		return nil, false
+	}
+
+	ids, _ := val.([]int)
+	return ids, true
+}
+
+func (db *DB) DelImgMsgID() {
+	key := photoMsgIDKey(db.UserID)
+	sentPhotoMsgIDs.Delete(key)
+}
+
+func photoMsgIDKey(userID int64) string {
+	return fmt.Sprintf("%d:sentPhotoMsgIDs", userID)
 }
 
 func inputExpectationKey(userID int64) string {
@@ -134,34 +166,4 @@ func filenameByMsgIDKey(userID int64, msgID int) string {
 
 func tmpFilePath(userID int64, name string) string {
 	return fmt.Sprintf("%s/%d.%s", os.TempDir(), userID, name)
-}
-
-func (db *DB) AddImgMsgID(userID int64, msgID int) {
-	key := photoMsgIDKey(userID)
-	if val, ok := sentPhotoMsgIDs.Load(key); ok {
-		ids := val.([]int)
-		sentPhotoMsgIDs.Store(key, append(ids, msgID))
-	} else {
-		sentPhotoMsgIDs.Store(key, []int{msgID})
-	}
-}
-
-func (db *DB) ImgMsgID(userID int64) ([]int, bool) {
-	key := photoMsgIDKey(userID)
-	val, ok := sentPhotoMsgIDs.Load(key)
-	if !ok {
-		return nil, false
-	}
-
-	ids, _ := val.([]int)
-	return ids, true
-}
-
-func (db *DB) DelImgMsgID(userID int64) {
-	key := photoMsgIDKey(userID)
-	sentPhotoMsgIDs.Delete(key)
-}
-
-func photoMsgIDKey(userID int64) string {
-	return fmt.Sprintf("%d:sentPhotoMsgIDs", userID)
 }

@@ -36,7 +36,7 @@ func TestDoneToday(t *testing.T) {
 	err = userFS.Write("archive", "a.md", "")
 	r.NoError(err)
 
-	database := db.NewDB()
+	database := db.NewDB(-1)
 	r.NoError(err)
 
 	tasks, err := DoneToday(userFS, database, -1)

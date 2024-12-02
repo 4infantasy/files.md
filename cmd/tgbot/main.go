@@ -56,7 +56,7 @@ func processUserUpdates(updates <-chan tgbotapi.Update, telegram *tg.TG, infolog
 			return
 		}
 
-		bot := internal.NewBot(userID, telegram, userFS, db.NewDB(), userconf)
+		bot := internal.NewBot(userID, telegram, userFS, db.NewDB(userID), userconf)
 		if err := bot.Answer(upd); err != nil {
 			slog.Error("Bot error", "err", err)
 		}

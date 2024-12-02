@@ -83,7 +83,7 @@ func MoveDueTasks(
 
 			infolog.Info("scheduled task moved to today", schedule.Filename, "filename")
 
-			bot := internal.NewBot(userID, telegram, userFS, db.NewDB(), userconf)
+			bot := internal.NewBot(userID, telegram, userFS, db.NewDB(userID), userconf)
 			_ = bot.ShowToday(nil)
 
 			// Schedule a recurring task if cron is not empty

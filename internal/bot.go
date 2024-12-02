@@ -83,23 +83,23 @@ type Chat interface {
 }
 
 type Database interface {
-	LastKeyboardMsgID(userID int64) (int, bool)
-	SetLastKeyboardMsgID(userID int64, ID int)
-	DelLastKeyboardMsgID(userID int64)
-	InputExpectation(userID int64) *tg.Cmd
-	SetInputExpectation(userID int64, cmd tg.Cmd)
-	DelInputExpectation(userID int64)
-	FilenameByMsgID(userID int64, msgID int) (string, bool)
-	DirByMsgID(userID int64, msgID int) (string, bool)
-	SetFilenameByMsgID(userID int64, msgID int, filename string)
-	SetDirByMsgID(userID int64, msgID int, filename string)
-	RecentCommand(userID int64) (string, bool)
-	SetRecentCommand(userID int64, cmd string)
-	RecentCommandParams(userID int64) ([]string, bool)
-	SetRecentCommandParams(userID int64, params []string)
-	AddImgMsgID(userID int64, msgID int)
-	ImgMsgID(userID int64) ([]int, bool)
-	DelImgMsgID(userID int64)
+	LastKeyboardMsgID() (int, bool)
+	SetLastKeyboardMsgID(ID int)
+	DelLastKeyboardMsgID()
+	InputExpectation() *tg.Cmd
+	SetInputExpectation(cmd tg.Cmd)
+	DelInputExpectation()
+	FilenameByMsgID(msgID int) (string, bool)
+	DirByMsgID(msgID int) (string, bool)
+	SetFilenameByMsgID(msgID int, filename string)
+	SetDirByMsgID(msgID int, filename string)
+	RecentCommand() (string, bool)
+	SetRecentCommand(cmd string)
+	RecentCommandParams() ([]string, bool)
+	SetRecentCommandParams(params []string)
+	AddImgMsgID(msgID int)
+	ImgMsgID() ([]int, bool)
+	DelImgMsgID()
 }
 
 // Bot provides an interface over files on the filesystem
@@ -277,16 +277,16 @@ func (b *Bot) extractCmd(u Update) (*tg.Cmd, error) {
 			return nil, nil
 		}
 
-		b.db.DelInputExpectation(b.userID)
+		b.db.DelInputExpectation()
 
 		return cmd, nil
 	}
 
 	// Input expectation is mostly used for renaming things
-	cmd = b.db.InputExpectation(b.userID)
+	cmd = b.db.InputExpectation()
 	if cmd != nil {
 		slog.Debug("Got command from input expectation", "command", cmd.Name)
-		b.db.DelInputExpectation(b.userID)
+		b.db.DelInputExpectation()
 
 		for i, param := range cmd.Params {
 			if param == "%s" {
@@ -372,8 +372,8 @@ func (b *Bot) saveFromRegularMsg(u Update) error {
 	}
 
 	msgID, _ := u.MsgID()
-	b.db.SetDirByMsgID(b.userID, msgID, fs.DirToday)
-	b.db.SetFilenameByMsgID(b.userID, msgID, filename)
+	b.db.SetDirByMsgID(msgID, fs.DirToday)
+	b.db.SetFilenameByMsgID(msgID, filename)
 
 	return b.showMoveTo([]string{fs.Hash(filename)})
 }
@@ -437,8 +437,8 @@ func (b *Bot) saveImage(u Update) (string, error) {
 }
 
 func (b *Bot) addToRepliedFile(replyToMsgID int, newContent string) error {
-	dir, _ := b.db.DirByMsgID(b.userID, replyToMsgID)
-	existingFilename, ok := b.db.FilenameByMsgID(b.userID, replyToMsgID)
+	dir, _ := b.db.DirByMsgID(replyToMsgID)
+	existingFilename, ok := b.db.FilenameByMsgID(replyToMsgID)
 	if !ok {
 		return fmt.Errorf("add to replied: can't find filename by msgID %d", replyToMsgID)
 	}
@@ -456,8 +456,8 @@ func (b *Bot) addToRepliedFile(replyToMsgID int, newContent string) error {
 
 	b.delAllKeyboards()
 
-	b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
-	b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(existingFilename), fs.ShortHash(fs.DirToday)})
+	b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
+	b.db.SetRecentCommandParams([]string{fs.ShortHash(existingFilename), fs.ShortHash(fs.DirToday)})
 
 	return b.ShowToday(nil)
 }
@@ -524,9 +524,9 @@ func (b *Bot) answerFileRequest(msg string) error {
 
 	// TODO add tests
 	// User wants to add his text to a selected file
-	c := b.db.InputExpectation(b.userID)
+	c := b.db.InputExpectation()
 	if c != nil {
-		b.db.DelInputExpectation(b.userID)
+		b.db.DelInputExpectation()
 		newFilenameHash := c.Params[0]
 		newFilename, err := b.fs.Unhash(fs.DirRoot, newFilenameHash)
 		if err != nil {
@@ -545,12 +545,12 @@ func (b *Bot) answerFileRequest(msg string) error {
 
 		if dir == fs.DirRoot {
 			// We have a file
-			b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
-			b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(filename), fs.ShortHash(fs.DirToday)})
+			b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
+			b.db.SetRecentCommandParams([]string{fs.ShortHash(filename), fs.ShortHash(fs.DirToday)})
 		} else {
 			// We have a note (a file placed in a subdirectory)
-			b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingNote)
-			b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(filename), fs.ShortHash(dir)})
+			b.db.SetRecentCommand(consts.CmdMoveToExistingNote)
+			b.db.SetRecentCommandParams([]string{fs.ShortHash(filename), fs.ShortHash(dir)})
 		}
 
 		err = b.addToFile(dir, filename, content)
@@ -659,7 +659,7 @@ func (b *Bot) tr(str string, args ...any) string {
 func (b *Bot) showHTML(validHTML string, kb *tg.Keyboard) error {
 	b.delAllImages()
 
-	mid, hasLastKeyboard := b.db.LastKeyboardMsgID(b.userID)
+	mid, hasLastKeyboard := b.db.LastKeyboardMsgID()
 	if !hasLastKeyboard {
 		b.delAllKeyboards()
 
@@ -668,7 +668,7 @@ func (b *Bot) showHTML(validHTML string, kb *tg.Keyboard) error {
 			return fmt.Errorf("show: %w", err)
 		}
 
-		b.db.SetLastKeyboardMsgID(b.userID, mid)
+		b.db.SetLastKeyboardMsgID(mid)
 
 		return nil
 	}
@@ -700,7 +700,7 @@ func (b *Bot) showMD(probablyInvalidMD string, kb *tg.Keyboard) error {
 		kb.PrependRow(tg.NewRow(tg.NewBtn(txt.Ucfirst(label), cmd)))
 	}
 
-	mid, hasLastKeyboard := b.db.LastKeyboardMsgID(b.userID)
+	mid, hasLastKeyboard := b.db.LastKeyboardMsgID()
 	textChunks := txt.SplitTextIntoChunks(probablyInvalidMD, maxMsgLength)
 	if !hasLastKeyboard || len(textChunks) > 1 || len(images) > 0 {
 		b.delAllKeyboards()
@@ -711,7 +711,7 @@ func (b *Bot) showMD(probablyInvalidMD string, kb *tg.Keyboard) error {
 			mids, imgErr := b.tg.SendImages(b.userID, images)
 			if imgErr == nil {
 				for _, imgMid := range mids {
-					b.db.AddImgMsgID(b.userID, imgMid)
+					b.db.AddImgMsgID(imgMid)
 				}
 			}
 		}
@@ -730,7 +730,7 @@ func (b *Bot) showMD(probablyInvalidMD string, kb *tg.Keyboard) error {
 			return fmt.Errorf("show: %w", err)
 		}
 
-		b.db.SetLastKeyboardMsgID(b.userID, mid)
+		b.db.SetLastKeyboardMsgID(mid)
 
 		return nil
 	}
@@ -778,12 +778,12 @@ func (b *Bot) showMoveTo(params []string) error {
 }
 
 func (b *Bot) recentCmdBtn(filenameHash string) *tg.Btn {
-	recentCmd, ok := b.db.RecentCommand(b.userID)
+	recentCmd, ok := b.db.RecentCommand()
 	if !ok {
 		return nil
 	}
 
-	args, _ := b.db.RecentCommandParams(b.userID)
+	args, _ := b.db.RecentCommandParams()
 	args = append(args, filenameHash)
 	targetFilenameHash := args[0]
 
@@ -1126,7 +1126,7 @@ func (b *Bot) showRenameFile(params []string) error {
 	})
 
 	cmd := tg.NewCmd(consts.CmdRename, []string{dir, filename, "%s"})
-	b.db.SetInputExpectation(b.userID, cmd)
+	b.db.SetInputExpectation(cmd)
 
 	err = b.showHTML(i18n.Tr("OK. Send me the new name for your task"), kb)
 	if err != nil {
@@ -1247,10 +1247,10 @@ func (b *Bot) showMultilineTask(params []string) error {
 		return fmt.Errorf("show task: %w", err)
 	}
 
-	msgID, hasLastKeyboard := b.db.LastKeyboardMsgID(b.userID)
+	msgID, hasLastKeyboard := b.db.LastKeyboardMsgID()
 	if hasLastKeyboard {
-		b.db.SetFilenameByMsgID(b.userID, msgID, filename)
-		b.db.SetDirByMsgID(b.userID, msgID, dir)
+		b.db.SetFilenameByMsgID(msgID, filename)
+		b.db.SetDirByMsgID(msgID, dir)
 	}
 
 	return nil
@@ -1282,10 +1282,10 @@ func (b *Bot) showFile(params []string) error {
 		return fmt.Errorf("show file: %w", err)
 	}
 
-	msgID, hasLastKeyboard := b.db.LastKeyboardMsgID(b.userID)
+	msgID, hasLastKeyboard := b.db.LastKeyboardMsgID()
 	if hasLastKeyboard {
-		b.db.SetFilenameByMsgID(b.userID, msgID, filename)
-		b.db.SetDirByMsgID(b.userID, msgID, dir)
+		b.db.SetFilenameByMsgID(msgID, filename)
+		b.db.SetDirByMsgID(msgID, dir)
 	}
 
 	return nil
@@ -1402,10 +1402,10 @@ func (b *Bot) moveToDir(params []string) error {
 	}
 
 	if toDir != fs.DirLater {
-		b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingNote)
+		b.db.SetRecentCommand(consts.CmdMoveToExistingNote)
 		// Move from dir is today, because quick command
 		// appears when file is in today dir
-		b.db.SetRecentCommandParams(b.userID, []string{fs.Hash(filename), toDirHash})
+		b.db.SetRecentCommandParams([]string{fs.Hash(filename), toDirHash})
 	}
 
 	b.delAllKeyboards()
@@ -1424,7 +1424,7 @@ func (b *Bot) requestNewDirName(params []string) error {
 		return fmt.Errorf("request new dir: %w", err)
 	}
 
-	b.db.SetInputExpectation(b.userID, tg.NewCmd(consts.CmdMoveToNewDir, []string{filenameHash, "%s"}))
+	b.db.SetInputExpectation(tg.NewCmd(consts.CmdMoveToNewDir, []string{filenameHash, "%s"}))
 
 	return nil
 }
@@ -1492,8 +1492,8 @@ func (b *Bot) moveToExistingFile(params []string) error {
 		return fmt.Errorf("move to file: can't add to existing file: %w", err)
 	}
 
-	b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
-	b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(existingFilename), fs.ShortHash(fs.DirToday)})
+	b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
+	b.db.SetRecentCommandParams([]string{fs.ShortHash(existingFilename), fs.ShortHash(fs.DirToday)})
 
 	b.delAllKeyboards()
 	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(existingFilename)))
@@ -1642,8 +1642,8 @@ func (b *Bot) moveToNewFile(params []string) error {
 	_ = journal.AddRecord(b.fs, fmt.Sprintf("📄 %s", fs.Title(filename)), b.cfg.Timezone())
 
 	// TODO test
-	b.db.SetRecentCommand(b.userID, consts.CmdMoveToExistingFile)
-	b.db.SetRecentCommandParams(b.userID, []string{fs.ShortHash(newFilenameFromUserInput), fs.ShortHash(fs.DirToday)})
+	b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
+	b.db.SetRecentCommandParams([]string{fs.ShortHash(newFilenameFromUserInput), fs.ShortHash(fs.DirToday)})
 
 	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(newFilenameFromUserInput)))
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
@@ -1717,11 +1717,11 @@ func (b *Bot) addToJournalFromShortcut(params []string) error {
 func (b *Bot) addToRecentFileOrNoteFromShortcut(params []string) error {
 	content := params[0]
 
-	args, _ := b.db.RecentCommandParams(b.userID)
+	args, _ := b.db.RecentCommandParams()
 	if len(args) < 2 {
 		return nil
 	}
-	cmd, _ := b.db.RecentCommand(b.userID)
+	cmd, _ := b.db.RecentCommand()
 
 	var existingFilename string
 	if cmd == consts.CmdMoveToExistingFile {
@@ -1904,9 +1904,9 @@ func (b *Bot) scheduleForTmrw(params []string) error {
 
 func (b *Bot) delAllKeyboards() {
 	var msgIDs []int
-	mid, hasLastKeyboard := b.db.LastKeyboardMsgID(b.userID)
+	mid, hasLastKeyboard := b.db.LastKeyboardMsgID()
 	if hasLastKeyboard {
-		b.db.DelLastKeyboardMsgID(b.userID)
+		b.db.DelLastKeyboardMsgID()
 		msgIDs = append(msgIDs, mid)
 	}
 
@@ -1919,12 +1919,12 @@ func (b *Bot) delAllKeyboards() {
 }
 
 func (b *Bot) delAllImages() {
-	mids, hasSentImages := b.db.ImgMsgID(b.userID)
+	mids, hasSentImages := b.db.ImgMsgID()
 	if !hasSentImages {
 		return
 	}
 
-	b.db.DelImgMsgID(b.userID)
+	b.db.DelImgMsgID()
 	for _, mid := range mids {
 		// If we fail to del - user would get a bunch
 		// of keyboards in one chat, which is messy but not critical
@@ -2060,7 +2060,7 @@ func (b *Bot) showMoveToFileOrDir(params []string) error {
 		kb.AddRow(tg.NewBtn(i18n.Tr("More..."), tg.NewCmd(consts.CmdShowMoveToDirOrFile, []string{filenameHash, "full"})))
 	}
 
-	b.db.SetInputExpectation(b.userID, tg.NewCmd(consts.CmdMoveToNewFile, []string{filenameHash, "%s"}))
+	b.db.SetInputExpectation(tg.NewCmd(consts.CmdMoveToNewFile, []string{filenameHash, "%s"}))
 
 	err = b.showHTML("📄 Select a file or enter a new name:", kb)
 	if err != nil {
@@ -2078,7 +2078,7 @@ func (b *Bot) showToChecklist(params []string) error {
 		return fmt.Errorf("show to checklist: can't get keyboard: %w", err)
 	}
 
-	b.db.SetInputExpectation(b.userID, tg.NewCmd(consts.CmdMoveToNewChecklist, []string{filenameHash, "%s"}))
+	b.db.SetInputExpectation(tg.NewCmd(consts.CmdMoveToNewChecklist, []string{filenameHash, "%s"}))
 
 	err = b.showHTML(i18n.Tr("Choose a checklist or name a new one"), kb)
 	if err != nil {
