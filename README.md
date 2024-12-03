@@ -91,7 +91,7 @@ $ git checkout -b feature_name
 Any file can be uniquely identified by filename and dir. We only support one level of nesting.
 
 ## Performance
-The app is  blazing fast :) If you're afraid of using files or mutexes unnecessarily for performance reasons, take a look at this:  
+The project is blazing fast :) If you're afraid of using files or mutexes unnecessarily for performance reasons, take a look at this:  
 ```
 Mutex lock/unlock = 25 ns
 Read 4K randomly from SSD = 150,000 ns
