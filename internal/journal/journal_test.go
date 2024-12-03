@@ -60,8 +60,8 @@ func TestAddRecord(t *testing.T) {
 		{
 			name:   "Image without caption",
 			md:     "some text",
-			record: "![[../img/tg_HASH.jpg|center|400]]",
-			want:   "some text\n#### 30 May, Tuesday\n`10:04` ![[../img/tg_HASH.jpg|center|400]]\n",
+			record: "![center|400](img/tg_HASH.jpg|center|400)",
+			want:   "some text\n#### 30 May, Tuesday\n![center|400](img/tg_HASH.jpg|center|400)\n`10:04` \n",
 		},
 		{
 			name:   "Image with caption",

@@ -111,7 +111,7 @@ func supervisor(userID int64, updates <-chan tgbotapi.Update, telegram *tg.TG, i
 		func() {
 			defer func() {
 				if err := recover(); err != nil {
-					slog.Error("Worker panic", "userID", userID, "err", err, "stacktrace", string(debug.Stack()))
+					slog.Error("Bot panic", "userID", userID, "err", err, "stacktrace", string(debug.Stack()))
 				}
 			}()
 			processUserUpdates(updates, telegram, infolog)

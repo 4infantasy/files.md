@@ -11,7 +11,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var imgPattern = `(!\[.*?\]\(.*?\)\s+).*`
+var ImgPattern = `!\[.*?\]\(.*?\)`
 
 // TelegramEntitiesToMarkdown converts plain text with Telegram entities (with UTF-16 offsets) to CommonMark Markdown.
 // Telegram's formatting entities don't take the new lines into account. I.e. if we have a multiline
@@ -180,7 +180,7 @@ func ExtractTextImgsLinks(text string) (txt string, images []string, links map[s
 }
 
 func HasImage(msg string) bool {
-	imgRegexp := regexp.MustCompile(`!\[.*?\]\(.*?\)`)
+	imgRegexp := regexp.MustCompile(ImgPattern)
 
 	return imgRegexp.MatchString(msg)
 }

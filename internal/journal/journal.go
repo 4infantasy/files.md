@@ -50,14 +50,14 @@ func AddRecord(userFS *fs.FS, record string, timezone *time.Location) error {
 		md += todayHeader(timezone) + "\n"
 	}
 
+	timestamp := Now().In(timezone).Format("`15:04`")
 	if txt.HasImage(record) {
-		// If there's an image - place text under the image
-		re := regexp.MustCompile(`(!\[.*?\]\(.*?\)\s+)`)
-		matches := re.FindStringSubmatch(record)
-		imgLinkWithNewline := matches[1]
-		modifiedText := fmt.Sprintf("%s%s ", imgLinkWithNewline, Now().In(timezone).Format("`15:04`"))
-		record = strings.Replace(record, matches[1], modifiedText, 1)
-		record = fmt.Sprintf("%s\n", strings.TrimSpace(record))
+		// If there's an image - place timestamp under the image
+		re := regexp.MustCompile(txt.ImgPattern)
+		matches := re.FindAllString(record, 1)
+		imgLink := matches[0]
+		record = strings.TrimSpace(re.ReplaceAllString(record, ""))
+		record = fmt.Sprintf("%s\n%s %s\n", imgLink, timestamp, strings.TrimSpace(record))
 	} else {
 		record = fmt.Sprintf("%s %s\n", Now().In(timezone).Format("`15:04`"), record)
 	}
