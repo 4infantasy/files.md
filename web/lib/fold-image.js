@@ -42,6 +42,7 @@
                     title = cm.getRange({ line: lineNo, ch: from.ch + 2 }, { line: lineNo, ch: url_begin.token.start - 1 });
                 }
                 let img = document.createElement("img");
+                img.style.cursor = "pointer";
                 // CUSTOMIZED, we don't want blank line with the cursor after image
                 let wrapper = document.createElement("span");
                 wrapper.style.display = "inline-flex";
@@ -55,6 +56,43 @@
                     collapsed: true,
                     replacedWith: wrapper,
                 });
+                img.addEventListener('click', function () {
+                    let modal = document.createElement("div");
+                    modal.style.position = "fixed";
+                    modal.style.top = "0";
+                    modal.style.left = "0";
+                    modal.style.width = "100vw";
+                    modal.style.height = "100vh";
+                    modal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+                    modal.style.display = "flex";
+                    modal.style.justifyContent = "center";
+                    modal.style.alignItems = "center";
+                    modal.style.zIndex = "1000";
+
+                    let fullSizeImg = document.createElement("img");
+                    fullSizeImg.src = img.src;
+                    fullSizeImg.style.maxWidth = "90%";
+                    fullSizeImg.style.maxHeight = "90%";
+                    fullSizeImg.style.border = "2px solid white";
+                    fullSizeImg.style.borderRadius = "8px";
+
+                    modal.appendChild(fullSizeImg);
+
+                    const closeModal = () => {
+                        document.body.removeChild(modal);
+                        document.removeEventListener("keydown", handleKeyDown);
+                    };
+
+                    modal.addEventListener("click", closeModal);
+                    const handleKeyDown = (event) => {
+                        if (event.key === "Escape") {
+                            closeModal();
+                        }
+                    };
+                    document.addEventListener("keydown", handleKeyDown);
+
+                    document.body.appendChild(modal);
+                }, false);
                 img.addEventListener('load', function () {
                     img.classList.remove("hmd-image-loading");
                     marker.changed();
@@ -64,7 +102,7 @@
                     img.classList.add("hmd-image-error");
                     marker.changed();
                 }, false);
-                // CUSTOMIZED img.addEventListener('click', function () { return fold_1.breakMark(cm, marker); }, false);
+                // img.addEventListener('click', function () { return fold_1.breakMark(cm, marker); }, false);
                 img.className = "hmd-image hmd-image-loading";
                 img.src = url;
                 img.title = title;
