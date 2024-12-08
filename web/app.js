@@ -137,7 +137,6 @@ function initHyperMD(el) {
     });
 }
 
-// We use it as links autocomplete
 function createAutocompleteDict() {
     const emojiDict = {};
     const ignoredFolders = ["img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "journal/past", "habits", "triggers", "places", ""];
@@ -554,7 +553,7 @@ function levenshtein(s1, s2) {
 }
 
 function loadRecentFiles() {
-    const ignoredDirs = ["archive", "_read_", "_watch_", "_shop_", "habits", "triggers", "today", "later", "insights"];
+    const ignoredDirs = ["archive", "_read_", "_watch_", "_shop_", "habits", "triggers", "journal", "today", "later", "insights"];
 
     let results = [...files]
         .filter(file => !ignoredDirs.includes(file.folder)) // Exclude files from ignored directories
