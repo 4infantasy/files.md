@@ -13,19 +13,21 @@ func I64(i int64) string {
 }
 
 func Ucfirst(str string) string {
-	for _, v := range str {
-		u := string(unicode.ToUpper(v))
-		return u + str[len(u):]
+	if len(str) == 0 {
+		return str
 	}
-	return ""
+	r := []rune(str)
+
+	return string(unicode.ToUpper(r[0])) + string(r[1:])
 }
 
 func Lcfirst(str string) string {
-	for _, v := range str {
-		u := string(unicode.ToLower(v))
-		return u + str[len(u):]
+	if len(str) == 0 {
+		return str
 	}
-	return ""
+	r := []rune(str)
+
+	return string(unicode.ToLower(r[0])) + string(r[1:])
 }
 
 // Substr respects unicode codepoints, but not multi-unicode-codepoint aware.

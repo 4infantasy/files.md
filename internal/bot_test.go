@@ -3471,10 +3471,12 @@ func FuzzSaveFromTextMsg(f *testing.F) {
 		if len(input) > 100 {
 			input = txt.Substr(input, 0, 100) + "..."
 		}
-		sanitizedFilename := fs.Filename(fs.SanitizeFilename(input))
-		r.Equal(sanitizedFilename, tasks[0].Name)
+		filename := strings.SplitN(input, "\n", 2)[0]
+		filename = strings.TrimSpace(filename)
+		filename = fs.Filename(fs.SanitizeFilename(filename))
+		r.Equal(filename, tasks[0].Name)
 
-		_, err = bot.fs.Read("today", sanitizedFilename)
+		_, err = bot.fs.Read("today", filename)
 		if err != nil {
 			if strings.Contains(err.Error(), "unsafe path") &&
 				(input == "." || strings.HasPrefix(input, "..")) {
