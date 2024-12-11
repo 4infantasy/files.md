@@ -3468,6 +3468,12 @@ func FuzzSaveFromTextMsg(f *testing.F) {
 
 		tgram := tg.NewFakeTG()
 
+		savedPlugins := BotPlugins
+		BotPlugins = []BotPlugin{}
+		defer func() {
+			BotPlugins = savedPlugins
+		}()
+
 		bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
 		err = bot.Answer(tg.NewUpd(-1, input))
 		if err != nil {

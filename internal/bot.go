@@ -37,7 +37,7 @@ var (
 	errUnknownCommand           = errors.New("unknown command")
 	errInvalidRequestFromInline = errors.New("invalid request from inline query")
 	errInvalidInlineQuery       = errors.New("invalid inline query")
-	botPlugins                  = []BotPlugin{plugins.NewWorldClockPlugin()}
+	BotPlugins                  = []BotPlugin{plugins.NewWorldClockPlugin()}
 )
 
 const (
@@ -134,7 +134,7 @@ func (b *Bot) Answer(u Update) error {
 		return b.answerSearch(u)
 	}
 
-	for _, plugin := range botPlugins {
+	for _, plugin := range BotPlugins {
 		if plugin.CanHandle(u.MsgText()) {
 			output, err := plugin.Handle(u.MsgText())
 			if err != nil {
