@@ -34,6 +34,26 @@ async function init(el) {
             document.getElementById('welcome').style.display = 'flex';
         }
         files = await loadFiles(savedDirectoryHandle);
+        setInterval(async function() {
+            let newFiles = await loadFiles(savedDirectoryHandle);
+
+            // Check if current file has been modified
+            const { currentDir, currentFile } = editor;
+            if (currentDir && currentFile) {
+                const currentFileData = files[currentDir]?.[currentFile];
+                const newFileData = newFiles[currentDir]?.[currentFile];
+
+                if (currentFileData && newFileData) {
+                    if (newFileData.content !== currentFileData.content) {
+                        console.log("File was modified, reloading...");
+                        await showFile(currentDir, currentFile, false);
+                    }
+                }
+            }
+
+            files = newFiles;
+
+        }, 3000)
         buildSidebar();
         await showRandomFile();
     } else {
@@ -493,4 +513,94 @@ function excludeDirs(excludedDirs) {
     }
 
     return filteredFiles;
+}
+
+async function openDir() {
+    let dirHandle = await window.showDirectoryPicker();
+    document.getElementById('welcome').style.display = 'none';
+    await saveDirectoryHandle(dirHandle);
+    files = await loadFiles(dirHandle)
+    buildSidebar();
+    await showRandomFile();
+}
+
+// Returns files in flattened structure:
+// {
+//   "dir": {
+//      ...
+//   },
+//   "dir/dir2": {
+//      ...
+//   },
+// }
+async function loadFiles(dirHandle) {
+    let newFiles = {};
+
+    async function loadDir(dirHandle, path = "", depth = 1) {
+        const entries = [];
+        for await (const entry of dirHandle.values()) {
+            entries.push(entry);
+        }
+        entries.sort((a, b) => a.name.localeCompare(b.name));
+
+        for (const entry of entries) {
+            const filename = entry.name.normalize("NFC");
+            if (entry.kind === 'directory') {
+                if (filename.startsWith('.')) continue;
+
+                if (depth < 5) {
+                    const dir = `${path}${filename}/`;
+                    newFiles[filename] = {};
+                    await loadDir(entry, dir, depth + 1);
+                }
+            } else if (entry.kind === 'file' && allowedFileTypes.includes(filename.split('.').pop())) {
+                const dir = path.replace(/\/+$/, '');
+                if (!newFiles[dir]) newFiles[dir] = {};
+                let file = await entry.getFile();
+
+                newFiles[dir][filename] = {
+                    handle: entry,
+                    lastModified: file.lastModified
+                };
+                if (dir === 'img') {
+                    newFiles[dir][filename].imageUrl = await getImageUrl(entry);
+                }
+            }
+        }
+    }
+    await loadDir(dirHandle);
+
+    // Remove empty dirs
+    for (const dir in newFiles) {
+        if (Object.keys(newFiles[dir]).length === 0) {
+            delete newFiles[dir];
+        }
+    }
+
+    return newFiles;
+}
+
+async function saveFile() {
+    const dir = editor.currentDir;
+    const filename = editor.currentFile;
+    const fileData = files[dir][filename];
+    if (fileData && fileData.handle) {
+        let content = editor.getValue();
+        const header = filename.replace('.md', '').replace(/^\w/, (c) => c.toUpperCase());
+        content = content.trimStart();
+        if (content.startsWith(`# ${header}`)) {
+            content = content.slice(`# ${header}`.length).trimStart();
+        }
+
+        const writable = await fileData.handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+    } else {
+        alert(`Cannot save ${filename}. No file handle found.`);
+    }
+}
+
+async function getImageUrl(fileHandle) {
+    const file = await fileHandle.getFile();
+    return URL.createObjectURL(file);
 }
