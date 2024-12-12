@@ -38,16 +38,16 @@ async function init(el) {
             let newFiles = await loadFiles(savedDirectoryHandle);
 
             // Check if current file has been modified
-            const { currentDir, currentFile } = editor;
-            if (currentDir && currentFile) {
-                const currentFileData = files[currentDir]?.[currentFile];
-                const newFileData = newFiles[currentDir]?.[currentFile];
-
-                if (newFileData.lastModified > currentFileData.lastModified) {
-                    if (newFileData.lastModified > currentFileData.lastModified) {
-                        console.log("File was modified, reloading...");
-                        await showFile(currentDir, currentFile, false);
-                    }
+            let dir = editor.currentDir;
+            let file = editor.currentFile;
+            const currentFile = await files[dir][file].handle.getFile();
+            const newFile = await newFiles[dir]?.[file].handle.getFile();
+            if (currentFile && newFile) {
+                let currentContent = currentFile.text();
+                let newContent = newFile.text();
+                if (currentContent !== newContent) {
+                    console.log("File was modified, reloading...");
+                    await showFile(dir, file, false);
                 }
             }
 
@@ -272,7 +272,7 @@ async function showFile(dir, filename, saveToHistory = true) {
     content = content.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
 
     editor.currentDir = dir;
-    editor.currentFile = filename;
+    editor.currentFilename = filename;
     if (saveToHistory) {
         const state = {dir: dir, file: filename};
         history.pushState(state, '');
@@ -284,6 +284,7 @@ async function showFile(dir, filename, saveToHistory = true) {
     // Set cursor at the end of the page.
     // We need to execute this code after some rendering loop. If we don't do that,
     // Images and other heavy stuff won't be loaded
+    // P.S. Is it try after we set infite loading?
     setTimeout(() => {
         const lastLine = editor.lastLine();
         let targetLine = lastLine;
