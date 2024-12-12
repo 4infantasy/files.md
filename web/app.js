@@ -34,26 +34,26 @@ async function init(el) {
             document.getElementById('welcome').style.display = 'flex';
         }
         files = await loadFiles(savedDirectoryHandle);
-        setInterval(async function() {
-            let newFiles = await loadFiles(savedDirectoryHandle);
-
-            // Check if current file has been modified
-            let dir = editor.currentDir;
-            let file = editor.currentFile;
-            const newFile = await newFiles[dir]?.[file].handle.getFile();
-            if (newFile) {
-                let newContent = await newFile.text();
-                // TODO dirty hack, we replace links on the fly
-                newContent = newContent.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
-                if (getCurrentContent() !== newContent) {
-                    console.log("File was modified, reloading...");
-                    await showFile(dir, file, false);
-                }
-            }
-
-            files = newFiles;
-
-        }, 3000)
+        // setInterval(async function() {
+        //     let newFiles = await loadFiles(savedDirectoryHandle);
+        //
+        //     // Check if current file has been modified
+        //     let dir = editor.currentDir;
+        //     let file = editor.currentFile;
+        //     const newFile = await newFiles[dir]?.[file].handle.getFile();
+        //     if (newFile) {
+        //         let newContent = await newFile.text();
+        //         // TODO dirty hack, we replace links on the fly
+        //         newContent = newContent.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
+        //         if (getCurrentContent() !== newContent) {
+        //             console.log("File was modified, reloading...");
+        //             await showFile(dir, file, false);
+        //         }
+        //     }
+        //
+        //     files = newFiles;
+        //
+        // }, 3000)
         buildSidebar();
         await showRandomFile();
     } else {
