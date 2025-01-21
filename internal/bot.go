@@ -875,7 +875,7 @@ func (b *Bot) ShowToday(_ []string) error {
 			// TODO add tests for all that
 			if emoji == "" {
 				emoji = i18n.Emoji(file.Title)
-			} else if b.cfg.AllowTwoEmojisPerButton() {
+			} else if b.cfg.TwoEmojisPerButtonEnabled() {
 				emoji += i18n.Emoji(file.Title)
 			}
 			btn = tg.NewBtn(txt.Emoji(emoji, fs.UnsanitizeFilename(file.Title)), cmd)
@@ -886,11 +886,14 @@ func (b *Bot) ShowToday(_ []string) error {
 
 	// Adding habits
 	habitsRow := tg.NewRow()
-	// We can tolerate missing habits
-	userHabits, _ := habits.LastWeekHabits(b.fs)
-	_, ok := userHabits[habits.MoodHabit]
-	if ok {
-		delete(userHabits, habits.MoodHabit)
+	userHabits := make(map[string]habits.Year)
+	if b.cfg.QuickHabitsEnabled() {
+		// We can tolerate missing habits
+		userHabits, _ = habits.LastWeekHabits(b.fs)
+		_, ok := userHabits[habits.MoodHabit]
+		if ok {
+			delete(userHabits, habits.MoodHabit)
+		}
 	}
 	for habit, year := range userHabits {
 		if completed, _ := year[time.Now().YearDay()]; completed == 1 {

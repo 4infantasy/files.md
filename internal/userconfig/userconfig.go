@@ -28,8 +28,9 @@ var defaultConfig = config{
 	PomodoroDurationInMinutes: 50,
 	Schedules:                 []Schedule{},
 	QuickCmds:                 []string{},
-	AllowTwoEmojisInButton:    false,
+	TwoEmojisEnabled:          false,
 	Mode:                      "tasks",
+	QuickHabitsEnabled:        false,
 }
 
 var (
@@ -57,8 +58,9 @@ type config struct {
 	PomodoroDurationInMinutes int64      `json:"pomodoroDurationInMinutes"`
 	Schedules                 []Schedule `json:"schedules"`
 	QuickCmds                 []string   `json:"quickCommands"`
-	AllowTwoEmojisInButton    bool       `json:"allowTwoEmojisInButton"`
+	TwoEmojisEnabled          bool       `json:"twoEmojisEnabled"`
 	Mode                      string     `json:"mode"`
+	QuickHabitsEnabled        bool       `json:"quickHabitsEnabled"`
 }
 
 func NewConfig(userFS *fs.FS, userID int64, filename string) *Config {
@@ -236,10 +238,16 @@ func (c *Config) ShouldSplitChecklist(checklist string) bool {
 	return true
 }
 
-func (c *Config) AllowTwoEmojisPerButton() bool {
+func (c *Config) TwoEmojisPerButtonEnabled() bool {
 	cfg, _ := c.read(c.filename)
 
-	return cfg.AllowTwoEmojisInButton
+	return cfg.TwoEmojisEnabled
+}
+
+func (c *Config) QuickHabitsEnabled() bool {
+	cfg, _ := c.read(c.filename)
+
+	return cfg.QuickHabitsEnabled
 }
 
 func (c *Config) read(path string) (config, error) {
