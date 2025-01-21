@@ -20,6 +20,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"golang.org/x/exp/slog"
 
+	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/i18n"
 	"zakirullin/stuffbot/internal/consts"
 	"zakirullin/stuffbot/internal/fs"
@@ -885,15 +886,15 @@ func (b *Bot) ShowToday(_ []string) error {
 
 	// Adding habits
 	habitsRow := tg.NewRow()
-	remainingHabits, err := habits.LastWeekHabits(b.fs)
+	userHabits, err := habits.LastWeekHabits(b.fs)
 	if err != nil {
 		return fmt.Errorf("can't show today: %w", err)
 	}
-	_, ok := remainingHabits[habits.MoodHabit]
+	_, ok := userHabits[habits.MoodHabit]
 	if ok {
-		delete(remainingHabits, habits.MoodHabit)
+		delete(userHabits, habits.MoodHabit)
 	}
-	for habit, year := range remainingHabits {
+	for habit, year := range userHabits {
 		if completed, _ := year[time.Now().YearDay()]; completed == 1 {
 			continue
 		}
@@ -2420,7 +2421,34 @@ func (b *Bot) fullMode(_ []string) error {
 }
 
 func (b *Bot) completeHabit(params []string) error {
-	return nil
+	habit := params[0]
+	userHabits, err := habits.Habits(b.fs, time.Now().Year())
+	if err != nil {
+		return fmt.Errorf("complete habit: can't get habits: %w", err)
+	}
+
+	userHabits[habit][time.Now().YearDay()] = 1
+
+	err = habits.Write(b.fs, time.Now().Year(), userHabits)
+	if err != nil {
+		return fmt.Errorf("complete habit: can't write habits: %w", err)
+	}
+
+	emoji := habits.Emoji(b.fs, habit)
+
+	userConf := userconfig.NewConfig(b.fs, b.userID, config.BotCfg.ConfigFilename)
+	err = journal.AddEmoji(b.fs, emoji, userConf.Timezone())
+	if err != nil {
+		return fmt.Errorf("complete habit: can't write emoji to journal: %w", err)
+	}
+
+	record := fmt.Sprintf("%s %s", emoji, habit)
+	err = journal.AddRecord(b.fs, record, userConf.Timezone())
+	if err != nil {
+		return fmt.Errorf("complete habit: can't write record to journal: %w", err)
+	}
+
+	return b.ShowToday(nil)
 }
 
 func extractMarkdown(u Update) string {
