@@ -142,7 +142,8 @@ func Habits(userFS *fs.FS, year int) (map[string]Year, error) {
 	return habits, nil
 }
 
-// LastWeekHabits returns habits with the year days falling in the last week
+// LastWeekHabits returns Habit name => [day1 => 1, day2 => 0, ..., day365 => 0]
+// with the year days falling in the last week
 // FIXME doesn't work when a week falls into two years
 func LastWeekHabits(userFS *fs.FS) (map[string]Year, error) {
 	habitsForYear, err := Habits(userFS, now().Year())

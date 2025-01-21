@@ -860,6 +860,7 @@ func (b *Bot) ShowToday(_ []string) error {
 		return fmt.Errorf("show today: can't get files in %s dir: %w", fs.DirToday, err)
 	}
 
+	// Adding tasks
 	var kb tg.Keyboard
 	for _, file := range files {
 		var btn tg.Btn
@@ -882,6 +883,8 @@ func (b *Bot) ShowToday(_ []string) error {
 		kb.AddRow(btn)
 	}
 
+	// Adding habits
+	habitsRow := tg.NewRow()
 	remainingHabits, err := habits.LastWeekHabits(b.fs)
 	if err != nil {
 		return fmt.Errorf("can't show today: %w", err)
@@ -890,7 +893,17 @@ func (b *Bot) ShowToday(_ []string) error {
 	if ok {
 		delete(remainingHabits, habits.MoodHabit)
 	}
+	for habit, year := range remainingHabits {
+		if completed, _ := year[time.Now().YearDay()]; completed == 1 {
+			continue
+		}
 
+		cmd := tg.NewCmd(consts.CmdCompleteHabit, []string{habit})
+		habitsRow = append(habitsRow, tg.NewBtn(habits.Emoji(b.fs, habit), cmd))
+	}
+	kb.AddRow(habitsRow)
+
+	// Adding quick buttons
 	quickBtns := b.quickBtns()
 	if len(quickBtns) > 0 {
 		quickBtnsByRows := slice.Chunk(quickBtns, quickBtnsPerRow)
