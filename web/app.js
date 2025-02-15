@@ -320,28 +320,33 @@ async function showFile(dir, filename, saveToHistory = true) {
     }
 
     editor.getDoc().setValue(content);
+    focusLastLine();
     editor.clearHistory();
 
     // Set cursor at the end of the page.
     // We need to execute this code after some rendering loop. If we don't do that,
     // Images and other heavy stuff won't be loaded
-    // P.S. Is it try after we set infite loading?
+    // P.S. Is it try after we set infinite loading?
     setTimeout(() => {
-        const lastLine = editor.lastLine();
-        let targetLine = lastLine;
-        for (let i = lastLine; i >= 0; i--) {
-            const lineContent = editor.getLine(i).trim();
-            if (!lineContent.startsWith("[") && (!lineContent.endsWith("]") || !lineContent.endsWith(")"))) {
-                targetLine = i;
-                break;
-            }
-        }
-        const targetChar = editor.getLine(targetLine).length;
-        editor.setCursor({line: targetLine, ch: targetChar});
-        editor.scrollTo(null, 0);
-        // TODO only focus if there's no quick dialogue
-        editor.focus();
+        focusLastLine();
     }, 100);
+}
+
+function focusLastLine() {
+    const lastLine = editor.lastLine();
+    let targetLine = lastLine;
+    for (let i = lastLine; i >= 0; i--) {
+        const lineContent = editor.getLine(i).trim();
+        if (!lineContent.startsWith("[") && (!lineContent.endsWith("]") || !lineContent.endsWith(")"))) {
+            targetLine = i;
+            break;
+        }
+    }
+    const targetChar = editor.getLine(targetLine).length;
+    editor.setCursor({line: targetLine, ch: targetChar});
+    editor.scrollTo(null, 0);
+    // TODO only focus if there's no quick dialogue
+    editor.focus();
 }
 
 function updateFocusedItem(resultsList) {
