@@ -105,11 +105,12 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update server files with client files
+	// Apply updated files from the client
 	for path, clientFile := range request.Files {
 		fullPath := filepath.Join(StorageDir, path)
 
 		serverModTime := int64(0)
+		// Check for any .../ attacks
 		if info, err := os.Stat(fullPath); err == nil {
 			serverModTime = info.ModTime().Unix()
 		}
@@ -121,7 +122,8 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 		} else if os.IsNotExist(err) {
 			contentToWrite = clientFile.Content
 		} else {
-			if clientFile.LastServerUpdate < serverModTime {
+			fileWasModifiedOnServer := serverModTime > clientFile.LastServerUpdate
+			if fileWasModifiedOnServer {
 				serverContent, err := ioutil.ReadFile(fullPath)
 				if err != nil {
 					log.Printf("Error reading file %s: %v", fullPath, err)

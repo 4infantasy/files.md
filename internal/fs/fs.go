@@ -1,6 +1,6 @@
 // Package fs provides a simple interface for files manipulations.
 // Bot users should have all their artefacts saved in cross-platform
-// plain text files, that's why we chose a filesystem over some database.
+// plain text files, that's why we use good old-fashioned filesystem.
 // Each user should have its own isolated root folder.
 package fs
 
@@ -250,7 +250,7 @@ func (fs FS) Unhash(dir, filenameHash string) (string, error) {
 		return DirRoot, nil
 	}
 
-	// TODO add safety checks
+	// TODO add safety checks (what safety checks?)
 
 	filenames, err := fs.FilesAndDirs(dir)
 	if err != nil {
@@ -262,6 +262,7 @@ func (fs FS) Unhash(dir, filenameHash string) (string, error) {
 		}
 	}
 
+	// Fallback, treat hash as filename
 	for _, file := range filenames {
 		if strings.HasPrefix(file.Name, filenameHash) {
 			return file.Name, nil

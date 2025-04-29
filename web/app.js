@@ -51,6 +51,9 @@ async function init(el) {
     }
 
     files = await loadFiles(savedDirectoryHandle);
+    await initFilesMetadata();
+    await syncWithServer();
+
     changesPollingInterval = setInterval(async function() {
         // Check if current file has been modified
         let dir = editor.currentDir;
@@ -553,6 +556,9 @@ window.addEventListener('popstate', (event) => {
 window.addEventListener('beforeunload', function () {
     clearInterval(changesPollingInterval);
     clearInterval(queueWorkerInterval);
+    clearInterval(changesPollingInterval);
+    clearInterval(queueWorkerInterval);
+    clearInterval(syncInterval);
 });
 
 document.getElementById('search').addEventListener('keydown', (event) => {
@@ -761,5 +767,6 @@ window.addEventListener("focus", async () => {
     const savedDirectoryHandle = await getSavedDirectoryHandle();
     files = await loadFiles(savedDirectoryHandle);
     console.log("files loaded");
+    syncWithServer()
+    console.log("Sync completed");
 });
-
