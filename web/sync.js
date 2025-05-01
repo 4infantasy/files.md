@@ -74,8 +74,10 @@ async function syncWithServer() {
         const server = await response.json();
         for (const fileInfo of server.files) {
             console.log(`Syncing file: ${fileInfo.path}`);
+            // If fileInfo is empty, create a record
             const { path, content, lastModified} = fileInfo;
 
+            // What about more than 2 levels nested?
             let dir, filename;
             if (path.includes('/')) {
                 const parts = path.split('/');
@@ -101,14 +103,21 @@ async function syncWithServer() {
                 // await writable.close();
             }
 
-            const savedDirectoryHandle = await getSavedDirectoryHandle();
-            console.log(savedDirectoryHandle);
-            const fileHandle = await savedDirectoryHandle.getFileHandle(path + "_sync", { create: true });
+            // TODO if file was modified locally, we need to re-read it before writing.
+            const dirs = path.split('/');
+            dirs.pop() // remove filename
+            let currentDirHandle = await getSavedDirectoryHandle();
+            for (const dirName of dirs) {
+                if (dirName) {
+                    currentDirHandle = await currentDirHandle.getDirectoryHandle(dirName, { create: true });
+                }
+            }
+
+            const fileHandle = await currentDirHandle.getFileHandle(filename, { create: true });
             console.log(fileHandle);
             const writable = await fileHandle.createWritable();
             await writable.write(content);
             await writable.close();
-
             if (!filesMetadata['files'][dir]) filesMetadata['files'][dir] = {};
             filesMetadata['files'][dir][filename] = {
                 hash: hash(content),
