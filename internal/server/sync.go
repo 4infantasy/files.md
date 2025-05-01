@@ -114,13 +114,13 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 	_, _ = fs.NewFS(StorageDir, afero.NewOsFs())
 
 	// 1) Save client-modified files to the server
-	// 2) In case of conflict, merge the files and include them in the response
+	// 2) In case of conflict (server has a newer modification), merge the files and include them in the response
 	// 3) Based on known client dirs timestamps, send newly updated or created files
 	// 4) Respond with last modification timestamps for every dir
 
 	// Save client-modified files to the server
 	for _, clientFile := range request.Files {
-		logSync(fmt.Sprintf("Got client file: %s", clientFile.Path))
+		logSync(fmt.Sprintf("Got client file: '%s'", clientFile.Path))
 		fullPath := filepath.Join(StorageDir, clientFile.Path)
 
 		serverModTime := int64(0)
@@ -132,11 +132,11 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 		var clientContent string
 
 		if err != nil && !os.IsNotExist(err) {
-			log.Printf("Error reading file %s: %v", fullPath, err)
+			log.Printf("Error reading file '%s': %v", fullPath, err)
 			// All-or-nothing sync?
 			continue
 		} else if os.IsNotExist(err) {
-			logSync(fmt.Sprintf("Creating: %s", clientFile.Path))
+			logSync(fmt.Sprintf("Creating: '%s'", clientFile.Path))
 			clientContent = clientFile.Content
 		} else {
 			// File locks?
@@ -144,14 +144,14 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 			if fileWasModifiedOnServer {
 				serverContent, err := ioutil.ReadFile(fullPath)
 				if err != nil {
-					log.Printf("Error reading file %s: %v", fullPath, err)
+					log.Printf("Error reading file '%s': %v", fullPath, err)
 					continue
 				}
-				logSync(fmt.Sprintf("Merging on conflict: %s", clientFile.Path))
+				logSync(fmt.Sprintf("Merging on conflict: '%s'", clientFile.Path))
 				clientContent = Merge(string(serverContent), clientFile.Content)
 			} else {
 				// Server file hasn't changed since client's last sync
-				logSync(fmt.Sprintf("Modifying existing: %s", clientFile.Path))
+				logSync(fmt.Sprintf("Modifying existing: '%s'", clientFile.Path))
 				clientContent = clientFile.Content
 			}
 		}
@@ -196,6 +196,7 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
+		// Calculate the latest file timestamp for each directory
 		existingTimestamp, exists := dirTimestamps[dir]
 		if !exists {
 			dirTimestamps[dir] = serverFileTime

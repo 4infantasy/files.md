@@ -25,10 +25,9 @@ function hash(str) {
 async function syncWithServer() {
     console.log("Starting sync with server...");
 
-    const filesToSync = {};
+    let filesToSync = [];
     for (const dir in files) {
-        if (!filesToSync[dir]) filesToSync[dir] = {};
-
+        // ROOT files?
         for (const filename in files[dir]) {
             try {
                 if (dir === 'img') continue;
@@ -41,13 +40,16 @@ async function syncWithServer() {
                     content = files[dir][filename]?.content || "";
                 }
 
+                let path = filesMetadata?.files?.[dir]?.[filename]?.path;
                 let serverHash = filesMetadata?.files?.[dir]?.[filename]?.hash;
+                let serverTime = filesMetadata?.files?.[dir]?.[filename]?.lastModified;
                 let fileWasModifiedLocally = serverHash !== hash(content)
                 if (fileWasModifiedLocally) {
-                    filesToSync[dir][filename] = {
+                    filesToSync.push({
                         content: content,
-                        lastModified: files[dir][filename].lastModified
-                    };
+                        path: path,
+                        lastModified: serverTime,
+                    });
                 }
             } catch (error) {
                 console.error(`Error processing ${dir}/${filename}:`, error);
@@ -99,10 +101,19 @@ async function syncWithServer() {
                 // await writable.close();
             }
 
+            const savedDirectoryHandle = await getSavedDirectoryHandle();
+            console.log(savedDirectoryHandle);
+            const fileHandle = await savedDirectoryHandle.getFileHandle(path + "_sync", { create: true });
+            console.log(fileHandle);
+            const writable = await fileHandle.createWritable();
+            await writable.write(content);
+            await writable.close();
+
             if (!filesMetadata['files'][dir]) filesMetadata['files'][dir] = {};
             filesMetadata['files'][dir][filename] = {
                 hash: hash(content),
-                lastModified: lastModified
+                lastModified: lastModified,
+                path: path
             };
         }
         filesMetadata['timestamps'] = server.timestamps;
@@ -185,35 +196,6 @@ async function init(el) {
     buildSidebar();
     await showRandomFile();
 }
-
-// // Add sync to the file save function
-// async function saveFile() {
-//     const dir = editor.currentDir;
-//     const filename = editor.currentFile;
-//     const fileData = files[dir][filename];
-//     if (fileData && fileData.handle) {
-//         let content = getCurrentContent();
-//         const writable = await fileData.handle.createWritable();
-//         await writable.write(content);
-//         await writable.close();
-//
-//         // Calculate hash after saving
-//         const hash = await calculateFileHash(content);
-//
-//         // Check if file needs to be synced with server
-//         if (!filesMetadata[dir] ||
-//             !filesMetadata[dir][filename] ||
-//             filesMetadata[dir][filename].hash !== hash) {
-//
-//             // Queue sync for this file
-//             await syncFileWithServer(dir, filename, content, hash);
-//         }
-//     } else {
-//         if (fileData.handle) {
-//             alert(`Cannot save ${filename}. No file handle found.`);
-//         }
-//     }
-// }
 
 // // Sync a single file with the server
 // async function syncFileWithServer(dir, filename, content, hash) {
