@@ -66,7 +66,6 @@ async function init(el) {
         if (saveQueue.length === 0) {
             newContent = newContent.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
             if (norm(currentContent) !== norm(newContent)) {
-                console.log("'" + currentContent + "',", "'" + newContent + "'", "File was modified, reloading...");
                 await showFile(dir, file, false);
             }
         }

@@ -25,27 +25,25 @@ function hash(str) {
 async function syncWithServer() {
     console.log("Starting sync with server...");
 
-    let filesToSync = [];
+    let filesToSend = [];
     for (const dir in files) {
-        // ROOT files?
         for (const filename in files[dir]) {
             try {
                 if (dir === 'img') continue;
 
                 let content = "";
-                if (files[dir][filename].handle) {
-                    const file = await files[dir][filename].handle.getFile();
-                    content = await file.text();
-                } else {
-                    content = files[dir][filename]?.content || "";
-                }
+                const file = await files[dir][filename].handle.getFile();
+                content = await file.text();
 
                 let path = filesMetadata?.files?.[dir]?.[filename]?.path;
+                if (!path) {
+                    console.log(`File ${dir}/${filename} not found on server, skipping...`);
+                }
                 let serverHash = filesMetadata?.files?.[dir]?.[filename]?.hash;
                 let serverTime = filesMetadata?.files?.[dir]?.[filename]?.lastModified;
                 let fileWasModifiedLocally = serverHash !== hash(content)
                 if (fileWasModifiedLocally) {
-                    filesToSync.push({
+                    filesToSend.push({
                         content: content,
                         path: path,
                         lastModified: serverTime,
@@ -62,7 +60,7 @@ async function syncWithServer() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
             body: JSON.stringify({
-                files: filesToSync,
+                files: filesToSend,
                 timestamps: filesMetadata['timestamps'] || [],
             })
         });
