@@ -1,7 +1,7 @@
 const saverInterval = 50; // ms, how often to save currently open file
 const loaderInterval = 3000; // ms, how often to load files from local system and sync with server
 
-let saveQueue = [];
+let unsavedChanges = false;
 let isSaving = false;
 
 // Files structure:
@@ -199,7 +199,7 @@ async function collectLocallyModifiedFiles() {
         if (dir === 'img') continue; // Skip image directory
 
         for (const filename in files[dir]) {
-            const promise = collectFile(dir, filename)
+            const promise = getFileIfChanged(dir, filename)
                 .then(result => {
                     if (result) filesToSend.push(result);
                 });
@@ -211,7 +211,7 @@ async function collectLocallyModifiedFiles() {
     return filesToSend;
 }
 
-async function collectFile(dir, filename) {
+async function getFileIfChanged(dir, filename) {
     try {
         const fileData = files[dir][filename];
         if (!fileData?.handle) return null;
@@ -243,7 +243,7 @@ async function collectFile(dir, filename) {
     }
 }
 
-async function saveFile() {
+async function saveCurrentFile() {
     const dir = editor.currentDir;
     const filename = editor.currentFile;
     const fileData = files[dir][filename];
@@ -258,24 +258,6 @@ async function saveFile() {
         }
     }
 }
-
-// Worker to process the saving queue
-window.saver = setInterval(async function processSaveQueue() {
-    if (isSaving) return;
-    if (saveQueue.length === 0) return;
-
-    isSaving = true;
-    while (saveQueue.length > 0) {
-        try {
-            await saveFile();
-        } catch (error) {
-            console.error("Error during save:", error);
-        }
-        saveQueue.shift();
-    }
-
-    isSaving = false;
-}, saverInterval);
 
 function hash(str) {
     let hash = 0;
@@ -304,7 +286,7 @@ async function initFiles() {
         let newContent = await updatedFile.text();
         // TODO dirty hack, we replace links on the fly
         let currentContent = getCurrentContent();
-        if (saveQueue.length === 0) {
+        if (!unsavedChanges) {
             newContent = newContent.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
             if (norm(currentContent) !== norm(newContent)) {
                 await showFile(dir, file, false);
@@ -317,3 +299,17 @@ window.addEventListener('beforeunload', function () {
     clearInterval(window.loader);
     clearInterval(window.saver);
 });
+
+// Worker to process the saving queue
+window.saver = setInterval(async function processSaveQueue() {
+    if (isSaving) return;
+    if (!unsavedChanges) return;
+
+    isSaving = true;
+    try {
+        await saveCurrentFile();
+    } catch (error) {
+        console.error("Error during save:", error);
+    }
+    isSaving = false;
+}, saverInterval);

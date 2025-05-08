@@ -97,9 +97,7 @@ function initEditor(el) {
     editor.on("change", async function (cm, changeObj) {
         // Save on user input only
         if (changeObj.origin && changeObj.origin !== "setValue") {
-            editor.currentFileSaving = true;
-            saveQueue.push(true);
-            // await saveFile();
+            unsavedChanges = true
         }
     });
 
@@ -237,22 +235,6 @@ function buildSidebar() {
     });
 }
 
-async function processSaveQueue() {
-    if (isProcessing) return;
-    isProcessing = true;
-
-    while (saveQueue.length > 0) {
-        const saveTask = saveQueue.shift();
-        try {
-            await saveTask(); // Execute the save task
-        } catch (error) {
-            console.error("Error during save:", error);
-        }
-    }
-
-    isProcessing = false; // Mark as idle
-}
-
 async function showRandomFile() {
     const allFiles = [];
     for (let dir in excludeDirs(systemDirs)) {
@@ -294,7 +276,6 @@ async function showFile(dir, filename, saveToHistory = true) {
 
     editor.currentDir = dir;
     editor.currentFile = filename;
-    editor.currentFileSaving = false;
     if (saveToHistory) {
         const state = {dir: dir, file: filename};
         history.pushState(state, '');
