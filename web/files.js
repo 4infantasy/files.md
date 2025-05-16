@@ -172,13 +172,10 @@ async function syncWithServer() {
 
 async function syncFileWithServer(dir, filename) {
     const path = `${dir}/${filename}`;
-    console.log(path);
     let file = await (await getFileHandle(path)).getFile();
     // TODO we might only need to send content when modifying
     let content = await file.text();
     let serverTimestamp = getMetadata(path)?.lastModified || 0;
-
-    console.log(serverTimestamp, file);
 
     let serverFile = {};
     try {
@@ -201,13 +198,14 @@ async function syncFileWithServer(dir, filename) {
         }
 
         serverFile = await response.json();
-        await write(path, serverFile.Content);
-        await showFile(dir, filename);
-        console.log("File synced with server");
     } catch (error) {
         console.error("Network error occurred:", error.message);
         return;
     }
+    console.log(serverFile);
+    await write(path, serverFile.content);
+    await showFile(dir, filename);
+    console.log("File synced with server");
 }
 
 async function collectLocallyModifiedFiles() {
