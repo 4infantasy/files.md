@@ -114,6 +114,12 @@ async function syncAllWithServer() {
     const startTime = performance.now();
     console.log("Starting sync with server...");
 
+    try {
+        await syncMediaFilesFromServer();
+    } catch (error) {
+        console.error("Can't sync media with server: ", error.message)
+    }
+
     // Send locally modified files and timestamps of last seen dirs from the server
     let server = {};
     let filesToSend = await collectLocallyModifiedTextFiles();
@@ -123,7 +129,6 @@ async function syncAllWithServer() {
             headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
             body: JSON.stringify({
                 // TODO rem
-                files: [],
                 files: filesToSend,
                 timestamps: filesMetadata['timestamps'] || [],
             })
@@ -284,10 +289,9 @@ async function saveMediaFile(path, blob, lastModified) {
     }
 
     try {
-        console.log(path, blob);
-        // const writable = await fileHandle.createWritable();
-        // await writable.write(blob);
-        // await writable.close();
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
         console.log(`Successfully wrote media file: ${path}`);
         // TODO we assume that we got no fails. Instead save filenames hashes, same for text
         if (lastModified > filesMetadata['mediaTimestamp'] || 0) {
