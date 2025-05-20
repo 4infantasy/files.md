@@ -495,7 +495,7 @@ function saveMetadata() {
 
 // 1) Save current content to local filesystem
 // 2) Sync it with the server
-async function saveCurrentFile() {
+async function saveAndSyncCurrentFile() {
     if (!hasUnsavedChanges) return;
 
     // Wait until not saving
@@ -515,10 +515,11 @@ async function saveCurrentFile() {
         const fileData = files[dir][filename];
         if (fileData && fileData.handle) {
             let content = getCurrentContent();
-            // We need to atomically reset the flag once we hold a snapshot of particular version of text.
-            // If this variable is changed once we in the event loop, the unsaved changes won't be lost.
-            // They will be handled by the subsequent saveCurrentFile() call. Initially, this assignment was
-            // erroneously placed at the end of the function, that way we have a race condition.
+            // We need to atomically reset the flag once we captured a snapshot of particular version of the content.
+            // This flag can be changed in the event loop, as a result of user making changes to the text in the middle
+            // of our saving process. The new unsaved changes would be then handled by a subsequent saveCurrentFile() call.
+            // Initially, this flag assignment was erroneously placed at the end of the function, resulting in a race condition.
+            // If we override flag in the end, we would lose any changes that occurred during the 3 await calls.
             hasUnsavedChanges = false
             const writable = await fileData.handle.createWritable();
             await writable.write(content);
@@ -569,4 +570,4 @@ window.addEventListener('beforeunload', function () {
 
 
 // Worker to process the saving queue
-window.saver = setInterval(saveCurrentFile, saverInterval);
+window.saver = setInterval(saveAndSyncCurrentFile, saverInterval);

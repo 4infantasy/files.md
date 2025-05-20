@@ -608,7 +608,7 @@ document.addEventListener('mousedown', (event) => {
 
 // Reload files once the app gains focus
 window.addEventListener("focus", async () => {
-    await saveCurrentFile();
+    await saveAndSyncCurrentFile();
 
     const savedDirectoryHandle = await getRootDirHandle();
     files = await loadLocalFiles(savedDirectoryHandle);
