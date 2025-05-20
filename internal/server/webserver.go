@@ -197,7 +197,6 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 		}
 	})
 
-	router.HandleFunc("/timestamps", corsMiddleware(authMiddleware(Timestamps)))
 	router.HandleFunc("/syncTexts", corsMiddleware(authMiddleware(SyncAllTextFiles)))
 	router.HandleFunc("/syncText", corsMiddleware(authMiddleware(SyncText)))
 	router.HandleFunc("/syncMedias", corsMiddleware(authMiddleware(SyncAllMedia)))

@@ -495,7 +495,8 @@ function saveMetadata() {
 
 // 1) Save current content to local filesystem
 // 2) Sync it with the server
-async function saveAndSyncCurrentFile() {
+// TODO add hash of last read file comparision, merge on conflict (in which scenarious in can happen tho?)
+async function syncCurrentFile() {
     if (!hasUnsavedChanges) return;
 
     // Wait until not saving
@@ -570,4 +571,4 @@ window.addEventListener('beforeunload', function () {
 
 
 // Worker to process the saving queue
-window.saver = setInterval(saveAndSyncCurrentFile, saverInterval);
+window.saver = setInterval(syncCurrentFile, saverInterval);

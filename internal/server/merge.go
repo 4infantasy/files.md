@@ -7,10 +7,10 @@ import "strings"
 // been edited independently, such as journal entries or notes.
 //
 // The algorithm:
-// - Splits both inputs into lines
-// - Uses dynamic programming to find the longest common subsequence (LCS) between the lines
-// - Constructs a merged result that preserves all unique content from both strings
-// - Maintains the original order of content from both strings.
+// 1) Splits both inputs into lines
+// 2) Uses dynamic programming to find the longest common subsequence (LCS) between the lines
+// 3) Constructs a merged result that preserves all unique content from both strings
+// 4) Maintains the original order of content from both strings
 func Merge(s1, s2 string) string {
 	if len(s1) == 0 {
 		return s2
@@ -21,7 +21,7 @@ func Merge(s1, s2 string) string {
 	lines1 := strings.Split(s1, "\n")
 	lines2 := strings.Split(s2, "\n")
 
-	// Dynamical table containing the longest common prefix for each pair.
+	// Dynamical programming table containing the longest common prefix for each pair.
 	lcsLength := make([][]int, len(lines1)+1)
 	for i := range lcsLength {
 		lcsLength[i] = make([]int, len(lines2)+1)

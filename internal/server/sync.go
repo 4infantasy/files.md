@@ -342,27 +342,6 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func Timestamps(w http.ResponseWriter, r *http.Request) {
-	timestamps, err := timestamps(StorageDir)
-	if err != nil {
-		log.Printf("Error getting timestamps: %v", err)
-		http.Error(w, fmt.Sprintf("Failed to get timestamps: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Return the timestamps
-	response := struct {
-		Timestamps map[string]int64 `json:"timestamps"`
-	}{
-		Timestamps: timestamps,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Printf("Error encoding timestamp response: %v", err)
-	}
-}
-
 // timestamps recursively scans a directory and returns the latest modification time
 // for directories only (including root directory) as Unix timestamps
 func timestamps(rootPath string) (map[string]int64, error) {
