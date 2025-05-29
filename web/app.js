@@ -98,7 +98,6 @@ function initEditor(el) {
     });
 
     editor.setOption("viewportMargin", Infinity);
-    // editor.setOption("cursorScrollMargin", 50);
     initAutoscroll(editor);
 
     // TODO Image uploading
@@ -233,6 +232,11 @@ function buildSidebar() {
 }
 
 async function showRandomFile() {
+    if (debug) {
+        await showFile(debug.dir, debug.file);
+        return;
+    }
+
     const allFiles = [];
     for (let dir in excludeDirs(systemDirs)) {
         for (let file in files[dir]) {
@@ -275,8 +279,6 @@ async function showFile(dir, filename, saveToHistory = true) {
     }
 
     content = `# ${header}\n${content}`;
-    // Replace extended links with just link
-    // content = content.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
 
     editor.currentDir = dir;
     editor.currentFile = filename;

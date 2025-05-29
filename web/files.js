@@ -6,6 +6,9 @@ let hasUnsavedChanges = false;
 let isSaving = false;
 let isSyncing = false
 
+// debug = false;
+let debug = {dir: "", file: "Sim.md"};
+
 // Files structure:
 // {
 //   "dir": [
@@ -89,6 +92,14 @@ async function loadLocalFiles(rootDirHandle) {
             }
         }
 
+        if (debug) {
+            if (debug.loaded === undefined) {
+                debug.loaded = true
+                await loadDir(rootDirHandle, debug.dir, 1);
+            }
+            return;
+        }
+
         await Promise.all(dirPromises.map(({handle, dir, depth}) =>
             loadDir(handle, dir, depth)
         ));
@@ -113,6 +124,10 @@ async function loadLocalFiles(rootDirHandle) {
 }
 
 async function syncAllWithServer() {
+    if (debug) {
+        return;
+    }
+
     if (isSyncing) return;
     isSyncing = true;
 
@@ -164,7 +179,7 @@ async function syncAllWithServer() {
         }
         filesMetadata['timestamps'] = server.timestamps;
         saveMetadata();
-    } catch(error) {
+    } catch (error) {
         console.error("Can't sync: ", error.message)
     }
 
@@ -218,6 +233,10 @@ async function syncFileWithServer(dir, filename) {
 }
 
 async function syncMediaFilesFromServer() {
+    if (debug) {
+        return;
+    }
+
     // TODO skip if already syncing
 
     console.log(`Starting media sync from img folder...`);
@@ -246,7 +265,7 @@ async function syncMediaFilesFromServer() {
         // Process and save media files
         let filesProcessed = 0;
         for (const fileInfo of serverData.files) {
-            const { path, lastModified} = fileInfo;
+            const {path, lastModified} = fileInfo;
             console.log(`Downloading media file: ${path}`);
 
             try {
@@ -516,6 +535,10 @@ function saveMetadata() {
 // 2) Sync it with the server
 // TODO add hash of last read file comparison, merge on conflict (in which scenarious in can happen tho?)
 async function syncCurrentFile() {
+    if (debug) {
+        return;
+    }
+
     // Wait until not saving
     while (isSaving) {
         await new Promise(r => setTimeout(r, 50));
