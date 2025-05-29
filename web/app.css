@@ -263,17 +263,15 @@ a:hover {
 }
 
 
-.CodeMirror .cm-formatting-list-ul {
-    justify-content: center;
-    align-items: center;
-    width: 24px;
-    height: 32px;
-    display: flex
-}
+/*.CodeMirror .cm-formatting-list-ul {*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    width: 24px;*/
+/*    height: 32px;*/
+/*    display: flex*/
+/*}*/
 
 .CodeMirror .HyperMD-list-line {
-    align-items: flex-start;
-    display: flex;
 
     padding-left: 20px !important;
 }
