@@ -599,12 +599,8 @@
     /*CHANGED*/
     max-width: 400px;
     display: inline-block;
-}
 
-.CodeMirror-widget {
-    /*CHANGED, all lines*/
-    margin-left: 24%;
-    transform: translateX(-24%);
+    margin-left: 25%;
 }
 
 /*CHANGED, if z-index is 2, then our section block is below the image*/
