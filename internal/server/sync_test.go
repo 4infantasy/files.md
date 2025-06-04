@@ -334,149 +334,109 @@ func TestSyncAllTexts_CreateNewFilesOnServer(t *testing.T) {
 	r.Equal("Task 2 content", content2)
 }
 
-//func TestSyncAllTexts_UpdateExistingFiles(t *testing.T) {
-//	r := require.New(t)
-//	setupTestServer(t)
-//
-//	// Create existing files on server
-//	userFS, err := fs.NewUserFS(123)
-//	r.NoError(err)
-//	err = userFS.Write("", "today/existing.md", "Original content")
-//	r.NoError(err)
-//
-//	serverTime, err := userFS.Ctime("", "today/existing.md")
-//	r.NoError(err)
-//
-//	request := syncRequest{
-//		UserID: 123,
-//		Timestamps: map[string]int64{
-//			"today": serverTime - 1000, // Old timestamp
-//		},
-//		Files: []file{
-//			{
-//				Path:         "today/existing.md",
-//				Content:      "Updated content",
-//				LastModified: serverTime, // Same as server time
-//			},
-//		},
-//	}
-//
-//	body, err := json.Marshal(request)
-//	r.NoError(err)
-//
-//	req := httptest.NewRequest(http.MethodPost, "/sync-all", bytes.NewBuffer(body))
-//	req.Header.Set("Content-Type", "application/json")
-//	w := httptest.NewRecorder()
-//
-//	SyncAllTexts(w, req)
-//
-//	r.Equal(http.StatusOK, w.Code)
-//
-//	var response syncResponse
-//	err = json.Unmarshal(w.Body.Bytes(), &response)
-//	r.NoError(err)
-//	r.Equal(StatusOK, response.Status)
-//
-//	// Verify file was updated
-//	content, err := userFS.Read("", "today/existing.md")
-//	r.NoError(err)
-//	r.Equal("Updated content", content)
-//}
-//
-//func TestSyncAllTexts_ConflictMerge(t *testing.T) {
-//	r := require.New(t)
-//	setupTestServer(t)
-//
-//	// Mock the Merge function
-//	originalMerge := Merge
-//	defer func() {
-//		Merge = originalMerge
-//	}()
-//	Merge = func(serverContent, clientContent string) string {
-//		return "MERGED: " + serverContent + " + " + clientContent
-//	}
-//
-//	// Create file on server
-//	userFS, err := fs.NewUserFS(123)
-//	r.NoError(err)
-//	err = userFS.Write("", "conflict.md", "Server version")
-//	r.NoError(err)
-//
-//	request := syncRequest{
-//		UserID:     123,
-//		Timestamps: make(map[string]int64),
-//		Files: []file{
-//			{
-//				Path:         "conflict.md",
-//				Content:      "Client version",
-//				LastModified: 1000, // Very old timestamp
-//			},
-//		},
-//	}
-//
-//	body, err := json.Marshal(request)
-//	r.NoError(err)
-//
-//	req := httptest.NewRequest(http.MethodPost, "/sync-all", bytes.NewBuffer(body))
-//	req.Header.Set("Content-Type", "application/json")
-//	w := httptest.NewRecorder()
-//
-//	SyncAllTexts(w, req)
-//
-//	r.Equal(http.StatusOK, w.Code)
-//
-//	// Verify merged content was saved
-//	content, err := userFS.Read("", "conflict.md")
-//	r.NoError(err)
-//	r.Equal("MERGED: Server version + Client version", content)
-//}
-//
-//func TestSyncAllTexts_SendUpdatedFiles(t *testing.T) {
-//	r := require.New(t)
-//	setupTestServer(t)
-//
-//	// Create files on server
-//	userFS, err := fs.NewUserFS(123)
-//	r.NoError(err)
-//	err = userFS.Write("", "today/new.md", "New server file")
-//	r.NoError(err)
-//	err = userFS.Write("", "today/old.md", "Old file")
-//	r.NoError(err)
-//
-//	oldFileTime, err := userFS.Ctime("", "today/old.md")
-//	r.NoError(err)
-//
-//	request := syncRequest{
-//		UserID: 123,
-//		Timestamps: map[string]int64{
-//			"today": oldFileTime - 1000, // Client has old timestamp
-//		},
-//		Files: []file{},
-//	}
-//
-//	body, err := json.Marshal(request)
-//	r.NoError(err)
-//
-//	req := httptest.NewRequest(http.MethodPost, "/sync-all", bytes.NewBuffer(body))
-//	req.Header.Set("Content-Type", "application/json")
-//	w := httptest.NewRecorder()
-//
-//	SyncAllTexts(w, req)
-//
-//	r.Equal(http.StatusOK, w.Code)
-//
-//	var response syncResponse
-//	err = json.Unmarshal(w.Body.Bytes(), &response)
-//	r.NoError(err)
-//	r.Equal(StatusOK, response.Status)
-//	r.Len(response.Files, 2) // Both files should be sent
-//
-//	// Check that files contain content
-//	for _, file := range response.Files {
-//		r.NotEmpty(file.Content)
-//		r.True(file.LastModified > 0)
-//	}
-//}
+func TestSyncAllTexts_UpdateExistingFilesOnServer(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+	origFS := fs.NewUserFS
+	fs.NewUserFS = func(userID int64) (*fs.FS, error) {
+		return userFS, nil
+	}
+	defer func() {
+		fs.NewUserFS = origFS
+	}()
+
+	err = userFS.Write("", "today/existing.md", "Original content")
+	r.NoError(err)
+
+	request := syncRequest{
+		UserID: -1,
+		Timestamps: map[string]int64{
+			"today": 0, // Old timestamp
+		},
+		Files: []file{
+			{
+				Path:         "today/existing.md",
+				Content:      "Updated content",
+				LastModified: 1, // Same as server time
+			},
+		},
+	}
+
+	body, err := json.Marshal(request)
+	r.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/sync-all", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	SyncTexts(w, req)
+
+	r.Equal(http.StatusOK, w.Code)
+
+	var response syncResponse
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	r.NoError(err)
+	r.Equal(StatusOK, response.Status)
+
+	// Verify file was updated
+	content, err := userFS.Read("", "today/existing.md")
+	r.NoError(err)
+	r.Equal("Updated content", content)
+}
+
+func TestSyncAllTexts_SendUpdatedFilesToClient(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+	origFS := fs.NewUserFS
+	fs.NewUserFS = func(userID int64) (*fs.FS, error) {
+		return userFS, nil
+	}
+	defer func() {
+		fs.NewUserFS = origFS
+	}()
+
+	// Create files on server
+	err = userFS.Write("", "today/new.md", "New server file")
+	r.NoError(err)
+	err = userFS.Write("", "today/old.md", "Old file")
+	r.NoError(err)
+
+	request := syncRequest{
+		UserID: 0,
+		Timestamps: map[string]int64{
+			"today": 0,
+		},
+		Files: []file{},
+	}
+
+	body, err := json.Marshal(request)
+	r.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/syncTexts", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	SyncTexts(w, req)
+
+	r.Equal(http.StatusOK, w.Code)
+
+	var response syncResponse
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	r.NoError(err)
+	r.Equal(StatusOK, response.Status)
+	r.Len(response.Files, 2) // Both files should be sent
+
+	// Check that files contain content
+	for _, file := range response.Files {
+		r.NotEmpty(file.Content)
+		r.True(file.LastModified > 0)
+	}
+}
+
 //
 ////func TestSyncAllTexts_CalculateDeletions(t *testing.T) {
 ////	r := require.New(t)
