@@ -172,12 +172,14 @@ async function syncAllWithServer() {
             // todo try-catch?
 
             await saveTextFile(path, content)
+            setMetadata(path, content, lastModified);
             // Unfortunately rename is not working, so we have to delete the old file
             const shouldRemoveOldFile = path in server.renames;
             if (shouldRemoveOldFile) {
-                await remove(server.renames[path]);
+                const oldPath = server.renames[path];
+                await removeFile(oldPath);
+                removeMetadata(oldPath);
             }
-            setMetadata(path, content, lastModified);
             saveMetadata();
         }
         filesMetadata['timestamps'] = server.timestamps;
@@ -502,7 +504,7 @@ async function saveTextFile(path, content) {
     }
 }
 
-async function remove(path) {
+async function removeFile(path) {
     let fileHandle = await getFileHandle(path);
     if (fileHandle === null) {
         // TODO fix once Chromium fixes the bug
@@ -537,6 +539,16 @@ function setMetadata(path, content, lastModified) {
         lastModified: lastModified,
         path: path
     };
+}
+
+function removeMetadata(path) {
+    const parts = path.split('/');
+    const filename = parts.pop();
+    const dir = parts.join('/');
+
+    if (filesMetadata.files?.[dir]?.[filename]) {
+        delete filesMetadata.files[dir][filename];
+    }
 }
 
 function saveMetadata() {
