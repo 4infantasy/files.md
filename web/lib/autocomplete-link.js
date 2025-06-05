@@ -32,7 +32,7 @@
    */
   exports.createHintFunc = function () {
     var editor = null
-    var defaultDict = FoldEmoji.defaultDict
+    var defaultDict = {}
 
     var previewShown = false
     var previewContainer = document.createElement('div')
