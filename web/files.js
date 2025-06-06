@@ -24,11 +24,10 @@ let isSyncingCurrent = false;
 //   ]
 // }
 let files = [];
+let filesMetadata = {files: {}, timestamps: {}, mediaTimestamp: 0};
+const FILES_STORAGE_KEY = 'files';
 const supportedFileTypes = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
 const systemDirs = ["img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
-
-let filesMetadata = {files: {}, timestamps: {}, mediaTimestamp: 0};
-const SYNC_STORAGE_KEY = 'files';
 
 // Returns files in flattened structure:
 // {
@@ -112,7 +111,7 @@ async function loadLocalFiles(rootDirHandle) {
     }
 
     // Load metadata
-    const savedMetadata = localStorage.getItem(SYNC_STORAGE_KEY);
+    const savedMetadata = localStorage.getItem(FILES_STORAGE_KEY);
     if (savedMetadata) {
         filesMetadata = JSON.parse(savedMetadata);
     }
@@ -362,6 +361,7 @@ async function saveMediaFile(path, blob, lastModified) {
 
 async function collectLocallyModifiedTextFiles() {
     const filesToSend = [];
+    const existingFiles = {};
     const promises = [];
     for (const dir in files) {
         if (dir === 'img') continue; // Skip image directory
@@ -372,23 +372,42 @@ async function collectLocallyModifiedTextFiles() {
                 continue;
             }
 
-            const promise = getFileIfChanged(dir, filename)
+            const promise = getFileStatus(dir, filename)
                 .then(result => {
-                    if (result) filesToSend.push(result);
+                    if (result !== null) {
+                        if (result.status === 'modified') {
+                            filesToSend.push(result);
+                        }
+
+                        existingFiles[result.path] = true;
+                    }
                 });
             promises.push(promise);
         }
     }
 
     await Promise.all(promises);
+
+    // Find deleted files that are in files metadata but not in existing files
+    for (const dir in filesMetadata.files) {
+        for (const file in filesMetadata.files[dir]) {
+            const path = `${dir}/${file}`;
+            if (!existingFiles[path]) {
+                console.log("DELETED " + path);
+            }
+        }
+    }
+
     return filesToSend;
 }
 
-async function getFileIfChanged(dir, filename) {
+async function getFileStatus(dir, filename) {
     let content;
     try {
         const fileData = files[dir][filename];
-        if (!fileData?.handle) return null;
+        if (!fileData?.handle) {
+            return null;
+        }
 
         const file = await fileData.handle.getFile();
         content = await file.text();
@@ -397,24 +416,33 @@ async function getFileIfChanged(dir, filename) {
         return null;
     }
 
-
+    // TODO why path is stored at all?
     const path = filesMetadata?.files?.[dir]?.[filename]?.path;
     if (!path) {
-        console.log(`File ${dir}/${filename} not found on server, skipping...`);
-        return null;
+        console.log("NEW FILE " + dir + "/" + filename);
+        return {
+            status: 'new',
+            content: content,
+            path: `${dir}/${filename}`, // WHY?
+            lastModified: 0 // new file
+        }
     }
 
     const serverHash = filesMetadata?.files?.[dir]?.[filename]?.hash;
     const serverTime = filesMetadata?.files?.[dir]?.[filename]?.lastModified;
     if (serverHash !== hash(content)) {
         return {
-            content,
-            path,
+            status: 'modified',
+            content: content,
+            path: path,
             lastModified: serverTime,
         };
     }
 
-    return null;
+    return {
+        status: 'notModified',
+        path: path,
+    };
 }
 
 async function getFileHandle(path) {
@@ -552,7 +580,7 @@ function removeMetadata(path) {
 }
 
 function saveMetadata() {
-    localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(filesMetadata));
+    localStorage.setItem(FILES_STORAGE_KEY, JSON.stringify(filesMetadata));
 }
 
 function getUserId() {
