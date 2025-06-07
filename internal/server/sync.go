@@ -95,7 +95,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 			logSync(fmt.Sprintf("Error reading file '%s': %v", path, err))
 			// TODO All-or-nothing sync?
 			continue
-		} else if os.IsNotExist(err) {
+		} else if errors.Is(err, os.ErrNotExist) {
 			logSync(fmt.Sprintf("Creating: '%s'", clientFile.Path))
 			clientContent = clientFile.Content
 		} else {

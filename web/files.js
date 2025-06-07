@@ -194,7 +194,7 @@ async function syncTextsWithServer() {
 }
 
 async function syncFileWithServer(dir, filename) {
-    const path = path(dir, filename);
+    const path = toPath(dir, filename);
     let file = await (await getFileHandle(path)).getFile();
     // TODO we might only need to send content when modifying
     let content = await file.text();
@@ -207,7 +207,7 @@ async function syncFileWithServer(dir, filename) {
             headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
             body: JSON.stringify({
                 userId: getUserId(),
-                path: path(dir, filename),
+                path: toPath(dir, filename),
                 lastModified: serverTimestamp,
                 content: content,
             })
@@ -375,11 +375,11 @@ async function collectLocallyModifiedTextFiles() {
 
             const promise = getFileStatus(dir, filename)
                 .then(result => {
-                    if (result !== null) {
-                        if (result.status === 'modified') {
-                            filesToSend.push(result);
-                        }
+                    if (result.status === 'modified' || result.status === 'new') {
+                        filesToSend.push(result);
+                    }
 
+                    if (result.status !== 'error') {
                         existingFiles[result.path] = true;
                     }
                 });
@@ -395,9 +395,9 @@ async function collectLocallyModifiedTextFiles() {
             if  (/[<>:"|?*\\/\x00-\x1F\x7F]/.test(file)) {
                 continue;
             }
-            if (!existingFiles[path(dir, file)]) {
+            if (!existingFiles[toPath(dir, file)]) {
                 console.log(dir, file);
-                console.log("DELETED " + path(dir, file));
+                console.log("DELETED " + toPath(dir, file));
             }
         }
     }
@@ -405,7 +405,7 @@ async function collectLocallyModifiedTextFiles() {
     return filesToSend;
 }
 
-function path(dir, file) {
+function toPath(dir, file) {
     if (dir === "") {
         return file;
     }
@@ -418,14 +418,18 @@ async function getFileStatus(dir, filename) {
     try {
         const fileData = files[dir][filename];
         if (!fileData?.handle) {
-            return null; // what status?
+            return {
+                status: 'error',
+            }
         }
 
         const file = await fileData.handle.getFile();
         content = await file.text();
     } catch (error) {
         console.error(`Error processing ${dir}/${filename}:`, error);
-        return null;
+        return {
+            status: 'error',
+        }
     }
 
     // TODO why path is stored at all?
@@ -435,7 +439,7 @@ async function getFileStatus(dir, filename) {
         return {
             status: 'new',
             content: content,
-            path: path(dir, filename), // WHY?
+            path: toPath(dir, filename), // WHY?
             lastModified: 0 // new file
         }
     }
@@ -497,7 +501,7 @@ async function isContentEqual(path, content) {
     let fileHandle = await getFileHandle(path);
     if (fileHandle === null) {
         // TODO fix once Chromium fixes the bug
-        console.log("Malformed name, skipping file...");
+        console.warn("Malformed name, skipping file...");
         return false;
     }
 
@@ -529,7 +533,6 @@ async function saveTextFile(path, content) {
     let fileHandle = await getFileHandle(path);
     if (fileHandle === null) {
         // TODO fix once Chromium fixes the bug
-        console.log("Malformed name, skipping file...");
         throw new Error("Invalid file name");
     }
 
