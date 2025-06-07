@@ -29,6 +29,7 @@ async function init(el) {
 
 function initEditor(el) {
     editor = HyperMD.fromTextArea(el, {
+        dragDrop: false,
         mode: "hypermd", lineNumbers: false, extraKeys: {
             // "Shift-Space": "autocomplete",
             'Cmd-[': false, 'Cmd-]': false,

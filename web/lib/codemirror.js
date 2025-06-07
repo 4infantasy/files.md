@@ -7850,16 +7850,41 @@
     // if the clear happens after their scheduled firing time).
     var counter = 0;
 
+    // function extend(e) {
+    //   var curCount = ++counter;
+    //   var cur = posFromMouse(cm, e, true, behavior.unit == "rectangle");
+    //   if (!cur) { return }
+    //   if (cmp(cur, lastPos) != 0) {
+    //     cm.curOp.focus = activeElt();
+    //     extendTo(cur);
+    //     var visible = visibleLines(display, doc);
+    //     if (cur.line >= visible.to || cur.line < visible.from)
+    //       { setTimeout(operation(cm, function () {if (counter == curCount) { extend(e); }}), 150); }
+    //   } else {
+    //     var outside = e.clientY < editorSize.top ? -20 : e.clientY > editorSize.bottom ? 20 : 0;
+    //     if (outside) { setTimeout(operation(cm, function () {
+    //       if (counter != curCount) { return }
+    //       display.scroller.scrollTop += outside;
+    //       extend(e);
+    //     }), 50); }
+    //   }
+    // }
+    // CHANGED added pixel distance threshold to extend, with hide token updateImmediately and 1 pixel distance
+    // ### headers sometimes get selected as if mouse was moved.
     function extend(e) {
       var curCount = ++counter;
       var cur = posFromMouse(cm, e, true, behavior.unit == "rectangle");
       if (!cur) { return }
       if (cmp(cur, lastPos) != 0) {
-        cm.curOp.focus = activeElt();
-        extendTo(cur);
-        var visible = visibleLines(display, doc);
-        if (cur.line >= visible.to || cur.line < visible.from)
+        // CHANGED: Only extend selection if mouse moved enough pixels
+        var pixelDistance = Math.abs(e.clientX - event.clientX) + Math.abs(e.clientY - event.clientY);
+        if (pixelDistance > 3) {
+          cm.curOp.focus = activeElt();
+          extendTo(cur);
+          var visible = visibleLines(display, doc);
+          if (cur.line >= visible.to || cur.line < visible.from)
           { setTimeout(operation(cm, function () {if (counter == curCount) { extend(e); }}), 150); }
+        }
       } else {
         var outside = e.clientY < editorSize.top ? -20 : e.clientY > editorSize.bottom ? 20 : 0;
         if (outside) { setTimeout(operation(cm, function () {
