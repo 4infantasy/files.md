@@ -76,7 +76,7 @@ let defaultFiles = {
                 "[My amazing project](/My amazing project.md)"
         },
         "Hotkeys.md": {
-            "content": "# Hotkeys\n" +
+            "content":
                 "#### File Navigation\n" +
                 "\n" +
                 "| Hotkey | Action |\n" +
