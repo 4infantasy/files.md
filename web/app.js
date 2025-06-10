@@ -324,6 +324,7 @@ async function openFile(dir, filename, saveToHistory = true) {
 
     const end = performance.now();
     console.log(`File opened in: ${(end - start).toFixed(3)} milliseconds`);
+    // Get the editor instance
 }
 
 async function newFile() {
@@ -346,6 +347,13 @@ async function newFile() {
     };
 
     await openFile(dir, filename);
+    editor.setCursor({line: 0, ch: 0});
+    editor.focus();
+    editor.setSelection(
+        {line: 0, ch: 2},
+        {line: 0, ch: null}
+    );
+
     await buildSidebar();
 }
 
