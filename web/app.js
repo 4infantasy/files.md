@@ -52,8 +52,7 @@ function initEditor(el) {
         hmdFoldEmoji: {
             myEmoji: createAutocompleteDict
         },
-        hmdModeLoader: {
-        }
+        configureMouse: () => ({addNew: false}) // disable multicursor
     });
     editor.setSize(null, "100%");
 
