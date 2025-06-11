@@ -122,7 +122,9 @@
     font-weight: 600;
 }
 .cm-s-hypermd-light span.cm-quote {
-    color: #666;
+    /*PATCHED*/
+    /*color: #666;*/
+    color: var(--color-tx-alt);
 }
 .cm-s-hypermd-light span.cm-meta {
     color: #FF1717;
@@ -266,20 +268,23 @@
     right: 0px;
     background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAQAAAAziH6sAAAADklEQVR42mOc+Z9x5n8ACTkDM4ikM1IAAAAASUVORK5CYII=) repeat-x 0px center;
 }
+/*PATCHED*/
 .cm-s-hypermd-light pre.HyperMD-quote:before {
     content: " ";
     position: absolute;
-    left: 2px;
+    left: 8px;
     top: 0;
     height: 100%;
     background: url("data:image/gif;base64,R0lGODlhIAABAIABAOjo6P///yH5BAEAAAEALAAAAAAgAAEAAAIHhI8Yy+1cAAA7") 0 0;
     background-size: 20px 1px;
 }
+
+/*PATCHED*/
 .cm-s-hypermd-light pre.HyperMD-quote-1 {
-    padding-left: 27px;
+    padding-left: 10px;
 }
 .cm-s-hypermd-light pre.HyperMD-quote-1:before {
-    width: 20px;
+    width: 2px;
 }
 .cm-s-hypermd-light pre.HyperMD-quote-1.HyperMD-footnote {
     padding-left: 67px;
@@ -287,10 +292,11 @@
 .cm-s-hypermd-light pre.HyperMD-quote-1 span.cm-formatting-quote {
     transform: translateZ(0);
     display: inline-block;
-    width: 20px;
+    width: 4px;
 }
 .cm-s-hypermd-light pre.HyperMD-quote-1 span.cm-formatting-quote:first-child {
-    margin-left: -20px;
+    /*PATCHED*/
+    margin-left: 1px;
 }
 .cm-s-hypermd-light pre.HyperMD-quote-2 {
     padding-left: 47px;
