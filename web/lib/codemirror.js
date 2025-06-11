@@ -3352,7 +3352,10 @@
           var openRight = (docLTR ? openEnd : openStart) && last;
           var left = openLeft ? leftSide : (ltr ? fromPos : toPos).left;
           var right = openRight ? (ltr ? toPos : fromPos).right : (ltr ? toPos : fromPos).right;
-          drawSelectionRect(left, fromPos.top, right - left, fromPos.bottom);
+          if (left === 5) {
+            left = 4; // :D, otherwise very first line of selection gets +1 padding
+          }
+          drawSelectionRect(left - 2, fromPos.top, right - left + 4, fromPos.bottom);
         } else { // Multiple visual lines, one logical line
           var topLeft, topRight, botLeft, botRight;
           if (ltr) {
@@ -3453,10 +3456,13 @@
           visualLines.forEach(visualLine => {
             let firstCharPos = charCoords(cm, Pos(lineNum, visualLine.startChar), "div");
             // TODO we only support LTR here
-            let left = wrapXObj(cm, line, visualLine.startChar, 'ltr', "before");
-            let right = wrapXObj(cm, line, visualLine.endChar, 'ltr', "after");
-            let width = left - right ;
-            drawSelectionRect(right, firstCharPos.top, width, firstCharPos.bottom);
+            let right = wrapXObj(cm, line, visualLine.startChar, 'ltr', "before");
+            // let left = wrapXObj(cm, line, visualLine.endChar, 'ltr', "after");
+            // It seems like 4px is standart codemirror padding, but for some it seems headers
+            // and regular text selected from 5th pixel
+            let left = paddingH(cm.display).left - 2;
+            let width = right - left ;
+            drawSelectionRect(left, firstCharPos.top, width + left, firstCharPos.bottom);
           });
         }
       }
