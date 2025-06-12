@@ -169,6 +169,7 @@ a:hover {
 
 #search-results .focused, #move-results .focused {
     background-color: var(--color-tx-sel);
+    border-radius: 5px;
 }
 
 .CodeMirror-scroll {
