@@ -47,7 +47,7 @@ func newRouter(logger *log.Logger) *http.ServeMux {
 				return
 			}
 			if r.URL.Path == "/chat" {
-				http.ServeFile(w, r, "./web/chat/chat.html")
+				http.ServeFile(w, r, "./web/chat.html")
 				return
 			}
 
