@@ -426,9 +426,27 @@ function receive(val) {
     processResponse(val)
 }
 
-function createFileElement(fileName, isImage, markdownText) {
+function createFileElement(fileName, isImage, markdownText, file = null) {
     const element = document.createElement('span');
-    if (isImage) {
+    if (isImage && file) {
+        element.className = 'md-image';
+
+        // Create a small thumbnail image
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.width = '60px';
+        img.style.height = '60px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '3px';
+        img.style.verticalAlign = 'middle';
+        img.title = fileName;
+
+        element.appendChild(img);
+
+        element.addEventListener('remove', () => {
+            URL.revokeObjectURL(img.src);
+        });
+    } else if (isImage) {
         element.className = 'md-image';
         element.textContent = '🖼️';
         element.title = fileName;
@@ -548,12 +566,8 @@ input.addEventListener('paste', async (event) => {
             loadingSpan.textContent = '⏳';
             loadingSpan.style.color = '#999';
 
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                range.insertNode(loadingSpan);
-                range.collapse(false);
-            }
+            // Always append to input
+            input.appendChild(loadingSpan);
 
             const saved = await saveFile(fileName, file);
             if (saved) {
@@ -561,18 +575,24 @@ input.addEventListener('paste', async (event) => {
                     ? `![${fileName}](media/${fileName})`
                     : `[${fileName}](media/${fileName})`;
 
-                const fileElement = createFileElement(fileName, isImage, markdownText);
-                loadingSpan.parentNode.replaceChild(fileElement, loadingSpan);
+                const fileElement = createFileElement(fileName, isImage, markdownText, file);
 
-                // Place cursor on next line after the inserted element
+                // Replace loading span with file element
+                input.replaceChild(fileElement, loadingSpan);
+
+                // If it's an image, insert two <br> tags and place cursor
                 if (isImage) {
-                    const newLine = document.createElement('br');
-                    fileElement.parentNode.insertBefore(newLine, fileElement.nextSibling);
+                    const br1 = document.createElement('br');
+                    const br2 = document.createElement('br'); // A second BR for a clear new line
 
-                    // Set cursor after the line break
+                    input.appendChild(br1);
+                    input.appendChild(br2);
+
+                    // Move cursor after the second <br>
                     const range = document.createRange();
-                    range.setStartAfter(newLine);
+                    range.setStartAfter(br2); // Place cursor after the second BR
                     range.collapse(true);
+                    const selection = window.getSelection();
                     selection.removeAllRanges();
                     selection.addRange(range);
                 }
