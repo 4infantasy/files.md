@@ -1037,6 +1037,10 @@ document.addEventListener('keydown', (e) => {
         document.getElementById('move').style.display === 'block') {
         return;
     }
+
+    if (isChat) {
+        return;
+    }
     if (isModifierKey(e) && e.key === 'a') {
         e.preventDefault();
         e.stopPropagation();
