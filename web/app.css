@@ -53,6 +53,10 @@ body {
         border-top: 1px solid var(--color-border);
         box-sizing: border-box;
     }
+
+    #chat-container {
+        width: calc(100vh - 1px) !important;
+    }
 }
 
 .CodeMirror-wrap {
