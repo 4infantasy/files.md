@@ -29,7 +29,7 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
 }
 
 #messages::before {
@@ -52,8 +52,11 @@
 
 .message.user {
     max-width: 70%;
-    background-color: color-mix(in srgb, var(--color-bg-active) 95%, black 5%);
     align-self: flex-end;
+}
+
+.message.user {
+    background-color: color-mix(in srgb, var(--color-bg-alt) 90%, black 10%) !important;
 }
 
 .message.bot {
