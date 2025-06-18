@@ -42,6 +42,8 @@ async function init(el) {
     files = await loadLocalFiles(rootDirHandle);
     console.log(`Files loaded in ${performance.now() - perf}ms`);
 
+    initChat();
+
     perf = performance.now();
     buildSidebar();
     console.log(`Sidebar built in: ${(performance.now() - perf).toFixed(3)} milliseconds`);
@@ -54,8 +56,6 @@ async function init(el) {
     await syncTextsWithServer();
     await syncMedia();
     console.log(`Files initialized in: ${(performance.now() - perf).toFixed(3)} milliseconds`);
-
-    initChat();
 }
 
 function initEditor(el) {

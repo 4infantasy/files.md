@@ -29,6 +29,7 @@ module.exports = defineConfig({
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
         },
+        // Firefox and Webkit aren't currently supporting showDirectoryPicker
         // {
         //     name: 'firefox',
         //     use: { ...devices['Desktop Firefox'] },
