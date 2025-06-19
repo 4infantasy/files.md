@@ -94,8 +94,8 @@ test('create new in root', async ({ page }) => {
     await page.evaluate(() => {
         window.getRootDirHandle = async function() {
             // Your mock code here
-            const opfsRoot = await navigator.storage.getDirectory();
-            const testDir = await opfsRoot.getDirectoryHandle('dir', { create: true });
+            const root = await navigator.storage.getDirectory();
+            const subDir = await root.getDirectoryHandle('dir', { create: true });
 
             const testFiles = [
                 { name: 'README.md', content: 'Hello world' },
@@ -104,22 +104,25 @@ test('create new in root', async ({ page }) => {
 
             for (const fileData of testFiles) {
                 try {
-                    await testDir.getFileHandle(fileData.name);
+                    await root.getFileHandle(fileData.name);
                 } catch (error) {
-                    const fileHandle = await testDir.getFileHandle(fileData.name, { create: true });
+                    const fileHandle = await root.getFileHandle(fileData.name, { create: true });
                     const writable = await fileHandle.createWritable();
                     await writable.write(fileData.content);
                     await writable.close();
                 }
             }
 
-            return opfsRoot;
+            return root;
         };
     });
 
     await page.evaluate(() => {
         init(document.getElementById("editor"));
     });
+
+    await page.click('#sidebar >> text=README');
+    await page.waitForTimeout(100);
 
     await page.click('#new-file');
     await page.waitForTimeout(100);
@@ -136,6 +139,7 @@ test('create new in root', async ({ page }) => {
         return cm.getValue();
     });
     expect(codeMirrorContent).toBe("# New file\ncontent\n");
+    await page.pause();
 });
 
 test('create new lower case', async ({ page }) => {
