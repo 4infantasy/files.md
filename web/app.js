@@ -339,7 +339,7 @@ function updateSidebar(focusDir = '') {
 
             let fileNode = new TreeNode(file.replace(/\.md$/, ''), {expanded: false});
             fileNode.on('click', async function (n, node) {
-                await openFile("", node.toString() + ".md");
+                await openFile("", file);
             });
             root.addChild(fileNode)
         }
