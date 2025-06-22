@@ -2,6 +2,8 @@
 // Bot users should have all their artefacts saved in cross-platform
 // plain text files, that's why we use good old-fashioned filesystem.
 // Each user should have its own isolated root folder.
+// TODO maybe make ... access for all methods? So we can use both paths and segments
+// Why not BasePathFS?
 package fs
 
 import (
@@ -134,13 +136,9 @@ func (fs FS) CreateDirsIfNotExist() error {
 }
 
 func (fs FS) Exists(dir, filename string) (bool, error) {
-	filePath := fs.unsafePath(dir, filename)
-	isSafe, err := fs.IsSafe(filePath)
+	filePath, err := fs.SafePath(dir, filename)
 	if err != nil {
-		return false, fmt.Errorf("exists: can't check if the file is safe to access '%s': %w", filePath, err)
-	}
-	if !isSafe {
-		return false, fmt.Errorf("exists: unsafe path '%s': %w", filePath, errUnsafePath)
+		return false, fmt.Errorf("exists: unsafe path '%s': %w", filepath.Join(dir, filename), errUnsafePath)
 	}
 
 	exists, err := Exists(fs.backend, filePath)
@@ -152,12 +150,8 @@ func (fs FS) Exists(dir, filename string) (bool, error) {
 }
 
 func (fs FS) Read(dir, filename string) (string, error) {
-	filePath := fs.unsafePath(dir, filename)
-	isSafe, err := fs.IsSafe(filePath)
+	filePath, err := fs.SafePath(dir, filename)
 	if err != nil {
-		return "", fmt.Errorf("fs read: can't check if the file is safe to access '%s': %w", filePath, err)
-	}
-	if !isSafe {
 		return "", fmt.Errorf("fs read: unsafe filePath '%s': %w", filePath, errUnsafePath)
 	}
 
@@ -170,14 +164,9 @@ func (fs FS) Read(dir, filename string) (string, error) {
 }
 
 func (fs FS) Write(dir, filename, content string) error {
-	filePath := fs.unsafePath(dir, filename)
-	isSafe, err := fs.IsSafe(filePath)
+	filePath, err := fs.SafePath(dir, filename)
 	if err != nil {
-		return fmt.Errorf("fs write: check if file is safe to access '%s': %w", filePath, err)
-	}
-
-	if !isSafe {
-		return fmt.Errorf("fs write: unsafe filePath '%s': %w", filePath, errUnsafePath)
+		return fmt.Errorf("fs write: unsafe filePath '%s': %w", filepath.Join(dir, filename), errUnsafePath)
 	}
 
 	dirs := strings.Split(filePath, "/")
@@ -196,12 +185,8 @@ func (fs FS) Write(dir, filename, content string) error {
 }
 
 func (fs FS) MakeDir(dir string) error {
-	filePath := fs.unsafePath(dir, "")
-	isSafe, err := fs.IsSafe(filePath)
+	filePath, err := fs.SafePath(dir, "")
 	if err != nil {
-		return fmt.Errorf("fs make dir: check if file is safe to access '%s': %w", filePath, err)
-	}
-	if !isSafe {
 		return fmt.Errorf("fs make dir: unsafe filePath '%s': %w", filePath, errUnsafePath)
 	}
 
@@ -214,12 +199,8 @@ func (fs FS) MakeDir(dir string) error {
 }
 
 func (fs FS) Del(dir, filename string) error {
-	filePath := fs.unsafePath(dir, filename)
-	isSafe, err := fs.IsSafe(filePath)
+	filePath, err := fs.SafePath(dir, filename)
 	if err != nil {
-		return fmt.Errorf("fs del: check if file is safe to access '%s': %w", filePath, err)
-	}
-	if !isSafe {
 		return fmt.Errorf("fs del file: unsafe filePath '%s': %w", filePath, errUnsafePath)
 	}
 
@@ -231,23 +212,14 @@ func (fs FS) Del(dir, filename string) error {
 	return nil
 }
 
-// TODO check safety
 func (fs FS) Rename(oldDir, oldFilename, newDir, newFilename string) error {
-	oldPath := fs.unsafePath(oldDir, oldFilename)
-	isSafe, err := fs.IsSafe(oldPath)
+	oldPath, err := fs.SafePath(oldDir, oldFilename)
 	if err != nil {
-		return fmt.Errorf("fs rename: check if file is safe to access '%s': %w", oldPath, err)
-	}
-	if !isSafe {
 		return fmt.Errorf("fs can't rename from '%s': %w", oldPath, errUnsafePath)
 	}
 
-	newPath := fs.unsafePath(newDir, newFilename)
-	isSafe, err = fs.IsSafe(newPath)
+	newPath, err := fs.SafePath(newDir, newFilename)
 	if err != nil {
-		return fmt.Errorf("fs rename: check if file is safe to access '%s': %w", newPath, err)
-	}
-	if !isSafe {
 		return fmt.Errorf("fs can't rename to '%s': %w", newPath, errUnsafePath)
 	}
 
@@ -295,12 +267,8 @@ func (fs FS) Unhash(dir, filenameHash string) (string, error) {
 }
 
 func (fs FS) FilesAndDirs(dir string) ([]File, error) {
-	userPath := fs.unsafePath(dir, "")
-	isSafe, err := fs.IsSafe(userPath)
+	userPath, err := fs.SafePath(dir, "")
 	if err != nil {
-		return nil, fmt.Errorf("exists: check if file is safe to access '%s': %w", userPath, err)
-	}
-	if !isSafe {
 		return nil, fmt.Errorf("can't get files for '%s': %w", path.Join(fs.RootPath, dir), errUnsafePath)
 	}
 
@@ -339,7 +307,12 @@ func (fs FS) Dirs() ([]File, error) {
 
 	var dirs []File
 	for _, file := range files {
-		isDir, err := afero.IsDir(fs.backend, fs.unsafePath(DirRoot, file.Name))
+		filePath, err := fs.SafePath(DirRoot, file.Name)
+		if err != nil {
+			return nil, fmt.Errorf("can't get dirs: unsafe path '%s': %w", filePath, errUnsafePath)
+		}
+
+		isDir, err := afero.IsDir(fs.backend, filePath)
 		if err != nil {
 			return nil, fmt.Errorf("can't get dirs: %w", err)
 		}
@@ -456,12 +429,18 @@ func (fs FS) SearchFiles(query string) ([]File, error) {
 // Touch updates an existing file's access and modification times.
 // If there's no such file it creates an empty file.
 func (fs FS) Touch(dir, filename string) error {
+	filePath, err := fs.SafePath(dir, filename)
+	if err != nil {
+		return fmt.Errorf("touch: unsafe path '%s': %w", filePath, errUnsafePath)
+	}
+
 	exists, err := fs.Exists(dir, filename)
 	if err != nil {
 		return fmt.Errorf("touch: %w", err)
 	}
+
 	if exists {
-		err = fs.backend.Chtimes(fs.unsafePath(dir, filename), time.Now(), time.Now())
+		err = fs.backend.Chtimes(filePath, time.Now(), time.Now())
 		if err != nil {
 			return fmt.Errorf("touch: can't update file's ctime: %w", err)
 		}
@@ -475,12 +454,8 @@ func (fs FS) Touch(dir, filename string) error {
 }
 
 func (fs FS) Ctime(dir, filename string) (int64, error) {
-	filePath := fs.unsafePath(dir, filename)
-	isSafe, err := fs.IsSafe(filePath)
+	filePath, err := fs.SafePath(dir, filename)
 	if err != nil {
-		return 0, fmt.Errorf("fs file: can't check if the file is safe to access '%s': %w", filePath, err)
-	}
-	if !isSafe {
 		return 0, fmt.Errorf("fs file: unsafe filePath '%s': %w", filePath, errUnsafePath)
 	}
 
@@ -497,12 +472,8 @@ func (fs FS) Ctime(dir, filename string) (int64, error) {
 // Returns [relPath] => ctime
 // TODO add tests
 func (fs FS) Ctimes(root, extension string) (map[string]int64, error) {
-	rootPath := fs.unsafePath(DirRoot, root)
-	isSafe, err := fs.IsSafe(rootPath)
+	rootPath, err := fs.SafePath(DirRoot, root)
 	if err != nil {
-		return nil, fmt.Errorf("fs ctimes: can't check if the file is safe to access '%s': %w", rootPath, err)
-	}
-	if !isSafe {
 		return nil, fmt.Errorf("fs ctimes: unsafe rootPath '%s': %w", rootPath, errUnsafePath)
 	}
 
@@ -552,41 +523,32 @@ func (fs FS) Ctimes(root, extension string) (map[string]int64, error) {
 	return ctimes, nil
 }
 
+// SafePath returns safe path to a file or directory, error if the path is unsafe.
+// Sanitize Early, call SanitizeFilename
+// as soon as you get on dir and filename from user input
 // TODO test all FS' public the methods for unsafePath traversal
 // TODO after you cover everything with the tests, we may remove this method
 // because we build our own paths (???)
 // TODO release remove error?
-// IsSafe doesn't eval symlinks, so an attacker can create a symlink to a file
+// isSafe doesn't eval symlinks, so an attacker can create a symlink to a file
 // outside the RootPath. If we use filepath.EvalSymlinks to expand symlinks and
 // check the real path for safety - we are still prone to TOCTOU (time-of-check to time-of-use)
 // attacks due to the race condition. The only real way to prevent this is to disallow symlinks
 // at the OS level. We can do this by mounting a folder with nosymfollow flag, see README.md.
-func (fs FS) IsSafe(path string) (bool, error) {
-	path = filepath.Clean(path)
+func (fs FS) SafePath(dir, filename string) (string, error) {
+	fullPath := filepath.Clean(filepath.Join(fs.RootPath, dir, filename))
 
-	// Path traversal attack (filepath.Clean only cleans absolute paths from ../)
-	// https://owasp.org/www-community/attacks/Path_Traversal
-	// A better way would be to convert the path to absolute path, but AferoFS doesn't support that
-	if strings.Contains(path, "../") || strings.Contains(path, "/..") {
-		return false, nil
+	// Are we outside of the root path?
+	rel, err := filepath.Rel(fs.RootPath, fullPath)
+	if err != nil {
+		return "", errUnsafePath
 	}
 
-	outsideOfUserRoot := !strings.HasPrefix(path, fs.RootPath)
-	if outsideOfUserRoot {
-		return false, nil
+	if rel == ".." || strings.HasPrefix(rel, "../") {
+		return "", errUnsafePath
 	}
 
-	return true, nil
-}
-
-// unsafePath builds a user-specific path.
-// It'S NOT SAFE to use this method with user input.
-// Sanitize Early, call SanitizeFilename
-// as soon as you get on dir and filename from user input
-func (fs FS) unsafePath(dir, filename string) string {
-	p := path.Join(fs.RootPath, dir, filename)
-
-	return p
+	return fullPath, nil
 }
 
 func exists(backend afero.Fs, path string) (bool, error) {

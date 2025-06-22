@@ -345,14 +345,20 @@ func TestFSGetAllNotesInAllDirsForEmptyQuery(t *testing.T) {
 func TestFSPathTraversalAttack(t *testing.T) {
 	r := require.New(t)
 
-	fs, _ := NewFS("/", afero.NewMemMapFs())
-	fs.RootPath = "/"
+	fs, _ := NewFS("/abc", afero.NewMemMapFs())
+	fs.RootPath = "/abc"
 
-	path := fs.unsafePath("../root/.ssh/", "authorized_keys")
-	r.Equal("/root/.ssh/authorized_keys", path)
+	path, err := fs.SafePath("../root/.ssh/", "authorized_keys")
+	r.Error(err)
+	r.Equal("", path)
 
-	path = fs.unsafePath("note", "../root/.ssh/authorized_keys")
-	r.Equal("/root/.ssh/authorized_keys", path)
+	path, err = fs.SafePath("note", "../root/.ssh/authorized_keys")
+	r.NoError(err)
+	r.Equal("/abc/root/.ssh/authorized_keys", path)
+
+	path, err = fs.SafePath("note", "../../root/.ssh/authorized_keys")
+	r.Error(err)
+	r.Empty(path)
 }
 
 func TestFSOnlyUserDirs(t *testing.T) {
@@ -381,25 +387,44 @@ func TestIsSafeWrongRoot(t *testing.T) {
 	r := require.New(t)
 
 	fs, _ := NewFS("/a", afero.NewMemMapFs())
-	r.False(fs.IsSafe("/b"))
+	p, err := fs.SafePath("/b", "")
+	r.NoError(err)
+	r.Equal("/a/b", p)
+
 }
 
 func TestIsSafePathTraversalAttack(t *testing.T) {
 	r := require.New(t)
 
 	fs, _ := NewFS("/a", afero.NewMemMapFs())
-	r.False(fs.IsSafe("/a/../b"))
-	r.False(fs.IsSafe("/a/../../b"))
-	r.False(fs.IsSafe("./a/../b"))
-	r.False(fs.IsSafe("./a/../../b"))
+	p, err := fs.SafePath("/a/../b", "")
+	r.NoError(err)
+	r.Equal("/a/b", p)
+
+	p, err = fs.SafePath("/a/../../b", "")
+	r.Error(err)
+	r.Empty(p)
+
+	p, err = fs.SafePath("./a/../b", "")
+	r.NoError(err)
+	r.Equal("/a/b", p)
+
+	p, err = fs.SafePath("./a/../../b", "")
+	r.Error(err)
+	r.Empty(p)
 }
 
 func TestIsSafePathTraversalAttackWithRelativePaths(t *testing.T) {
 	r := require.New(t)
 
 	fs, _ := NewFS(".", afero.NewMemMapFs())
-	r.False(fs.IsSafe("./a/../b"))
-	r.False(fs.IsSafe("./a/../../b"))
+	p, err := fs.SafePath("./a/../b", "")
+	r.NoError(err)
+	r.Equal("b", p)
+
+	p, err = fs.SafePath("./a/../../b", "")
+	r.Error(err)
+	r.Empty(p)
 }
 
 func TestUnhashRootDirectory(t *testing.T) {
@@ -566,11 +591,13 @@ func TestUnsafePathSanitization(t *testing.T) {
 
 	fs, _ := NewFS("/1", afero.NewMemMapFs())
 
-	unsafePath := fs.unsafePath("../", "test.md")
-	r.Equal("/test.md", unsafePath)
+	p, err := fs.SafePath("../", "test.md")
+	r.Error(err)
+	r.Empty(p)
 
-	unsafePath = fs.unsafePath("safe", "../unsafe.md")
-	r.Equal("/1/unsafe.md", unsafePath)
+	p, err = fs.SafePath("safe", "../unsafe.md")
+	r.NoError(err)
+	r.Equal("/1/unsafe.md", p)
 }
 
 func TestUnhash(t *testing.T) {
@@ -680,16 +707,18 @@ func FuzzWrite(f *testing.F) {
 		if unsafePath == "/user" {
 			otherUserDir = false
 		}
-		if otherUserDir || strings.Contains(unsafePath, "../") || strings.Contains(unsafePath, "/..") {
+		if otherUserDir || strings.Contains(unsafePath, "../") {
 			if !errors.Is(err, errUnsafePath) {
-				t.Errorf("Expected unsafe path error for dir: '%s', filename: '%s', calculated path: '%s'", dir, filename, unsafePath)
+				t.Errorf("Expected unsafe path error for dir: '%s', filename: '%s', calculated path: '%s', got: '%v'", dir, filename, unsafePath, err)
 			}
 			return
 		}
 
 		r.NoError(err, "Unexpected error for valid inputs dir: '%s', filename: '%s'", dir, filename)
 
-		filePath := userFS.unsafePath(dir, filename)
+		filePath, err := userFS.SafePath(dir, filename)
+		r.NoError(err)
+
 		actualContent, readErr := afero.ReadFile(userFS.backend, filePath)
 		r.NoError(readErr, "Error reading file: %s", filePath)
 		r.Equal(content, string(actualContent), "Content mismatch for file: %s", filePath)

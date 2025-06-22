@@ -78,7 +78,7 @@ func newRouter(logger *log.Logger) *http.ServeMux {
 	r.HandleFunc("/syncText", panicMiddleware(corsMiddleware(authMiddleware(SyncText))))
 	r.HandleFunc("/syncMedias", panicMiddleware(corsMiddleware(authMiddleware(SyncMedias))))
 	r.HandleFunc("/syncMedia", panicMiddleware(corsMiddleware(authMiddleware(SyncMedia))))
-	r.HandleFunc("/token", panicMiddleware(corsMiddleware(IssueToken)))
+	r.HandleFunc("/token", panicMiddleware(corsMiddleware(issueToken)))
 
 	r.HandleFunc("GET /habits_v2/{userID}", func(w http.ResponseWriter, r *http.Request) {
 		userID, err := strconv.ParseInt(r.PathValue("userID"), 10, 64)

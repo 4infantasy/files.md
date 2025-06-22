@@ -47,7 +47,7 @@ func GenOneTimeToken(userID int64) string {
 	return token
 }
 
-func FindUserID(token string) (int64, bool) {
+func findUserID(token string) (int64, bool) {
 	tokens, err := fs.NewFS(config.BotCfg.TokensDir, afero.NewOsFs())
 	if err != nil {
 		slog.Error("Failed to create file system for tokens", "error", err)
@@ -67,7 +67,7 @@ func FindUserID(token string) (int64, bool) {
 	return userID, true
 }
 
-func IssueToken(w http.ResponseWriter, r *http.Request) {
+func issueToken(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("PANIC in IssueToken: %v", r)
@@ -106,7 +106,7 @@ func IssueToken(w http.ResponseWriter, r *http.Request) {
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
-		userID, ok := FindUserID(token)
+		userID, ok := findUserID(token)
 		if !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
