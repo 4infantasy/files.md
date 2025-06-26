@@ -105,7 +105,7 @@ const DEFAULT_FILES = {
                 "[Markdown Guide](/Markdown Guide.md)",
         },
         "My thoughts.md": {
-            "content": "# My thoughts\nYou can dump project related thoughts here"
+            "content": "# My thoughts\nYou can dump project related thoughts here."
         }
     }
 }
@@ -149,7 +149,7 @@ const WELCOME_CONTENT = "Only essential features. No distractions.\n\n" +
     "*You can paste your own images via `Cmd/Ctrl + V`*\n\n" +
     "#### Links\n" +
     "You can insert your own links by typing `[`.\n\n" +
-    "[🎛️ Hotkeys](/🎛️ Hotkeys.md)\n";
+    "[🎹 Hotkeys](/🎹 Hotkeys.md)\n";
 
 const HOTKEYS_CONTENT = "#### File Navigation\n" +
     "\n" +
