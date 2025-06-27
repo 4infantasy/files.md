@@ -7,28 +7,63 @@ const CHAT_FILENAME = 'Chat.txt';
 
 
 function parseFileContent(content) {
+    // Normalize line endings
+    content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const lines = content.split('\n');
+
+    const headerRegex = /^#### /;
+    const timestampRegex = /^`\d{2}:\d{2}` /;
+
+    const blocks = [];
+    let currentBlock = '';
+
+    for (const line of lines) {
+        const isHeader = headerRegex.test(line);
+        const isTimestamp = timestampRegex.test(line);
+
+        if (isHeader || isTimestamp) {
+            // Save previous block if exists
+            if (currentBlock.length > 0) {
+                blocks.push(currentBlock.trim());
+                currentBlock = '';
+            }
+
+            // Start new block
+            currentBlock = line;
+        } else {
+            // Continue current block
+            if (currentBlock.length > 0) {
+                currentBlock += '\n' + line;
+            }
+        }
+    }
+
+    // Add final block
+    if (currentBlock.length > 0) {
+        blocks.push(currentBlock.trim());
+    }
+
+    // Parse blocks into messages
     const messages = [];
     let currentDate = null;
 
-    for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) continue;
+    for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
 
-        // Check if line is a date header (starts with ####)
-        if (trimmedLine.startsWith('####')) {
-            currentDate = trimmedLine.replace(/^#+\s*/, '').trim();
+        // Check if block is a date header
+        if (block.startsWith('####')) {
+            currentDate = block.replace(/^#+\s*/, '').trim();
             continue;
         }
 
-        // Check if line is a timestamped message (starts with backtick)
-        const timeMatch = trimmedLine.match(/^`(\d{2}:\d{2})`\s*(.*)$/);
+        // Check if block is a timestamped message
+        const timeMatch = block.match(/^`(\d{2}:\d{2})`\s*([\s\S]*)$/);
         if (timeMatch) {
             const [, timestamp, text] = timeMatch;
 
             if (text.trim()) {
                 messages.push({
-                    id: Date.now() + Math.random(), // Generate unique ID
+                    index: i,
                     text: text.trim(),
                     timestamp: timestamp,
                     date: currentDate || new Date().toDateString()
@@ -164,16 +199,20 @@ function renderMessages() {
         return;
     }
 
-    chatContainer.innerHTML = messages.map(note => `
-        <div class="message" data-note-id="${note.id}">
+    chatContainer.innerHTML = messages.map(message => `
+        <div class="message" data-index="${message.index}">
             <div class="message-content" 
                  contenteditable="true" 
-                 data-note-id="${note.id}"
-                 spellcheck="false">${escapeHtml(note.text)}</div>
+                 data-index="${message.index}"
+                 spellcheck="false">${escapeHtml(message.text)}</div>
             <div class="message-footer">
-                <span class="message-time">${note.timestamp}</span>
+                <span class="message-time">${message.timestamp}</span>
                 <div class="message-actions">
-                    <button class="action-btn delete-btn" data-note-id="${note.id}">
+                    <button class="action-btn journal-btn" data-index="${message.index}">
+                        💚
+                        <span class="btn-label">Journal</span>
+                    </button>
+                    <button class="action-btn delete-btn" data-index="${message.index}">
                         🗑️
                         <span class="btn-label">Delete</span>
                     </button>
@@ -212,6 +251,18 @@ function attachEventListeners() {
     });
 
     // Add delete button listeners
+    chatContainer.querySelectorAll('.journal-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            let cmd = {
+                n: "mv_to_journal",
+                t: "cmd",
+                p: [btn.dataset.index.toString()]
+            }
+            replyCmd(JSON.stringify(cmd))
+        });
+    });
+
     chatContainer.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();

@@ -39,7 +39,7 @@ func (b *Bot) saveToChat(content string, timezone *time.Location) (int, error) {
 	}
 
 	// Count existing records before adding new one
-	blocks := readBlocks(md)
+	blocks := readMessages(md)
 	headerRegex := regexp.MustCompile(`^#### `)
 	recordCount := 0
 	for _, block := range blocks {
@@ -92,7 +92,7 @@ func (b *Bot) MoveRecordFromChat(index int, callback func(content string, timest
 		return err
 	}
 
-	blocks := readBlocks(content)
+	blocks := readMessages(content)
 
 	// Filter to find record blocks (not headers)
 	headerRegex := regexp.MustCompile(`^#### `)
@@ -168,9 +168,9 @@ func (b *Bot) MoveRecordFromChat(index int, callback func(content string, timest
 	return b.fs.Write(fs.DirRoot, fs.ChatFilename, modifiedContent)
 }
 
-// readBlocks parses content into logical blocks
+// readMessages parses content into logical blocks
 // Returns slice where each element is either a header or a complete record
-func readBlocks(content string) []string {
+func readMessages(content string) []string {
 	content = txt.NormNewLines(content)
 	lines := strings.Split(content, "\n")
 
