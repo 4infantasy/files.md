@@ -119,7 +119,7 @@ async function saveData() {
     try {
         // For now, just save the current file's messages
         // You can extend this to save all files
-        const content = formatFileContent(sidebarFiles[currentFile]);
+        const content = formatFileContent(files[currentFile]);
 
         // You'll need to implement the file writing part
         // This is a placeholder for your file system API
