@@ -185,6 +185,7 @@
     border-color: var(--color-link);
 }
 
+
 .message-content {
     white-space: pre-wrap;
     line-height: 1.5;
@@ -214,4 +215,12 @@
         opacity: 0;
         transform: translateX(-100%);
     }
+}
+
+#chat.block-selecting {
+    user-select: none;
+}
+
+#chat.block-selecting .message-content {
+    user-select: none;
 }

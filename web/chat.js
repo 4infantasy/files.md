@@ -4,6 +4,27 @@ let chatContainer;
 let messageInput;
 const CHAT_FILENAME = 'Chat.txt';
 
+let isBlockSelecting = false;
+let startMessage = null;
+let allMessages = [];
+
+function updateMessageList() {
+    allMessages = Array.from(chatContainer.querySelectorAll('.message'));
+}
+
+function selectRange(start, end) {
+    const startIndex = allMessages.indexOf(start);
+    const endIndex = allMessages.indexOf(end);
+    const minIndex = Math.min(startIndex, endIndex);
+    const maxIndex = Math.max(startIndex, endIndex);
+
+    document.querySelectorAll('.message.selected').forEach(m => m.classList.remove('selected'));
+
+    for (let i = minIndex; i <= maxIndex; i++) {
+        allMessages[i].classList.add('selected');
+    }
+}
+
 function parseFileContent(content) {
     // Normalize line endings
     content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -243,28 +264,56 @@ function renderMessages() {
 }
 
 function attachEventListeners() {
-    // Add event listeners for editing message content
-    chatContainer.querySelectorAll('.message-content[contenteditable]').forEach(element => {
-        element.addEventListener('blur', function (e) {
-            saveEdit(e.target.dataset.noteId, e.target.textContent);
-            e.target.classList.remove('editing');
-        });
+    chatContainer.addEventListener('mousedown', function(e) {
+        const message = e.target.closest('.message');
+        if (!message || e.target.closest('.message-actions')) {
+            return;
+        }
 
-        element.addEventListener('focus', function (e) {
-            e.target.classList.add('editing');
-        });
-
-        element.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                e.target.blur();
-            }
-            if (e.key === 'Escape') {
-                e.target.textContent = messages.find(n => n.id == e.target.dataset.noteId).text;
-                e.target.blur();
-            }
-        });
+        updateMessageList();
+        startMessage = message;
     });
+
+    chatContainer.addEventListener('mousemove', function(e) {
+        if (!startMessage) return;
+
+        const currentMessage = e.target.closest('.message');
+        if (currentMessage && currentMessage !== startMessage && allMessages.includes(currentMessage)) {
+            if (!isBlockSelecting) {
+                isBlockSelecting = true;
+                document.getSelection().removeAllRanges();
+            }
+            selectRange(startMessage, currentMessage);
+        }
+    });
+
+    document.addEventListener('mouseup', function() {
+        isBlockSelecting = false;
+        startMessage = null;
+    });
+
+    // Add event listeners for editing message content
+    // chatContainer.querySelectorAll('.message-content[contenteditable]').forEach(element => {
+    //     element.addEventListener('blur', function (e) {
+    //         saveEdit(e.target.dataset.noteId, e.target.textContent);
+    //         e.target.classList.remove('editing');
+    //     });
+    //
+    //     element.addEventListener('focus', function (e) {
+    //         e.target.classList.add('editing');
+    //     });
+    //
+    //     element.addEventListener('keydown', function (e) {
+    //         if (e.key === 'Enter' && !e.shiftKey) {
+    //             e.preventDefault();
+    //             e.target.blur();
+    //         }
+    //         if (e.key === 'Escape') {
+    //             e.target.textContent = messages.find(n => n.id == e.target.dataset.noteId).text;
+    //             e.target.blur();
+    //         }
+    //     });
+    // });
 
     chatContainer.querySelectorAll('.to-file-btn').forEach(btn => {
         btn.addEventListener('click', function (e) {
