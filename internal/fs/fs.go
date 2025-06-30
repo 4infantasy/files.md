@@ -501,7 +501,7 @@ func (fs FS) Ctime(dir, filename string) (int64, error) {
 // for all files with specified extension as Unix timestamps.
 // Returns [relPath] => ctime
 // TODO add tests
-func (fs FS) Ctimes(root, extension string) (map[string]int64, error) {
+func (fs FS) Ctimes(root string, extensions ...string) (map[string]int64, error) {
 	rootPath, err := fs.SafePath(root, "")
 	if err != nil {
 		return nil, fmt.Errorf("fs ctimes: unsafe rootPath '%s': %w", rootPath, errUnsafePath)
@@ -527,8 +527,11 @@ func (fs FS) Ctimes(root, extension string) (map[string]int64, error) {
 		}
 
 		// Only process specified file extension.
-		if extension != "" && !strings.HasSuffix(strings.ToLower(path), extension) {
-			return nil
+		if len(extensions) > 0 {
+			ext := filepath.Ext(path)
+			if !slices.Contains(extensions, ext) {
+				return nil
+			}
 		}
 
 		// TODO what if a file inside folder?

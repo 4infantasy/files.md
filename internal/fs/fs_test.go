@@ -850,10 +850,9 @@ func TestCtimesAllExtensions(t *testing.T) {
 	err = fs.Write("today", ".hidden.md", "hidden content")
 	r.NoError(err)
 
-	ctimes, err := fs.Ctimes("/", "")
+	ctimes, err := fs.Ctimes("/")
 	r.NoError(err)
 
-	fmt.Println(ctimes)
 	r.Len(ctimes, 4)
 	r.Equal(int64(1000), ctimes["file1.md"])
 	r.Equal(int64(2000), ctimes["today/file2.md"])

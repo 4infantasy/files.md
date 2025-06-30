@@ -157,38 +157,19 @@ async function handleSend() {
     const text = messageInput.value.trim();
     if (!text) return;
 
-    // const now = new Date();
-    // const note = {
-    //     id: Date.now(),
-    //     text: text,
-    //     timestamp: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    //     date: now.toLocaleDateString('en-GB', {
-    //         day: 'numeric',
-    //         month: 'long',
-    //         weekday: 'long'
-    //     })
-    // };
-    //
-    // sidebarFiles[currentFile].push(note);
-
     messageInput.value = '';
-    // saveData();
-
     reply(text);
     await loadData();
     renderMessages();
     scrollToBottom();
-
-    // Notify sidebar of changes (commented for future implementation)
-    // updateSidebar();
 }
 
 function renderMessages() {
     if (messages.length === 0) {
         chatContainer.innerHTML = `
             <div class="empty-state">
-                <div class="empty-title">What's on your mind?</div>
-                <div class="empty-desc">You can dump here whatever thoughts you have</div>
+                <div class="empty-title">Free your head</div>
+                <div class="empty-desc">Drop whatever’s on your mind here</div>
             </div>
         `;
         return;
