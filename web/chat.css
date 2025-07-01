@@ -299,5 +299,5 @@
 }
 
 #close-chat:hover {
-    color: var(--color-tx);
+    color: var(--color-tx) !important;
 }
