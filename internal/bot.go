@@ -431,18 +431,17 @@ func (b *Bot) saveFromImage(u Update) error {
 	}
 
 	// Collapse a few consecutive messages into one, see bot_forwards.go
-	// TODO support forwards
-	//msgTime, updateHasTime := u.Time()
-	//if updateHasTime {
-	//	filename, shouldCollapse := collapseToMsg(b.userID, msgTime)
-	//	if shouldCollapse {
-	//		err := b.createOrAdd(fs.DirToday, filename, content)
-	//		if err != nil {
-	//			return fmt.Errorf("save collapsed: %w", err)
-	//		}
-	//		return nil
-	//	}
-	//}
+	msgTime, updateHasTime := u.Time()
+	if updateHasTime {
+		_, shouldCollapse := collapseToMsg(b.userID, msgTime)
+		if shouldCollapse {
+			err := b.createOrAdd(fs.DirRoot, fs.ChatFilename, content)
+			if err != nil {
+				return fmt.Errorf("save collapsed: %w", err)
+			}
+			return nil
+		}
+	}
 
 	// Adding to an existing file
 	if replyMsgID, ok := u.ReplyToMsgID(); ok {
@@ -470,11 +469,10 @@ func (b *Bot) saveFromImage(u Update) error {
 	//	return fmt.Errorf("save from image: %w", err)
 	//}
 
-	// TODO fix forwards
-	//if updateHasTime {
-	//	setFirstMsgFilename(b.userID, filename, msgTime)
-	//	setFirstMsgTime(b.userID, msgTime)
-	//}
+	if updateHasTime {
+		setFirstMsgIndex(b.userID, msgIndex, msgTime)
+		setFirstMsgTime(b.userID, msgTime)
+	}
 
 	if b.cfg.JournalOnlyMode() {
 		return b.moveToJournal([]string{strconv.Itoa(msgIndex)})
@@ -617,7 +615,6 @@ func (b *Bot) answerFileRequest(msg string) error {
 		}
 
 		err = b.moveFromChat(func(content string, timestamp time.Time) error {
-			// TODO fix recent commands
 			if dir == fs.DirRoot {
 				// We have a file
 				b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
@@ -1235,7 +1232,6 @@ func (b *Bot) postpone(params []string) error {
 }
 
 // TODO add tests
-// TODO add ability to rename later task?
 func (b *Bot) showRename(_ []string) error {
 	dir := fs.DirToday
 
@@ -1679,7 +1675,6 @@ func (b *Bot) moveToNewDir(params []string) error {
 	return b.moveToDirFromChat([]string{dir, strconv.Itoa(index)})
 }
 
-// TODO support both hashes and indices
 func (b *Bot) moveToExistingFile(params []string) error {
 	// TODO Remove input expectations if dir is not today (?)
 	existingFilenameHash := params[0]
@@ -1908,7 +1903,6 @@ func (b *Bot) moveToNewChecklist(params []string) error {
 	return b.moveToDirFromChat([]string{dir, msgIndexStr})
 }
 
-// TODO support both indexes and hashes
 func (b *Bot) moveToJournal(params []string) error {
 	var msgIndicies []int
 	for _, indexStr := range params {
@@ -1920,7 +1914,7 @@ func (b *Bot) moveToJournal(params []string) error {
 	}
 
 	err := b.moveFromChat(func(content string, t time.Time) error {
-		// TODO take into account time
+		// TODO take into account time from chat
 		return journal.AddRecord(b.fs, content, b.cfg.Timezone())
 	}, msgIndicies...)
 	if err != nil {
@@ -2562,7 +2556,6 @@ func (b *Bot) showHelp(_ []string) error {
 	return b.showHTML("Not yet implemented 🏗!", kb)
 }
 
-// TODO
 func (b *Bot) download(_ []string) error {
 	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil))})
 
