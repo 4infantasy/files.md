@@ -442,7 +442,7 @@ function renderSidebar(focusDir = '') {
             const dirNode = root.getChildren().find(child => child.toString() === dir);
             if (dirNode) {
                 root.removeChild(dirNode);
-                if (index === existingDirs.length - 1 && i < groups.length - 1) {
+                if (index === existingDirs.length - 1) {
                     dirNode.isGroupEnd = true;
                 }
                 root.addChild(dirNode);
