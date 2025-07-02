@@ -234,7 +234,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.4;
     transition: border-color 0.2s, box-shadow 0.2s;
-    margin: 24px;
+    margin: 0 24px 24px 24px;
 }
 
 #chat-input:focus {
