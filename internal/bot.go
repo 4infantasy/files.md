@@ -1760,9 +1760,15 @@ func (b *Bot) moveToExistingNote(params []string) error {
 		msgIndices = append(msgIndices, msgIndex)
 	}
 
-	toDir, err := b.fs.Unhash(fs.DirRoot, toDirHash)
-	if err != nil {
-		return fmt.Errorf("move to existing note: %w", err)
+	var toDir string
+	if toDirHash == "" {
+		toDir = fs.DirRoot
+	} else {
+		var err error
+		toDir, err = b.fs.Unhash(fs.DirRoot, toDirHash)
+		if err != nil {
+			return fmt.Errorf("move to existing note: %w", err)
+		}
 	}
 
 	toFilename, err := b.fs.Unhash(toDir, toFilenameHash)
