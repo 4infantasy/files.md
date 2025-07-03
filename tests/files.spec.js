@@ -168,7 +168,7 @@ test('file is not renamed on select all and change', async ({ page }) => {
 
     await page.evaluate(() => {
         const cm = document.querySelector('.CodeMirror').CodeMirror;
-        cm.setCursor(0, cm.getLine(0).length);
+        cm.setCursor(1, cm.getLine(0).length);
     });
     await page.waitForTimeout(500);
     await page.keyboard.press('Meta+a');
@@ -200,7 +200,7 @@ test('rename file via header removal', async ({ page }) => {
         const cm = document.querySelector('.CodeMirror').CodeMirror;
         cm.setCursor(0, cm.getLine(0).length);
     });
-    await page.keyboard.press('Meta+Backspace');
+    await page.keyboard.press('Meta+a');
     await page.waitForTimeout(500);
     await page.keyboard.type('Newname');
     await page.waitForTimeout(1000);
@@ -220,7 +220,8 @@ test('rename to empty name saves to untitled', async ({ page }) => {
         const cm = document.querySelector('.CodeMirror').CodeMirror;
         cm.setCursor(0, cm.getLine(0).length);
     });
-    await page.keyboard.press('Meta+Backspace');
+    await page.keyboard.press('Meta+a');
+    await page.keyboard.press('Backspace');
     await page.waitForTimeout(1000);
 
     await clickAndExpectContent(page, 'Notes', '# Notes\nSome text');
@@ -264,9 +265,6 @@ test('create file and move', async ({ page }) => {
 
     await page.click('#new-file');
     await page.waitForTimeout(100);
-    await page.keyboard.type('New file');
-    await page.waitForTimeout(100);
-    await page.keyboard.press('Enter');
     await page.keyboard.type('content');
     await page.waitForTimeout(700);
 
@@ -276,7 +274,7 @@ test('create file and move', async ({ page }) => {
         const cm = document.querySelector('.CodeMirror').CodeMirror;
         return cm.getValue();
     });
-    expect(codeMirrorContent).toBe("# New file\ncontent\n");
+    expect(codeMirrorContent).toBe("# New file\ncontent");
     await page.pause();
 });
 
@@ -436,6 +434,8 @@ test('create new lower case', async ({ page }) => {
 
     await page.click('#new-file');
     await page.waitForTimeout(100);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Meta+a');
     await page.keyboard.type('another file');
     await page.waitForTimeout(100);
     await page.keyboard.press('Enter');
@@ -672,6 +672,10 @@ test('create file in selected folder', async ({ page }) => {
 
     await page.click('#new-file');
     await page.waitForTimeout(100);
+
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Meta+a');
+
     await page.keyboard.type('Project file');
     await page.waitForTimeout(100);
     await page.keyboard.press('Enter');
@@ -765,6 +769,6 @@ async function setup(page) {
         init(document.getElementById('editor'));
     });
 
-    await page.waitForSelector('.CodeMirror', {timeout: 10000});
+    await page.waitForSelector('#chat', {timeout: 10000});
     await page.waitForSelector('#sidebar-tree', {timeout: 5000});
 }
