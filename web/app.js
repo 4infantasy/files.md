@@ -1,5 +1,6 @@
 // HyperMD/Codemirror editor
-let editor;
+// let editor;
+// let editor2;
 let tree;
 let isChat = false;
 let isWelcome = false;
@@ -42,8 +43,6 @@ async function init(el) {
             console.error('Error exchanging token:', error);
         }
     }
-
-    initEditor(el);
 
     const savedDirHandle = await getRootDirHandle();
     const hasSavedDir = savedDirHandle instanceof FileSystemDirectoryHandle;
@@ -89,7 +88,8 @@ async function init(el) {
     console.log(`Sidebar built in: ${(performance.now() - perf).toFixed(3)} milliseconds`);
 
     // perf = performance.now();
-    openChat();
+    // openChat();
+    showRandomFile();
     // console.log(`Random file opened in: ${(performance.now() - perf).toFixed(3)} milliseconds`);
 
     perf = performance.now();
@@ -100,15 +100,27 @@ async function init(el) {
 }
 
 function initEditor(el) {
-    if (editor !== undefined) {
+    if (window.editor !== undefined && el.id === 'editor-textarea' ) {
         editor.off();
         const wrapper = editor.getWrapperElement();
         if (wrapper && wrapper.parentNode) {
             wrapper.parentNode.removeChild(wrapper);
         }
+
+        editor2.off();
+        const wrapper2 = editor2.getWrapperElement();
+        if (wrapper2 && wrapper2.parentNode) {
+            wrapper2.parentNode.removeChild(wrapper2);
+        }
+    } else if (window.editor2 !== undefined && el.id === 'editor2-textarea') {
+        editor2.off();
+        const wrapper = editor2.getWrapperElement();
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+        }
     }
 
-    editor = HyperMD.fromTextArea(el, {
+    let newEditor = HyperMD.fromTextArea(el, {
         dragDrop: false,
         viewportMargin: Infinity,
         mode: {
@@ -132,9 +144,9 @@ function initEditor(el) {
         },
         configureMouse: () => ({addNew: false}) // disable multicursor
     });
-    editor.setSize(null, '100%');
+    newEditor.setSize(null, '100%');
 
-    editor.hmdResolveURL = function (path) {
+    newEditor.hmdResolveURL = function (path) {
         if (typeof path === 'undefined') {
             return path
         }
@@ -160,7 +172,7 @@ function initEditor(el) {
         return path;
     };
 
-    editor.hmdReadLink = async function (path) {
+    newEditor.hmdReadLink = async function (path) {
         path = path.replace(/\|.*]$/, '');
         path = path.replace('[', '').replace(']', '');
 
@@ -172,23 +184,23 @@ function initEditor(el) {
 
         let parts = path.split('/');
         if (parts.length === 1) {
-            await openFile('', path + '.md');
+            await openFile('', path + '.md', true, 'editor2-textarea');
             return;
         }
 
-        await openFile(parts[0], parts[1] + '.md');
+        await openFile(parts[0], parts[1] + '.md', true, 'editor2-textarea');
     };
 
-    editor.on('inputRead', async function (cm, change) {
+    newEditor.on('inputRead', async function (cm, change) {
         if (change.text.length === 1 && change.text[0] === '[') {
-            editor.showHint({
+            cm.showHint({
                 completeSingle: false, updateOnCursorActivity: true,
             })
         }
     })
 
     // Force '# ' to remain at first line.
-    editor.on('change', function (cm, change) {
+    newEditor.on('change', function (cm, change) {
         if (change.from.line === 0) {
             const line = cm.getLine(0);
             if (!line.startsWith('# ')) {
@@ -198,10 +210,10 @@ function initEditor(el) {
         }
     });
 
-    initAutoscroll(editor);
+    initAutoscroll(newEditor);
 
     // Image upload
-    editor.on('paste', async (_, event) => {
+    newEditor.on('paste', async (_, event) => {
         const items = (event.clipboardData || event.originalEvent.clipboardData).items;
         for (const item of items) {
             if (item.kind === 'file' && item.type.startsWith('image/')) {
@@ -238,7 +250,7 @@ function initEditor(el) {
     });
 
     // Editor keybindings
-    editor.addKeyMap({
+    newEditor.addKeyMap({
         'Cmd-A': function (cm) {
             const cursor = cm.getCursor();
 
@@ -351,7 +363,7 @@ function initEditor(el) {
         }
     });
 
-    editor.getWrapperElement().addEventListener('mousedown', function (e) {
+    newEditor.getWrapperElement().addEventListener('mousedown', function (e) {
         if (!isMetaKey(e)) return;
 
         e.preventDefault();
@@ -373,6 +385,8 @@ function initEditor(el) {
         document.body.appendChild(toast);
         setTimeout(() => document.body.removeChild(toast), 1000);
     }, true);
+
+    return newEditor;
 }
 
 async function initWasm() {
@@ -564,7 +578,13 @@ async function showRandomFile() {
     }
 }
 
-async function openFile(dir, filename, saveToHistory = true) {
+async function openFile(dir, filename, saveToHistory = true, el = 'editor-textarea') {
+    if (el === 'editor-textarea') {
+        currentEditor = editor;
+    } else if (el === 'editor2-textarea') {
+        currentEditor = editor2;
+    }
+
     await syncCurrentFile(false);
 
     if (dir === '' && filename === CHAT_FILENAME) {
@@ -581,14 +601,13 @@ async function openFile(dir, filename, saveToHistory = true) {
     chatContainer.style.display = 'none';
     closeChatModal();
 
-
     const start = performance.now();
     filename = filename.normalize('NFC');
     const fileData = files[dir][filename];
 
     // Check if we're loading the same file and save cursor position
     let cursorPos = null;
-    if (editor.currentDir === dir && editor.currentFile === filename) {
+    if (currentEditor.currentDir === dir && currentEditor.currentFile === filename) {
         console.log('saving cursor');
         cursorPos = editor.getCursor();
     }
@@ -604,27 +623,36 @@ async function openFile(dir, filename, saveToHistory = true) {
         content = fileData.content;
     }
 
-    editor.currentDir = dir;
-    editor.currentFile = filename;
+    currentEditor.currentDir = dir;
+    currentEditor.currentFile = filename;
     // TODO disable when syncing?
     if (saveToHistory) {
         const state = {dir: dir, file: filename};
         history.pushState(state, '');
     }
 
-    initEditor(document.getElementById('editor'));
-    editor.currentDir = dir;
-    editor.currentFile = filename;
-    editor.getDoc().setValue(content);
-    editor.clearHistory();
-    editor.markClean();
+    if (el === 'editor-textarea') {
+        editor = initEditor(document.getElementById(el));
+        currentEditor = editor;
+        hideEditor2();
+    } else if (el === 'editor2-textarea') {
+        editor2 = initEditor(document.getElementById(el));
+        currentEditor = editor2;
+        showEditor2();
+    }
+
+    currentEditor.currentDir = dir;
+    currentEditor.currentFile = filename;
+    currentEditor.getDoc().setValue(content);
+    currentEditor.clearHistory();
+    currentEditor.markClean();
 
     if (cursorPos !== null) {
         console.log('cursor not null');
-        editor.setCursor(cursorPos);
-        editor.scrollIntoView(cursorPos, 500);
+        currentEditor.setCursor(cursorPos);
+        currentEditor.scrollIntoView(cursorPos, 500);
         // TODO only focus if there's no quick dialogue
-        editor.focus();
+        currentEditor.focus();
     } else {
         focusLastLine();
     }
@@ -697,33 +725,33 @@ async function newFolder() {
 
 // Focus last line before the links.
 function focusLastLine() {
-    let lastLine = editor.lastLine();
+    let lastLine = currentEditor.lastLine();
     let targetLine = lastLine;
 
     // Eat all empty lines before first links.
     while (lastLine >= 0) {
-        const lineContent = editor.getLine(lastLine).trim();
+        const lineContent = currentEditor.getLine(lastLine).trim();
         if (lineContent === '') {
             lastLine--;
             continue;
         }
 
-        lastLine = Math.min(lastLine + 1, editor.lastLine());
+        lastLine = Math.min(lastLine + 1, currentEditor.lastLine());
         break;
     }
     for (let i = lastLine; i >= 0; i--) {
-        const lineContent = editor.getLine(i).trim();
+        const lineContent = currentEditor.getLine(i).trim();
         if (!lineContent.startsWith('[') && (!lineContent.endsWith(']') || !lineContent.endsWith(')'))) {
             targetLine = i;
             break;
         }
     }
-    const targetChar = editor.getLine(targetLine).length;
-    editor.setCursor({line: targetLine, ch: targetChar});
+    const targetChar = currentEditor.getLine(targetLine).length;
+    currentEditor.setCursor({line: targetLine, ch: targetChar});
     // Cursor at the end, but scroll the doc to top
-    editor.scrollTo(null, 0);
+    currentEditor.scrollTo(null, 0);
     // TODO only focus if there's no quick dialogue
-    editor.focus();
+    currentEditor.focus();
 }
 
 function isMetaKey(event) {
@@ -1147,4 +1175,15 @@ function findNextFile(currentDir, currentFilename) {
     // Return next file, or first file if we're at the end
     const nextIndex = (currentIndex + 1) % allFiles.length;
     return allFiles[nextIndex];
+}
+
+function showEditor2() {
+    document.getElementById('editor2-container').style.display = 'flex';
+    editor2.setValue(editor.getValue()); // Copy content from editor to editor2
+}
+
+function hideEditor2() {
+    document.getElementById('editor2-container').style.display = 'none';
+    editor.setValue(editor2.getValue()); // Copy content back to editor
+    editor.focus();
 }

@@ -206,6 +206,11 @@
                     if (noMetaIsPressed && shouldIgnoreClick) {
                        return;
                     }
+
+                    // PATCHED, we don't want cursor to be placed if we clicked on a link
+                    // ev.preventDefault();
+                    // ev.stopPropagation();
+
                     if (mat = styles.match(/\s(image|link|url)\s/)) {
                         // Could be a image, link, bare-link, footref, footnote, plain url, plain url w/o angle brackets
                         type = mat[1];

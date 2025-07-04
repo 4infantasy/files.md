@@ -94,7 +94,14 @@
 </div>
 
 <div id="content">
-    <textarea id="editor" style="display: none"></textarea>
+    <div id="editor-container">
+        <textarea id="editor-textarea" style="display: none"></textarea>
+    </div>
+    <div id="editor2-container" style="display: none;">
+        <textarea id="editor2-textarea" style="display: none"></textarea>
+    </div>
+<!--    <textarea id="editor" style="display: none"></textarea>-->
+<!--    <textarea id="editor2" style="display: none"></textarea>-->
 
     <div id="chat-container" style="display: none">
         <div id="chat" style="display: none;"></div>
@@ -149,7 +156,13 @@
 <script src="modals.js?v="></script>
 <script>
     window.COMMIT_HASH = '?v=';
-    init(document.getElementById("editor"));
+
+    currentEditor = null;
+    editor = initEditor(document.getElementById("editor-textarea"));
+    init(editor);
+    currentEditor = editor;
+
+    editor2 = initEditor(document.getElementById("editor2-textarea"));
 </script>
 </body>
 </html>
