@@ -45,16 +45,17 @@ var (
 )
 
 const (
-	maxTitleLength         = 33 // Fits regular mobile screen
-	inlineResultsCacheTime = 15 // Seconds
-	btnsPerRow             = 3
-	quickBtnsPerRow        = 4
-	maxBtns                = 50
-	maxBtnsInChecklist     = 10 // For _read_ and _watch_ checklists, so we're less likely to be overwhelmed :)
-	maxGroupedBtnsInMoveTo = 6
-	maxInlineResults       = 20
-	maxMsgLength           = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2
-	maxMsgsToSendAtOnce    = 5    // For lengthy messages
+	maxTitleLength          = 100
+	maxTitleLengthForMobile = 33 // Fits regular mobile screen
+	inlineResultsCacheTime  = 15 // Seconds
+	btnsPerRow              = 3
+	quickBtnsPerRow         = 4
+	maxBtns                 = 50
+	maxBtnsInChecklist      = 10 // For _read_ and _watch_ checklists, so we're less likely to be overwhelmed :)
+	maxGroupedBtnsInMoveTo  = 6
+	maxInlineResults        = 20
+	maxMsgLength            = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2
+	maxMsgsToSendAtOnce     = 5    // For lengthy messages
 
 	// On mobile phones buttons shrink to the message width, and sometimes it's too narrow, so we make the message wider
 	wideSpacer = "<code>            ⁠</code>"
@@ -670,7 +671,7 @@ func (b *Bot) createOrAdd(dir, filename, content string) error {
 	return nil
 }
 
-func (b *Bot) extractTitleAndContent(msg string) (string, string, error) {
+func (b *Bot) extractTitleAndContent(msg string, maxTitleLen int) (string, string, error) {
 	if len(msg) == 0 {
 		return "", "", fmt.Errorf("extract title: empty msg")
 	}
@@ -685,11 +686,10 @@ func (b *Bot) extractTitleAndContent(msg string) (string, string, error) {
 		if title == "" || len(parts) == 1 {
 			title = fmt.Sprintf("Img %s", now().Format("02.01.06 15:04"))
 		}
-		fmt.Println("TIT:", title, "END")
 	}
 
-	if utf8.RuneCountInString(title) > maxTitleLength {
-		title = txt.Substr(title, 0, maxTitleLength) + "..."
+	if utf8.RuneCountInString(title) > maxTitleLen {
+		title = txt.Substr(title, 0, maxTitleLen) + "..."
 	}
 
 	sanitizedTitle := fs.SanitizeFilename(title)
@@ -1637,9 +1637,14 @@ func (b *Bot) moveToDirFromChat(params []string) error {
 	}
 
 	err = b.moveFromChat(func(content string, timestamp time.Time) error {
-		sanitizedTitle, content, err := b.extractTitleAndContent(content)
+		var sanitizedTitle string
+		if toDir == fs.DirToday || toDir == fs.DirLater {
+			sanitizedTitle, content, err = b.extractTitleAndContent(content, maxTitleLengthForMobile)
+		} else {
+			sanitizedTitle, content, err = b.extractTitleAndContent(content, maxTitleLength)
+		}
 		if err != nil {
-			return fmt.Errorf("save: %w", err)
+			return fmt.Errorf("move to dir from chat: can't extract title and content: %w", err)
 		}
 
 		filename := fs.Filename(sanitizedTitle)
@@ -1843,7 +1848,7 @@ func (b *Bot) moveToChecklist(params []string) error {
 				}
 			}
 		} else {
-			sanitizedTitle, content, err := b.extractTitleAndContent(content)
+			sanitizedTitle, content, err := b.extractTitleAndContent(content, maxTitleLengthForMobile)
 			if err != nil {
 				return fmt.Errorf("move to checklistDir: %w", err)
 			}
@@ -2093,7 +2098,7 @@ func (b *Bot) completeFromChat(params []string) error {
 	}
 
 	err = b.moveFromChat(func(content string, timestamp time.Time) error {
-		sanitizedTitle, _, err := b.extractTitleAndContent(content)
+		sanitizedTitle, _, err := b.extractTitleAndContent(content, maxTitleLength)
 		if err != nil {
 			return fmt.Errorf("complete: %w", err)
 		}
@@ -2210,7 +2215,7 @@ func (b *Bot) schedule(params []string) error {
 			return fmt.Errorf("schedule: can't parse timestamp: %w", err)
 		}
 
-		sanitizedTitle, content, err := b.extractTitleAndContent(content)
+		sanitizedTitle, content, err := b.extractTitleAndContent(content, maxTitleLengthForMobile)
 		if err != nil {
 			return fmt.Errorf("schedule: %w", err)
 		}
@@ -2239,7 +2244,7 @@ func (b *Bot) scheduleForTmrw(params []string) error {
 
 	var filenameHash string
 	err = b.moveFromChat(func(content string, timestamp time.Time) error {
-		title, content, err := b.extractTitleAndContent(content)
+		title, content, err := b.extractTitleAndContent(content, maxTitleLengthForMobile)
 		if err != nil {
 			return fmt.Errorf("schedule for tomorrow from chat: %w", err)
 		}
