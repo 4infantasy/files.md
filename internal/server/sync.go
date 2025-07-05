@@ -134,7 +134,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// We don't accept config from client, because for now it is only modified on server.
-		// Plus we need to mess with JSON merging :)
+		// Plus we need to mess with JSON mergingg :)
 		if clientFile.Path == config.BotCfg.ConfigFilename {
 			continue
 		}

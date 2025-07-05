@@ -28,6 +28,8 @@ class SearchModal {
 
             if (event.key === 'Escape') {
                 this.close();
+                event.preventDefault();
+                event.stopPropagation();
             }
         });
 
@@ -239,7 +241,6 @@ class SearchModal {
         list.innerHTML = '';
 
         results.forEach(({dir, filename}, index) => {
-            console.log(this.messageIndex);
             if (filename === CONFIG_FILENAME) {
                 return;
             }
@@ -387,6 +388,8 @@ class MoveModal {
 
             if (event.key === 'Escape') {
                 this.close();
+                event.preventDefault();
+                event.stopPropagation();
             }
         });
 

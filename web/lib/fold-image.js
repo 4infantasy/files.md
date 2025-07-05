@@ -95,16 +95,18 @@
 
                     const closeModal = () => {
                         document.body.removeChild(modal);
-                        document.removeEventListener("keydown", handleKeyDown);
+                        document.removeEventListener("keydown", handleKeyDown, true);
                     };
 
-                    modal.addEventListener("click", closeModal);
+                    modal.addEventListener("click", closeModal,);
                     const handleKeyDown = (event) => {
                         if (event.key === "Escape") {
+                            event.stopPropagation();
+                            event.preventDefault();
                             closeModal();
                         }
                     };
-                    document.addEventListener("keydown", handleKeyDown);
+                    document.addEventListener("keydown", handleKeyDown, true);
 
                     document.body.appendChild(modal);
                 }, false);
