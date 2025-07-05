@@ -207,8 +207,6 @@ test('rename file via header removal', async ({ page }) => {
 
     await clickAndExpectContent(page, 'Notes', '# Notes\nSome text');
     await clickAndExpectContent(page, 'Newname', '# Newname\nHello world');
-
-    await page.pause();
 });
 
 test('rename to empty name saves to untitled', async ({ page }) => {
@@ -226,8 +224,6 @@ test('rename to empty name saves to untitled', async ({ page }) => {
 
     await clickAndExpectContent(page, 'Notes', '# Notes\nSome text');
     await clickAndExpectContent(page, 'Untitled', '# Untitled\nHello world');
-
-    await page.pause();
 });
 
 test('create file and move', async ({ page }) => {
@@ -275,7 +271,6 @@ test('create file and move', async ({ page }) => {
         return cm.getValue();
     });
     expect(codeMirrorContent).toBe("# New file\ncontent");
-    await page.pause();
 });
 
 test('rename should not create multiply files', async ({ page }) => {
@@ -336,7 +331,6 @@ test('rename should not create multiply files', async ({ page }) => {
         return cm.getValue();
     });
     expect(codeMirrorContent).toBe("# New file\ncontent\n");
-    await page.pause();
 
     const debug = await page.evaluate(() => {
         return {

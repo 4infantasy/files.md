@@ -82,7 +82,6 @@ test('sync new files from client', async ({ page }) => {
     await page.waitForTimeout(100);
     await page.keyboard.type('Content');
     await page.waitForTimeout(3000);
-    await page.pause();
 
     await expectFileOnServer(page, 'New file.md', 'Content');
 });
@@ -162,6 +161,8 @@ test('changed on both client and serve, should merge', async ({ page }) => {
 test("sync one new file from client doesn't conflict with syncTexts", async ({ page }) => {
     await setup(page);
 
+    await page.pause();
+
     await page.click('#new-file');
     await page.waitForTimeout(100);
     await page.keyboard.type('abc');
@@ -182,7 +183,6 @@ test("sync one new file from client doesn't conflict with syncTexts", async ({ p
     await page.keyboard.press('Enter');
     await page.keyboard.type('Content');
     await page.waitForTimeout(3000);
-    await page.pause();
 
     await expectFileOnServer(page, 'New file.md', 'abcdefabcdef\ndef\nContents');
 });

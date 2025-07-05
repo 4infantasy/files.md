@@ -109,8 +109,6 @@ test.describe('Files.md Text Editor Sync Tests', () => {
             expect(selectionData.width).toBe(expectedSelections[i].width);
             expect(selectionData.right).toBe(expectedSelections[i].right);
         }
-
-        await page.pause();
     });
 
     test('should handle text selection for word-wrap content', async ({page}) => {
