@@ -20,6 +20,9 @@ func init() {
 	fs.Ctime = func(fi os.FileInfo) int64 {
 		return 1
 	}
+	fs.Mtime = func(fi os.FileInfo) int64 {
+		return 1
+	}
 }
 
 func TestSyncText_CreateNewFileOnServer(t *testing.T) {

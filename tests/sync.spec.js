@@ -184,7 +184,7 @@ test("sync one new file from client doesn't conflict with syncTexts", async ({ p
     await page.keyboard.type('Content');
     await page.waitForTimeout(3000);
 
-    await expectFileOnServer(page, 'New file.md', 'abcdefabcdef\ndef\nContents');
+    await expectFileOnServer(page, 'New file.md', 'abcdefabcdef\ndef\nContent');
 });
 
 async function createFileOnServer(filepath, content) {

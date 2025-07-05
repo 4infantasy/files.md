@@ -483,6 +483,8 @@ func (fs FS) Touch(dir, filename string) error {
 	return nil
 }
 
+// Ctime returns the change time of a file as Unix timestamp in milliseconds.
+// It updates on file creation, modification, metadata changes, moving to a different dir, renames.
 func (fs FS) Ctime(dir, filename string) (int64, error) {
 	filePath, err := fs.SafePath(dir, filename)
 	if err != nil {
@@ -495,6 +497,22 @@ func (fs FS) Ctime(dir, filename string) (int64, error) {
 	}
 
 	return Ctime(info), nil
+}
+
+// Mtime returns the modification time of a file as Unix timestamp in milliseconds.
+// It only updates on file modification.
+func (fs FS) Mtime(dir, filename string) (int64, error) {
+	filePath, err := fs.SafePath(dir, filename)
+	if err != nil {
+		return 0, fmt.Errorf("fs file: unsafe filePath '%s': %w", filePath, errUnsafePath)
+	}
+
+	info, err := fs.backend.Stat(filePath)
+	if err != nil {
+		return 0, fmt.Errorf("fs file: can't stat file '%s': %w", filePath, err)
+	}
+
+	return Mtime(info), nil
 }
 
 // Ctimes recursively scans a directory and returns the ctime

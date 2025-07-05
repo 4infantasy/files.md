@@ -321,9 +321,16 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serverLastModified, err = userFS.Ctime(fs.DirRoot, path)
+	serverLastModified, err = userFS.Mtime(fs.DirRoot, path)
 	// TODO what if 0?
 	logSync(fmt.Sprintf("Final server timestamp for '%s': %d", path, serverLastModified), r)
+	//// Dropbox sometimes changes ctime for new files, for some reason.
+	//// So we have to query consequently.
+	//time.Sleep(100 * time.Millisecond)
+	//serverLastModified, err = userFS.Ctime(fs.DirRoot, path)
+	//logSync(fmt.Sprintf("Final server timestamp for '%s': %d", path, serverLastModified), r)
+	//serverLastModified, err = userFS.Ctime(fs.DirRoot, path)
+	//logSync(fmt.Sprintf("Final server timestamp for '%s': %d", path, serverLastModified), r)
 
 	if !fileWasModifiedOnServer {
 		response := map[string]interface{}{

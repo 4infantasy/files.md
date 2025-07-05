@@ -16,6 +16,7 @@ func init() {
 	Ctime = func(fi os.FileInfo) int64 {
 		return 0
 	}
+	Mtime = func(fi os.FileInfo) int64 { return 0 }
 }
 
 func TestIsChecklistItem(t *testing.T) {
