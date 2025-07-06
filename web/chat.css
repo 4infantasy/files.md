@@ -50,6 +50,10 @@
     border-radius: 0 0 10px 10px;
 }
 
+.message:only-child {
+    border-radius: 10px;
+}
+
 .message:hover {
     background: var(--col-bg-active);
 }
