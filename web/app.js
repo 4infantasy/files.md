@@ -450,7 +450,7 @@ function createAutocompleteDict() {
     const entries = [];
 
     // Collect all files with their metadata
-    Object.keys(files).forEach(dir => {
+    Object.keys(excludeDirs(SYSTEM_DIRS)).forEach(dir => {
         Object.keys(files[dir]).forEach(filename => {
             if (filename === CONFIG_FILENAME || filename === CHAT_FILENAME) {
                 return;
@@ -462,28 +462,41 @@ function createAutocompleteDict() {
             entries.push({
                 key,
                 filePath,
-                lastModified: files[dir][filename].lastModified,
-                isSystemDir: SYSTEM_DIRS.includes(dir)
+                lastModified: files[dir][filename].lastModified
             });
         });
     });
 
-    // Sort by system dirs last, then by last modified (most recent first)
-    entries.sort((a, b) => {
-        // System dirs always go to the bottom
-        if (a.isSystemDir && !b.isSystemDir) return 1;
-        if (!a.isSystemDir && b.isSystemDir) return -1;
-
-        // Within same category (system or non-system), sort by last modified
-        return b.lastModified - a.lastModified;
-    });
-
-    // Convert back to dictionary
+    // Sort by last modified (most recent first)
+    entries.sort((a, b) => b.lastModified - a.lastModified);
     const dict = {};
     entries.forEach(entry => {
         dict[entry.key] = entry.filePath;
     });
 
+    let lowPriorityEntries = [];
+    Object.keys('_read_', '_watch_', '_shop_', 'today', 'later').forEach(dir => {
+        Object.keys(files[dir]).forEach(filename => {
+            if (filename === CONFIG_FILENAME || filename === CHAT_FILENAME) {
+                return;
+            }
+            const key = `${filename.replace(/\.md$/, '')}`;
+            const url = `${dir}/${filename}`.replace(/ /g, '%20');
+            const filePath = `${filename.replace(/\.md$/, '')}](${url})`;
+
+            lowPriorityEntries.push({
+                key,
+                filePath,
+                lastModified: files[dir][filename].lastModified
+            });
+        });
+    });
+
+    lowPriorityEntries.sort((a, b) => b.lastModified - a.lastModified);
+    lowPriorityEntries.forEach(entry => {
+        dict[entry.key] = entry.filePath;
+    });
+    
     return dict;
 }
 
