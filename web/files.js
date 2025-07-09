@@ -258,7 +258,6 @@ async function syncTextsWithServer() {
 }
 
 async function syncLocalFileWithServer(path) {
-    return;
     // TODO multidir
     if (localStorage.getItem('token') === null) {
         return;
