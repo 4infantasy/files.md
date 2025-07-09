@@ -255,6 +255,8 @@ async function syncTextsWithServer() {
 
 // TODO multidir all callers
 async function syncLocalFileWithServer(path) {
+    return;
+    // TODO multidir
     if (localStorage.getItem('token') === null) {
         return;
     }
@@ -1060,7 +1062,6 @@ async function openFile(path, saveToHistory = true, el = 'editor-textarea') {
 // 2) Sync it with the server
 // TODO add hash of last read file comparison, merge on conflict (in which scenarious in can happen tho?)
 async function syncCurrentFile(syncWithServer = true) {
-    return;
     if (files === undefined || isWelcome || debug || currentEditor.path === undefined) {
         return;
     }
@@ -1210,7 +1211,7 @@ async function syncCurrentFile(syncWithServer = true) {
     const content = getCurrentContent();
     let contentWasModifiedLocally = false;
     try {
-        const path = `${dir}/${filename}`;
+        // const path = `${dir}/${filename}`;
         contentWasModifiedLocally = !await isContentEqual(path, content);
     } catch (error) {
         console.error('Error checking content equality:', error);
@@ -1226,11 +1227,11 @@ async function syncCurrentFile(syncWithServer = true) {
 
     // Handling editor changes.
     if (contentWasModifiedLocally && currentEditor.isClean()) {
-        console.log('WAS MODIFIED LOCALLY, and the editor is clean', filename);
+        console.log('WAS MODIFIED LOCALLY, and the editor is clean', path);
 
         // Changes only from local system
         try {
-            await openFile(dir, filename);
+            await openFile(path);
         } catch (error) {
             console.error('Error opening file:', error);
             isSyncingCurrentFile = false;
@@ -1239,7 +1240,8 @@ async function syncCurrentFile(syncWithServer = true) {
     } else if (!currentEditor.isClean()) {
         isSaving = true;
         try {
-            const file = files[dir][filename];
+            // const file = files[dir][filename];
+            const file = getMemFile(path);
             if (file && file.handle) {
                 const freshContent = getCurrentContent();
                 if (!currentEditor.isClean() && contentWasModifiedLocally) {
@@ -1261,7 +1263,7 @@ async function syncCurrentFile(syncWithServer = true) {
             } else {
                 // When could that happen?
                 if (file.handle) {
-                    console.error(`Cannot save ${filename}. No file handle found.`);
+                    console.error(`Cannot save ${path}. No file handle found.`);
                 }
             }
         } catch (error) {
@@ -1280,7 +1282,7 @@ async function syncCurrentFile(syncWithServer = true) {
 
     if (syncWithServer) {
         try {
-            await syncLocalFileWithServer(dir, filename);
+            await syncLocalFileWithServer(path);
         } catch (error) {
             console.error('Error during sync with server:', error);
         }

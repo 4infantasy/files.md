@@ -1064,7 +1064,7 @@ async function openDir() {
 
 function getCurrentContent() {
     let content = currentEditor.getValue();
-    const header = toHeader(currentEditor.currentFile).toLowerCase();
+    const header = toHeader(toFilename(currentEditor.path)).toLowerCase();
     // Remove header if it exists.
     if (content.toLowerCase().startsWith(header)) {
         content = content.slice(`${header}\n`.length);
