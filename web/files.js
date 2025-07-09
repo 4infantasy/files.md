@@ -868,7 +868,7 @@ function getServerFile(path) {
     dirs = dirs.filter(d => d !== '');
     const filename = dirs.pop();
 
-    let currentDir = serverFiles;
+    let currentDir = serverFiles['files'];
     for (const dir of dirs) {
         if (!currentDir[dir]) {
             return null;
@@ -896,7 +896,7 @@ function addServerFile(path, content, lastModifiedAt, clientLastSynced = null) {
     dirs = dirs.filter(d => d !== '');
     const filename = dirs.pop();
 
-    let currentDir = serverFiles;
+    let currentDir = serverFiles['files'];
     for (const dir of dirs) {
         if (!currentDir[dir]) {
             return null;
@@ -913,13 +913,28 @@ function addServerFile(path, content, lastModifiedAt, clientLastSynced = null) {
 }
 
 function removeServerFile(path) {
-    console.log('removing info about server file', path);
-    const parts = path.split('/');
-    const filename = parts.pop();
-    const dir = parts.join('/');
+    // console.log('removing info about server file', path);
+    // const parts = path.split('/');
+    // const filename = parts.pop();
+    // const dir = parts.join('/');
+    //
+    // if (serverFiles.files?.[dir]?.[filename]) {
+    //     delete serverFiles.files[dir][filename];
+    // }
+    let dirs = path.split('/');
+    dirs = dirs.filter(d => d !== '');
+    const filename = dirs.pop();
 
-    if (serverFiles.files?.[dir]?.[filename]) {
-        delete serverFiles.files[dir][filename];
+    let currentDir = serverFiles['files'];
+    for (const dir of dirs) {
+        if (!currentDir[dir]) {
+            return null;
+        }
+        currentDir = currentDir[dir];
+    }
+
+    if (currentDir[filename] !== undefined) {
+        delete currentDir[filename];
     }
 }
 
@@ -956,7 +971,7 @@ async function openFile(path, saveToHistory = true, el = 'editor-textarea') {
 
     const start = performance.now();
 
-    const memFile = getMemoryFile(path);
+    const memFile = getMemFile(path);
     console.log(memFile);
 
     // Check if we're loading the same file and save cursor position
@@ -1133,11 +1148,11 @@ async function syncCurrentFile(syncWithServer = true) {
         // Try to load local changes.
         if (chatIsClean) {
             try {
-                let inMemoryLastModified = getMemoryFile(path)?.lastModified;
+                let inMemoryLastModified = getMemFile(path)?.lastModified;
                 let file = await ((await getFileHandle(CHAT_PATH)).getFile());
 
                 // Update last modified in memory.
-                let memFile = getMemoryFile(path);
+                let memFile = getMemFile(path);
                 memFile.lastModified = file.lastModified;
                 addMemFile(path, memFile);
 
@@ -1359,7 +1374,7 @@ function toFilename(path) {
 }
 
 // Gets a file from memory by its path.
-function getMemoryFile(path) {
+function getMemFile(path) {
     if (files === undefined) {
         return null;
     }
@@ -1403,7 +1418,7 @@ function removeMemFile(path) {
         currentDir = currentDir[dir];
     }
 
-    if (currentDir[filename]) {
+    if (currentDir[filename] !== undefined) {
         delete currentDir[filename];
     }
 }
