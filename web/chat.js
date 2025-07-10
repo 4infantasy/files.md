@@ -763,15 +763,37 @@ function sendCmd(cmd, params) {
 }
 
 function getRecentlyModifiedFiles() {
-    if (!files || typeof files !== 'object') return [];
+    if (files === undefined) return [];
 
-    return Object.entries(files)
-        .filter(([filename, content]) => filename && content && filename !== CHAT_PATH && filename !== CONFIG_PATH)
-        .sort(([, a], [, b]) => {
-            return new Date(b.lastModified || 0) - new Date(a.lastModified || 0);
-        })
-        .slice(0, 3)
-        .map(([filename]) => filename);
+    const entries = [];
+    for (const filename in files) {
+        const content = files[filename];
+        if (filename && content && filename !== toFilename(CHAT_PATH) && filename !== toFilename(CONFIG_PATH)) {
+            entries.push([filename, content]);
+        }
+    }
+
+    for (let i = 0; i < entries.length - 1; i++) {
+        for (let j = i + 1; j < entries.length; j++) {
+            const aTime = new Date(entries[i][1].lastModified || 0);
+            const bTime = new Date(entries[j][1].lastModified || 0);
+            if (aTime < bTime) {
+                // Swap
+                const temp = entries[i];
+                entries[i] = entries[j];
+                entries[j] = temp;
+            }
+        }
+    }
+
+    // Take first 3 and extract filenames
+    const result = [];
+    const limit = Math.min(3, entries.length);
+    for (let i = 0; i < limit; i++) {
+        result.push(entries[i][0]);
+    }
+
+    return result;
 }
 
 chatInput.addEventListener('paste', async (e) => {
