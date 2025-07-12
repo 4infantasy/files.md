@@ -59,10 +59,10 @@ async function init(el) {
     } else {
         isWelcome = false;
         document.getElementById('open-folder').style.display = 'none';
-        document.getElementById('new-file').style.display = 'inline';
-        document.getElementById('new-folder').style.display = 'inline';
-        document.getElementById('open-chat').style.display = 'inline';
-        document.getElementById('open-chat-modal').style.display = 'inline';
+        // document.getElementById('new-file').style.display = 'inline';
+        // document.getElementById('new-folder').style.display = 'inline';
+        // document.getElementById('open-chat').style.display = 'inline';
+        // document.getElementById('open-chat-modal').style.display = 'inline';
     }
 
     let rootDirHandle = await getRootDirHandle();
@@ -72,10 +72,10 @@ async function init(el) {
     console.log('PERMISSION', permission);
     if (permission !== 'granted') {
         document.getElementById('open-folder').style.display = 'inline';
-        document.getElementById('new-file').style.display = 'none';
-        document.getElementById('new-folder').style.display = 'none';
-        document.getElementById('open-chat').style.display = 'none';
-        document.getElementById('open-chat-modal').style.display = 'none';
+        // document.getElementById('new-file').style.display = 'none';
+        // document.getElementById('new-folder').style.display = 'none';
+        // document.getElementById('open-chat').style.display = 'none';
+        // document.getElementById('open-chat-modal').style.display = 'none';
         isWelcome = true;
     }
 
@@ -833,14 +833,14 @@ window.addEventListener('popstate', (event) => {
 });
 
 async function openDir() {
-    // TODO migrate files from opfs to local
     let dirHandle = await window.showDirectoryPicker({'mode': 'readwrite'});
     document.getElementById('open-folder').style.display = 'none';
-    document.getElementById('new-file').style.display = 'inline';
-    document.getElementById('new-folder').style.display = 'inline';
-    document.getElementById('open-chat').style.display = 'inline';
+
+
+    // TODO check that permissions are given?
 
     await saveDirectoryHandle(dirHandle);
+    await migrateFromOPFSToLocal();
     files = await loadLocalFiles(dirHandle)
 
     initWasm();
