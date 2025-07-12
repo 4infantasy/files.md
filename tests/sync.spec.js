@@ -341,6 +341,7 @@ test('files exist on both client and server, serverFiles contains proper server 
     let filesOnServer = await page.evaluate(() => {
         return server['files'];
     });
+    console.log(filesOnServer);
     expect(filesOnServer).toEqual({
         'Chat.txt': {
             hash: expect.any(Number),
@@ -386,6 +387,7 @@ test('files exist on both client and server, serverFiles contains proper server 
                 path: '/dir/file2.md'
             }
         },
+
         'file.md': {
             hash: expect.any(Number),
             isFile: true,
