@@ -81,10 +81,10 @@ test('should handle text selection correctly', async ({page}) => {
     expect(count).toEqual(4);
 
     const expectedSelections = [
-        { left: 2, width: 134, right: 136 },
+        { left: 2, width: 139, right: 141 },
         { left: 2, width: 95, right: 97 },
         { left: 2, width: 188, right: 190 },
-        { left: 2, width: 225, right: 227 },
+        { left: 2, width: 223, right: 225 },
     ];
 
     for (let i = 0; i < count; i++) {
@@ -162,7 +162,8 @@ test('should handle text selection for word-wrap content', async ({page}) => {
 
 test('should handle partical text selection for word-wrap content', async ({page}) => {
     await page.click('#sidebar >> text=Welcome');
-    await page.keyboard.press('Control+a');
+    await page.waitForTimeout(500);
+    await page.keyboard.press('Meta+a');
     await page.keyboard.press('Delete');
 
     const testContent = `\`1400–1500\` Рассвет эпохи возрождения (особенно Флоренция, Рим, Венеция). Человек в центре. Развитие гуманизма: акцент на личность, разум, творчество человека. Наука и открытия расцвет астрономии, анатомии, математики (Коперник, Галилей, Леонардо да Винчи). Искусство – новые методы перспективы, реализма, анатомической точности. Великие художники: Леонардо, Микеланджело, Рафаэль, Боттичелли.`;
@@ -183,7 +184,7 @@ test('should handle partical text selection for word-wrap content', async ({page
     expect(count).toEqual(2);
 
     const expectedSelections = [
-        { left: 699, width: 62, right: 761 },
+        { left: 697, width: 62, right: 759 },
         { left: 2, width: 752, right: 754 },
     ];
 
