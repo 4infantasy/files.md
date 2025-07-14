@@ -1,6 +1,7 @@
 package tg
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -84,6 +85,39 @@ func (tg *TG) SendImages(userID int64, photos []string) ([]int, error) {
 	}
 
 	return msgIDs, nil
+}
+
+func (tg *TG) SendReaction(userID int64, msgID int, reaction string) error {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/setMessageReaction", tg.api.Token)
+
+	payload := map[string]interface{}{
+		"chat_id":    userID,
+		"message_id": msgID,
+		"reaction": []map[string]string{
+			{
+				"type":  "emoji",
+				"emoji": reaction,
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("telegram API error: %s", string(body))
+	}
+
+	return nil
 }
 
 func (tg *TG) sendDocuments(userID int64, photos []string) ([]int, error) {

@@ -84,6 +84,7 @@ type Update interface {
 type Chat interface {
 	Send(userID int64, text string, kb *tg.Keyboard, markup string) (int, error)
 	SendImages(userID int64, images []string) ([]int, error)
+	SendReaction(userID int64, msgID int, reaction string) error
 	Edit(userID int64, msgID int, text string, kb *tg.Keyboard, markup string) error
 	Del(userID int64, msgID int) error
 	AnswerCallbackQuery(queryID string, text string) error
@@ -380,12 +381,15 @@ func (b *Bot) saveFromTextMsg(u Update) error {
 	}
 
 	if b.cfg.ChatOnlyMode() {
-		return b.createOrAdd(fs.DirRoot, fs.ChatFilename, msg)
-	}
+		err := b.createOrAdd(fs.DirRoot, fs.ChatFilename, msg)
 
-	//if b.cfg.OneFileOnlyMode() {
-	//	return b.createOrAdd(fs.DirRoot, fs.ChatFilename, msg)
-	//}
+		msgID, _ := u.MsgID()
+		if err != nil {
+			_ = b.tg.SendReaction(b.userID, msgID, "👌")
+		}
+
+		return err
+	}
 
 	// Adding to an existing file
 	if replyMsgID, ok := u.ReplyToMsgID(); ok {
