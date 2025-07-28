@@ -122,7 +122,7 @@
 /*	!*border: 1px solid transparent;*!*/
 /*}*/
 
-.group-end {
+.group-end:not(.expanded) {
 	margin-bottom: 15px;
 }
 

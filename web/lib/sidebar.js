@@ -932,8 +932,10 @@ function TreeView(root, container, options) {
             span_desc.classList.add("selected");
         }
 
-        // TODO dirty hack
-        if (node.isExpanded() && node.toString() !== 'today' && node.toString() !== 'later') {
+        // TODO dirty hack, for some reason expanded is set for leaf nodes
+        if (node.isExpanded() &&
+            node.toString() !== 'today' && node.toString() !== 'later' &&
+            node.toString() !== 'watch_' && node.toString() !== 'shop_' && node.toString() !== 'read_') {
             span_desc.classList.add("expanded");
         }
 
