@@ -7,6 +7,10 @@ const chatInput = document.getElementById('chat-input');
 const chatButton = document.getElementById('open-chat-modal');
 const chatContainer = document.getElementById('chat-container');
 
+const READ_PATH = '/Read_.txt';
+const SHOP_PATH = '/Shop_.txt';
+const WATCH_PATH = '/Watch_.txt';
+
 async function openChat() {
     closeChatModal();
     chatContainer.style.display = 'flex';

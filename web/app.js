@@ -888,6 +888,15 @@ function fromHeaderToFilename(header) {
     if (header === '# Done') {
         return toFilename(DONE_PATH);
     }
+    if (header === '# Shop_') {
+        return toFilename(SHOP_PATH);
+    }
+    if (header === '# Watch_') {
+        return toFilename(WATCH_PATH);
+    }
+    if (header === '# Read_') {
+        return toFilename(READ_PATH);
+    }
     if (header.startsWith('# ')) {
         return header.slice(2).trim() + '.md';
     }

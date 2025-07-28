@@ -124,23 +124,48 @@ function renderSidebar(focusDir = '', modifiedPaths) {
     const groupedDirs = new Set(['_read_', '_watch_', '_shop_', 'journal', 'habits', 'insights', 'archive', 'today', 'later']);
     const underscoreDirs = [];
     // Group all checklists
-    for (const dir in dirNodes) {
-        const filename = toFilename(dir);
-        if (filename.startsWith('_') && filename.endsWith('_')) {
-            underscoreDirs.push(dir);
-            groupedDirs.add(filename);
+    // for (const file in fileNodes) {
+    //     const filename = toFilename(dir);
+    //     if (filename.endsWith('_')) {
+    //         underscoreDirs.push(dir);
+    //         groupedDirs.add(filename);
+    //     }
+    // }
+    // underscoreDirs.forEach((dir, index) => {
+    //     const dirNode = dirNodes[dir];
+    //     if (dirNode && dirNode.parent === root) {
+    //         root.removeChild(dirNode);
+    //         if (index === underscoreDirs.length - 1) {
+    //             dirNode.isGroupEnd = true;
+    //         }
+    //         root.addChild(dirNode);
+    //     }
+    // });
+    //
+
+    // Step 0: Lists group
+    let lastListNode = null;
+    walk(files, (path, isFile) => {
+        if (!isFile) {
+            return;
         }
-    }
-    underscoreDirs.forEach((dir, index) => {
-        const dirNode = dirNodes[dir];
-        if (dirNode && dirNode.parent === root) {
-            root.removeChild(dirNode);
-            if (index === underscoreDirs.length - 1) {
-                dirNode.isGroupEnd = true;
-            }
-            root.addChild(dirNode);
+
+        const filename = toFilename(path);
+        if (!filename.endsWith('_.txt')) {
+            return;
         }
+
+        let node = new TreeNode(trimPostfix(filename, '.txt').toLowerCase(), {expanded: false, dir: false});
+        node.path = path;
+        node.on('click', async function (n, node) {
+            await openFile(path);
+        });
+        lastListNode = node;
+        root.addChild(node);
     });
+    if (lastListNode !== null) {
+        lastListNode.isGroupEnd = true;
+    }
 
     // Step 1: Tasks group
     if (dirNodes['/today']) {
@@ -204,7 +229,9 @@ function renderSidebar(focusDir = '', modifiedPaths) {
         }
         lastNode = insightsNode;
     }
-    lastNode.isGroupEnd = true;
+    if (lastNode !== null) {
+        lastNode.isGroupEnd = true;
+    }
 
     // Hide if only 2 groups
     let groupEndCount = 0;
@@ -237,7 +264,7 @@ function renderSidebar(focusDir = '', modifiedPaths) {
             return;
         }
 
-        if (path === CONFIG_PATH || path === INBOX_PATH || path === TODAY_PATH || path === LATER_PATH) {
+        if ([CONFIG_PATH, INBOX_PATH, TODAY_PATH, LATER_PATH, WATCH_PATH, READ_PATH, SHOP_PATH].includes(path)) {
             return;
         }
 
@@ -883,7 +910,7 @@ function TreeView(root, container, options) {
 
             if (needsGroupHeader) {
                 let nodeStr = node.toString();
-                if (nodeStr.startsWith('_') && nodeStr.endsWith('_')) {
+                if (nodeStr.endsWith('_')) {
                     groupHeaderText = "Lists";
                     groupHeaderClass = "lists";
                 } else if (['today', 'later'].includes(nodeStr)) {
@@ -1108,6 +1135,8 @@ function TreeView(root, container, options) {
                 ret += '<span class="tj_mod_icon">' + TreeConfig.tasks_icon + '</span>';
             } else if (node.toString() === 'later') {
                 ret += '<span class="tj_mod_icon">' + TreeConfig.tasks_icon + '</span>';
+            } else if (node.toString().endsWith('_')) {
+                ret += '<span class="tj_mod_icon">' + TreeConfig.checklists_icon + '</span>';
             } else {
                 ret += '<span class="tj_icon">' + TreeConfig.leaf_icon + '</span>';
             }
