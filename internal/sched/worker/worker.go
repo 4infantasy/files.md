@@ -149,8 +149,8 @@ func RemoveCompletedChecklistItems(
 
 		userconf := userconfig.NewConfig(userFS, userID, configFilename)
 		tz := userconf.Timezone()
-		// If we are less than 10 minutes before the end of the day - return
-		if now().In(tz).Hour() == 23 && now().In(tz).Minute() >= 50 {
+		// Only remove completed items if it's 23:50 in the user's timezone.
+		if now().In(tz).Hour() != 23 && now().In(tz).Minute() < 50 {
 			continue
 		}
 
