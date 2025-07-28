@@ -1339,19 +1339,17 @@ func (b *Bot) postpone(params []string) error {
 
 // TODO add tests
 func (b *Bot) showRename(_ []string) error {
-	dir := fs.DirToday
-
-	files, err := b.fs.FilesAndDirs(dir)
-	if err != nil {
-		return fmt.Errorf("rename: can't get files in %s dir: %w", dir, err)
+	todayMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("rename: can't read today file: %w", err)
 	}
-	files = fs.OnlyMDFiles(files)
 
+	tasks := txt.ChecklistItems(todayMD)
 	var kb tg.Keyboard
-	for _, file := range files {
+	for task := range tasks {
 		var btn tg.Btn
-		cmd := tg.NewCmd(consts.CmdShowRenameFile, []string{dir, fs.Hash(file.Name)})
-		btn = tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), file.Title), cmd)
+		cmd := tg.NewCmd(consts.CmdShowRenameFile, []string{fs.TodayFilename, fs.Hash(task)})
+		btn = tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), task), cmd)
 
 		kb.AddRow(btn)
 	}
@@ -1366,22 +1364,17 @@ func (b *Bot) showRename(_ []string) error {
 }
 
 func (b *Bot) showRenameFile(params []string) error {
-	dir := params[0]
-	filenameHash := params[1]
-
-	filename, err := b.fs.Unhash(dir, filenameHash)
-	if err != nil {
-		return fmt.Errorf("show rename: can't unhash filename %s in %s: %w", filenameHash, dir, err)
-	}
+	checklist := params[0]
+	itemHash := params[1]
 
 	kb := tg.NewKeyboard([]tg.Row{
-		tg.NewRow(tg.NewBtn(i18n.StrBack, tg.NewCmd(dir, []string{dir}))),
+		tg.NewRow(tg.NewBtn(i18n.StrBack, tg.NewCmd(consts.CmdShowToday, []string{}))),
 	})
 
-	cmd := tg.NewCmd(consts.CmdRename, []string{dir, filename, "%s"})
+	cmd := tg.NewCmd(consts.CmdRename, []string{checklist, itemHash, "%s"})
 	b.db.SetInputExpectation(cmd)
 
-	err = b.showHTML(i18n.Tr("OK. Send me the new name for your task"), kb)
+	err := b.showHTML(i18n.Tr("OK. Send me the new name for your task"), kb)
 	if err != nil {
 		return fmt.Errorf("show rename: %w", err)
 	}
@@ -1390,23 +1383,20 @@ func (b *Bot) showRenameFile(params []string) error {
 }
 
 func (b *Bot) rename(params []string) error {
-	dirHash := params[0]
-	fromFilenameHash := params[1]
-	newFilenameFromUserInput := params[2]
+	checklist := params[0]
+	itemHash := params[1]
+	newItemNameFromUserInput := params[2]
 
-	dir, err := b.fs.Unhash(fs.DirRoot, dirHash)
+	md, err := b.fs.Read(fs.DirRoot, checklist)
 	if err != nil {
-		return fmt.Errorf("move: can't unhash old dir: %w", err)
+		return fmt.Errorf("rename: can't read checklist %s: %w", checklist, err)
 	}
+	md, _ = txt.RemoveChecklistItem(md, itemHash)
+	md = txt.AddChecklistItem(md, newItemNameFromUserInput, false)
 
-	filename, err := b.fs.Unhash(dir, fromFilenameHash)
+	err = b.fs.Write(fs.DirRoot, checklist, md)
 	if err != nil {
-		return fmt.Errorf("rename: can't unhash old filename: %w", err)
-	}
-
-	err = b.fs.Rename(dir, filename, dir, newFilenameFromUserInput)
-	if err != nil {
-		return fmt.Errorf("move: can't move: %w", err)
+		return fmt.Errorf("rename: can't write checklist %s: %w", checklist, err)
 	}
 
 	return b.ShowToday(nil)
