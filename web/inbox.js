@@ -804,11 +804,16 @@ function getRecentlyModifiedFiles() {
     const entries = [];
     for (const filename in files) {
         const content = files[filename];
-        if (filename && content
-            && filename !== toFilename(INBOX_PATH)
-            && filename !== toFilename(CONFIG_PATH)
-            && filename !== toFilename(TODAY_PATH)
-            && filename !== toFilename(LATER_PATH)) {
+        if (filename && content &&
+            ![
+                toFilename(INBOX_PATH),
+                toFilename(CONFIG_PATH),
+                toFilename(TODAY_PATH),
+                toFilename(LATER_PATH),
+                toFilename(WATCH_PATH),
+                toFilename(READ_PATH),
+                toFilename(SHOP_PATH),
+            ].includes(filename)) {
             entries.push([filename, content]);
         }
     }

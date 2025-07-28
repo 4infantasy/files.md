@@ -150,12 +150,18 @@ function renderSidebar(focusDir = '', modifiedPaths) {
             return;
         }
 
-        const filename = toFilename(path);
-        if (!filename.endsWith('_.txt')) {
+        if (!isChecklist(toFilename(path))) {
             return;
         }
 
-        let node = new TreeNode(trimPostfix(filename, '.txt').toLowerCase(), {expanded: false, dir: false});
+        let filename = toFilename(path);
+        if (filename.endsWith('.txt')) {
+            filename = trimPostfix(filename, '.txt');
+        } else if (filename.endsWith('.md')) {
+            filename = trimPostfix(filename, '.md');
+        }
+
+        let node = new TreeNode(filename.toLowerCase(), {expanded: false, dir: false});
         node.path = path;
         node.on('click', async function (n, node) {
             await openFile(path);
@@ -264,7 +270,11 @@ function renderSidebar(focusDir = '', modifiedPaths) {
             return;
         }
 
-        if ([CONFIG_PATH, INBOX_PATH, TODAY_PATH, LATER_PATH, WATCH_PATH, READ_PATH, SHOP_PATH].includes(path)) {
+        if ([CONFIG_PATH, INBOX_PATH, TODAY_PATH, LATER_PATH].includes(path)) {
+            return;
+        }
+
+        if (isChecklist(toFilename(path))) {
             return;
         }
 
@@ -1280,6 +1290,10 @@ const TreeUtil = {
         return ret;
     }
 };
+
+function isChecklist(filename) {
+    return filename.endsWith('_.txt') || filename.endsWith('_.md');
+}
 
 window.handleNodeMove = async function (sourceDir, sourceFile, targetDir) {
     console.log(`Moving ${sourceDir}/${sourceFile} to ${targetDir}/`);
