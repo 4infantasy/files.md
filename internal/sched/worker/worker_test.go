@@ -170,7 +170,7 @@ func TestMoveDueTasksFromArchive(t *testing.T) {
 	todayMD, err := userFS.Read(fs.DirRoot, fs.TodayFilename)
 	r.NoError(err)
 
-	items := txt.ChecklistItems(todayMD)
+	items, _ := txt.ChecklistItems(todayMD)
 	r.Contains(items, "due task")
 
 	sc, err = cfg.Schedules()
@@ -215,7 +215,7 @@ func TestMoveDueTasksFromLater(t *testing.T) {
 	todayMD, err := userFS.Read(fs.DirRoot, fs.TodayFilename)
 	r.NoError(err)
 
-	items := txt.ChecklistItems(todayMD)
+	items, _ := txt.ChecklistItems(todayMD)
 	r.Contains(items, "due task")
 
 	sc, err = cfg.Schedules()

@@ -863,9 +863,9 @@ func TestChecklists(t *testing.T) {
 
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
 	r.NoError(err)
-	err = userFS.MakeDir("_checklist1_")
+	err = userFS.Write("/", "Checklist1_.txt", "")
 	r.NoError(err)
-	err = userFS.MakeDir("_checklist2_")
+	err = userFS.Write("/", "Checklist2_.txt", "")
 	r.NoError(err)
 
 	tgram := tg.NewFakeTG()
@@ -876,8 +876,8 @@ func TestChecklists(t *testing.T) {
 
 	r.Equal("☑️ Checklists", tgram.LastSentText)
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewBtn("Checklist1", tg.NewCmd("checklist", []string{"49d872c025c"})),
-		tg.NewBtn("Checklist2", tg.NewCmd("checklist", []string{"8ee0681b01b"})),
+		tg.NewBtn("Checklist1", tg.NewCmd("checklist", []string{"05682c65e97"})),
+		tg.NewBtn("Checklist2", tg.NewCmd("checklist", []string{"916600ba600"})),
 		tg.NewBtn("🏠 Today", tg.NewCmd("today", nil)),
 	},
 	), tgram.LastSentKeyboard)
@@ -950,19 +950,17 @@ func TestShowChecklist(t *testing.T) {
 
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
 	r.NoError(err)
-	err = userFS.MakeDir("_checklist1_")
-	r.NoError(err)
-	err = userFS.Write("_checklist1_", "Item.md", "")
+	err = userFS.Write("/", "Checklist1_.txt", "- [ ] Item")
 	r.NoError(err)
 
 	tgram := tg.NewFakeTG()
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("checklist", []string{"49d872c025c"})))
+	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("checklist", []string{"Checklist1_.txt"})))
 	r.NoError(err)
 
 	r.Equal("Checklist1"+wideSpacer, tgram.LastSentText)
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewBtn("Item", tg.NewCmd("check_comp", []string{"49d872c025c", "7b72407ca70"})),
+		tg.NewBtn("Item", tg.NewCmd("check_item", []string{"Checklist1_.txt", "7d74f3b92b1"})),
 		tg.NewBtn("🏠 Today", tg.NewCmd("today", nil)),
 	},
 	), tgram.LastSentKeyboard)

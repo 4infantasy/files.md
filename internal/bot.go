@@ -1790,9 +1790,9 @@ func (b *Bot) addToChecklist(checklistHash string, msgIndex int) (string, error)
 		supportedChecklists := []string{
 			fs.TodayFilename,
 			fs.LaterFilename,
-			fs.DirRead,
-			fs.DirWatch,
-			fs.DirShop,
+			fs.ReadFilename,
+			fs.WatchFilename,
+			fs.ShopFilename,
 		}
 
 		created := false

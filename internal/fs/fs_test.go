@@ -201,7 +201,7 @@ func TestOnlyChecklists(t *testing.T) {
 	err := fs.Write("today", "a.md", "")
 	r.NoError(err)
 
-	err = fs.MakeDir("_list_")
+	err = fs.Write("/", "list_", "")
 	r.NoError(err)
 
 	entries, err := fs.FilesAndDirs("/")
@@ -209,7 +209,7 @@ func TestOnlyChecklists(t *testing.T) {
 
 	dirs := OnlyChecklists(entries)
 	r.Len(dirs, 1)
-	r.Equal("_list_", dirs[0].Name)
+	r.Equal("list_", dirs[0].Name)
 }
 
 func TestFSTouchNew(t *testing.T) {
