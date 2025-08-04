@@ -761,3 +761,13 @@ body.dragging * {
 .HyperMD-list-line:has(.cm-formatting-task.hmd-hidden-token) {
     text-indent: -5px !important;
 }
+
+.cm-formatting-task.cm-property ~ .cm-list-1 {
+    text-decoration: line-through;
+    opacity: 0.6;
+    color: #888;
+}
+
+.cm-formatting-task.cm-property {
+    opacity: 0.6;
+}
