@@ -27,6 +27,7 @@ func (b *Bot) showSettings(params []string) error {
 	kb.AddRow(tg.NewBtn("-", tg.NewCmd(consts.CmdDoNothing, nil)))
 	kb.AddRow(tg.NewBtn(i18n.StrQuickBtns, tg.NewCmd(consts.CmdShowQuickBtnsSettings, nil)))
 	kb.AddRow(tg.NewBtn(i18n.StrMoveToBtns, tg.NewCmd(consts.CmdShowMoveToBtnsSettings, nil)))
+	kb.AddRow(tg.NewBtn(txt.Emoji(i18n.Emoji("world"), b.tr("Timezone")), tg.NewCmd(consts.CmdShowTimezone, nil)))
 	kb.AddRow(tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil)))
 
 	err := b.showHTML("Settings:", &kb)
@@ -35,6 +36,51 @@ func (b *Bot) showSettings(params []string) error {
 	}
 
 	return nil
+}
+
+func (b *Bot) showTimezone(_ []string) error {
+	var kb tg.Keyboard
+	timezones := []string{
+		"UTC",
+		"Asia/Nicosia",
+		"Europe/Warsaw",
+		"Europe/Belgrade",
+		"Europe/Podgorica",
+		"Europe/Moscow",
+		"Africa/Johannesburg",
+		"Africa/Cairo",
+		"Europe/London",
+		"America/Lima",
+		"America/Santiago",
+		"America/Buenos_Aires",
+	}
+
+	for _, tz := range timezones {
+		name := tz
+		if b.cfg.Timezone().String() == tz {
+			name = "✅ " + name
+		}
+		kb.AddRow(tg.NewBtn(name, tg.NewCmd(consts.CmdSetTimezone, []string{tz})))
+	}
+	kb.AddRow(tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil)))
+
+	err := b.showHTML("Timezone:", &kb)
+	if err != nil {
+		return fmt.Errorf("showTimezone : %w", err)
+	}
+
+	return nil
+}
+
+func (b *Bot) setTimezone(params []string) error {
+	timezone := params[0]
+
+	err := b.cfg.SetTimezone(timezone)
+	if err != nil {
+		return fmt.Errorf("setTimezone : %w", err)
+	}
+
+	return b.ShowToday(nil)
 }
 
 func (b *Bot) showQuickBtnsSettings(params []string) error {

@@ -61,6 +61,8 @@ const (
 	CmdDelFromQuickBtns            = "del_quick"
 	CmdAddToMoveToBtns             = "add_move"
 	CmdDelFromMoveToBtns           = "del_move"
+	CmdShowTimezone                = "timezone"
+	CmdSetTimezone                 = "set_timezone"
 	CmdShowReadChecklist           = "read"
 	CmdShowWatchChecklist          = "watch"
 	CmdShowShopChecklist           = "shop"

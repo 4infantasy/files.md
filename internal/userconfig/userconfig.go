@@ -102,6 +102,24 @@ func (c *Config) Timezone() *time.Location {
 	return location
 }
 
+func (c *Config) SetTimezone(tz string) error {
+	lock := c.userLock()
+	lock.Lock()
+	defer lock.Unlock()
+
+	cfg, err := c.read(c.filename)
+	if err != nil {
+		return fmt.Errorf("set timezone: can't read config: %w", err)
+	}
+	cfg.Timezone = tz
+	err = c.write(cfg)
+	if err != nil {
+		return fmt.Errorf("set timezone: can't write config: %w", err)
+	}
+
+	return nil
+}
+
 func (c *Config) ChatOnlyMode() bool {
 	cfg, _ := c.read(c.filename)
 

@@ -206,6 +206,7 @@ const DEFAULT_FILES = {
             "| `Cmd+Enter` / `Ctrl+Enter` | Toggle chat mode |\n" +
             "| `Cmd+[` / `Ctrl+[`  | Go to previous file   |\n" +
             "| `Cmd+]` / `Ctrl+]`  | Go to next file  |\n" +
+            "| `Cmd+\\` / `Ctrl+\\`  | Toggle sidebar |\n" +
             "\n" +
             "#### Text Formatting\n" +
             "\n" +

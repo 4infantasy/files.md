@@ -244,6 +244,8 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		consts.CmdShowSchedule:        b.showSchedule,
 		consts.CmdShowMoveFromToday:   b.showMoveFromToday,
 		consts.CmdShowSettings:        b.showSettings,
+		consts.CmdShowTimezone:        b.showTimezone,
+		consts.CmdSetTimezone:         b.setTimezone,
 		consts.CmdOpenInApp:           b.openInApp,
 		consts.CmdShowHelp:            b.showHelp,
 		consts.CmdDownload:            b.download,
