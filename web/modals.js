@@ -201,7 +201,6 @@ class SearchModal {
         }
         results = Array.from(uniqueResultsMap.values()).sort((a, b) => b.score - a.score);
         searchModal.showResults(results);
-        console.log(results);
     }
 
     open(text = '', messageIndex = null, buttonElement  = null) {

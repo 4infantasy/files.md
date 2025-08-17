@@ -234,7 +234,7 @@ async function syncTextsWithServer() {
                 if (shouldRemoveOldFile) {
                     const oldPath = joinPath('/', response.renames[relPath]);
                     try {
-                        console.log('REMOVING due to renaming', oldPath);
+                        console.log('DELETED due to renaming', oldPath);
                         await removeFile(oldPath);
                     } catch (err) {
                         console.log('RENAME: cant remove file: ', err, path);
@@ -551,6 +551,7 @@ async function collectModifiedAndDeletedFiles() {
     // Freeze paths to prevent RC. Current file can change during collecting.
     const editorPath = editor.path;
     const editor2Path = editor2.path;
+    console.log('Frozen paths:', editorPath, editor2Path);
     walk(files, (path, isFile) => {
         if (!isFile) {
             return;
@@ -614,8 +615,10 @@ async function collectModifiedAndDeletedFiles() {
             return;
         }
 
-        if (existingFiles[path] === undefined) {
-            console.log('DELETED ' + path);
+        const notExisting = existingFiles[path] === undefined;
+        const notModified = modifiedFiles.find(f => f.path === path) === undefined;
+        if (notExisting && notModified) {
+            console.log('DELETED because not in existing or modified files:', path);
             deleted.push(path);
         }
     });
