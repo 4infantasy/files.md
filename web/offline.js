@@ -92,6 +92,11 @@ self.addEventListener("fetch", (event) => {
             .catch(() => fetch(event.request)) // Retry 1
             .catch(() => fetch(event.request)) // Retry 2
             .then(async response => {
+                if (response.status === 206) {
+                    console.warn('⚠️ Partial content (206), not caching:', event.request.url);
+                    return response;
+                }
+
                 const contentLength = response.headers.get('content-length');
                 const responseClone = response.clone();
                 const actualData = await responseClone.arrayBuffer();
