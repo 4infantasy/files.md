@@ -36,16 +36,8 @@ type Response struct {
 
 func Reply(_ js.Value, args []js.Value) any {
 	logToJS("Wasm: called reply")
-	//callAsync("hi", func(result js.Value, err error) {
-	//	if err != nil {
-	//		sendToJS(fmt.Sprintf("Error: %v\n", err))
-	//		return
-	//	}
-	//	sendToJS(result.String())
-	//})
 	upd := tg.NewUpd(-1, args[0].String())
 	go reply(upd)
-	//go readFile("file.md")
 
 	return nil
 }
@@ -167,6 +159,7 @@ func initBot() {
 			if err != nil {
 				debug.PrintStack()
 				slog.Error("Bot panic", "err", err)
+				logToJS("Wasm panic:", err)
 			}
 		}()
 
@@ -190,6 +183,7 @@ func initBot() {
 		}
 		bot := internal.NewBot(userID, chat, userFS, db.NewDB(userID), userconf)
 		if err := bot.Reply(u); err != nil {
+			logToJS("Wasm error:", err)
 			fmt.Printf("Bot error: %v", err)
 		}
 
