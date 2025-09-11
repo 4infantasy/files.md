@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"syscall/js"
 	_ "time/tzdata" // for was env we need timezone database
 
@@ -23,6 +24,7 @@ import (
 var (
 	reply func(u internal.Update)
 	chat  *tg.FakeTG
+	lock  sync.Mutex
 )
 
 type Update struct {
@@ -48,6 +50,8 @@ func main() {
 }
 
 func Reply(_ js.Value, args []js.Value) any {
+	// add lock
+
 	logToJS("Wasm: called reply")
 	upd := tg.NewUpd(-1, args[0].String())
 	// GO and JS share one thread, so we need to run a separate goroutine not to block JS.
@@ -147,6 +151,9 @@ func initBot() {
 				logToJS("Wasm panic:", err)
 			}
 		}()
+
+		lock.Lock()
+		defer lock.Unlock()
 
 		userID := u.UserID()
 
