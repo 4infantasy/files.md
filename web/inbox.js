@@ -858,29 +858,7 @@ chatInput.addEventListener('paste', async (e) => {
     }
 });
 
-async function addToJournal(record) {
-    record = record.trim();
-
-    const journalFilename = todayJournalFilename();
-    const journalPath = `journal/${journalFilename}`;
-
-    let md = '';
-    try {
-        md = await read(journalPath);
-        md = normNewLines(md);
-        md = md.trim();
-        if (md.length !== 0) {
-            md += '\n';
-        }
-    } catch (err) {
-        // File doesn't exist, will be created
-        md = '';
-    }
-
-    md = appendHeader(md, todayHeader(), record);
-
-    await write(journalPath, md);
-}
+// TODO Remove in fav of "appendHeaderAndText"
 
 function todayJournalFilename() {
     const now = new Date();
@@ -912,7 +890,7 @@ function todayHeader(timezone) {
     return `#### ${day} ${monthNames[monthIndex]} ${year}, ${dayNames[dayIndex]}`;
 }
 
-function prependHeader(existingContent, header, newContent) {
+function prependHeaderAndText(existingText, header, text) {
     const now = new Date();
     const timestamp = `\`${now.toLocaleTimeString('en-US', {
         hour12: false,
@@ -921,26 +899,26 @@ function prependHeader(existingContent, header, newContent) {
     })}\``;
 
     let formattedContent;
-    if (hasImage(newContent)) {
-        const imgMatch = newContent.match(IMG_PATTERN);
+    if (hasImage(text)) {
+        const imgMatch = text.match(IMG_PATTERN);
         if (imgMatch) {
             const imgLink = imgMatch[0];
-            const textContent = newContent.replace(imgLink, '').trim();
+            const textContent = text.replace(imgLink, '').trim();
             formattedContent = `${imgLink}\n${timestamp} ${textContent}`;
         }
     } else {
-        formattedContent = `${timestamp} ${newContent}`;
+        formattedContent = `${timestamp} ${text}`;
     }
 
-    if (!existingContent.includes(header)) {
-        if (existingContent === "") {
+    if (!existingText.includes(header)) {
+        if (existingText === "") {
             return `${header}\n${formattedContent}`;
         } else {
-            return `${header}\n${formattedContent}\n\n${existingContent}`;
+            return `${header}\n${formattedContent}\n\n${existingText}`;
         }
     }
 
-    const lines = existingContent.split("\n");
+    const lines = existingText.split("\n");
     let headerIndex = -1;
 
     for (let i = 0; i < lines.length; i++) {
@@ -951,7 +929,7 @@ function prependHeader(existingContent, header, newContent) {
     }
 
     if (headerIndex === -1) {
-        return `${header}\n${formattedContent}\n\n${existingContent}`;
+        return `${header}\n${formattedContent}\n\n${existingText}`;
     }
 
     let insertIndex = headerIndex + 1;
@@ -981,7 +959,7 @@ function prependHeader(existingContent, header, newContent) {
     return newLines.join("\n");
 }
 
-function appendHeader(existingContent, header, newContent) {
+function appendHeaderAndText(existingText, header, text) {
     const now = new Date();
     const timestamp = `\`${now.toLocaleTimeString('en-US', {
         hour12: false,
@@ -990,26 +968,26 @@ function appendHeader(existingContent, header, newContent) {
     })}\``;
 
     let formattedContent;
-    if (hasImage(newContent)) {
-        const imgMatch = newContent.match(IMG_PATTERN);
+    if (hasImage(text)) {
+        const imgMatch = text.match(IMG_PATTERN);
         if (imgMatch) {
             const imgLink = imgMatch[0];
-            const textContent = newContent.replace(imgLink, '').trim();
+            const textContent = text.replace(imgLink, '').trim();
             formattedContent = `${imgLink}\n${timestamp} ${textContent}`;
         }
     } else {
-        formattedContent = `${timestamp} ${newContent}`;
+        formattedContent = `${timestamp} ${text}`;
     }
 
-    if (!existingContent.includes(header)) {
-        if (existingContent === "") {
+    if (!existingText.includes(header)) {
+        if (existingText === "") {
             return `${header}\n${formattedContent}`;
         } else {
-            return `${existingContent}\n\n${header}\n${formattedContent}`;
+            return `${existingText}\n\n${header}\n${formattedContent}`;
         }
     }
 
-    const lines = existingContent.split("\n");
+    const lines = existingText.split("\n");
     let headerIndex = -1;
 
     for (let i = 0; i < lines.length; i++) {
@@ -1020,7 +998,7 @@ function appendHeader(existingContent, header, newContent) {
     }
 
     if (headerIndex === -1) {
-        return `${existingContent}\n\n${header}\n${formattedContent}`;
+        return `${existingText}\n\n${header}\n${formattedContent}`;
     }
 
     let insertIndex = headerIndex + 1;
@@ -1048,4 +1026,95 @@ function appendHeader(existingContent, header, newContent) {
     newLines.push(...lines.slice(insertIndex));
 
     return newLines.join("\n");
+}
+
+async function addHeaderAndText(path, header, text, atStart = false) {
+    const now = new Date();
+    const timestamp = `\`${now.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+    })}\``;
+
+    let formattedContent;
+    if (hasImage(text)) {
+        const imgMatch = text.match(IMG_PATTERN);
+        if (imgMatch) {
+            const imgLink = imgMatch[0];
+            const textContent = text.replace(imgLink, '').trim();
+            formattedContent = `${imgLink}\n${timestamp} ${textContent}`;
+        }
+    } else {
+        formattedContent = `${timestamp} ${text}`;
+    }
+
+    let existingText = '';
+    try {
+        existingText = await read(path);
+        existingText = normNewLines(existingText);
+        existingText = existingText.trim();
+    } catch (err) {
+        existingText = '';
+    }
+
+    let result;
+    if (!existingText.includes(header)) {
+        if (existingText === "") {
+            result = `${header}\n${formattedContent}`;
+        } else {
+            result = atStart
+                ? `${header}\n${formattedContent}\n\n${existingText}`
+                : `${existingText}\n\n${header}\n${formattedContent}`;
+        }
+    } else {
+        const lines = existingText.split("\n");
+        let headerIndex = -1;
+
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === header) {
+                headerIndex = i;
+                break;
+            }
+        }
+
+        if (headerIndex === -1) {
+            result = atStart
+                ? `${header}\n${formattedContent}\n\n${existingText}`
+                : `${existingText}\n\n${header}\n${formattedContent}`;
+        } else {
+            let insertIndex = headerIndex + 1;
+
+            for (let i = headerIndex + 1; i < lines.length; i++) {
+                if (lines[i].startsWith("###")) {
+                    insertIndex = i;
+                    break;
+                }
+                if (lines[i].trim() === "") {
+                    insertIndex = i;
+                    break;
+                }
+                insertIndex = i + 1;
+            }
+
+            const newLines = [];
+            newLines.push(...lines.slice(0, insertIndex));
+            newLines.push(formattedContent);
+
+            if (insertIndex < lines.length && lines[insertIndex].trim() !== "") {
+                newLines.push("");
+            }
+
+            newLines.push(...lines.slice(insertIndex));
+            result = newLines.join("\n");
+        }
+    }
+
+    await write(path, result);
+}
+
+async function addToJournal(record) {
+    record = record.trim();
+    const journalFilename = todayJournalFilename();
+    const journalPath = `journal/${journalFilename}`;
+    await addHeaderAndText(journalPath, todayHeader(), record);
 }
