@@ -81,8 +81,8 @@ $ git checkout -b feature_name
 
 ## Glossary
 - `filename` - a filename with extension, like "note.md" (USE THIS AS ID)
-- `title` - an extension-stripped and capitalized filename, like "Note"
-- `content` - note's content (body/text)
+- `header` - an extension-stripped and capitalized filename, like "Note"
+- `body` - file's content 
 - `dir` - a dir that is meant to store notes under some category, like "happiness"
 - `userID` - chatID. For the most part we're only using chatID as userID (PM with the bot)
 - `ctime` for file - data blocks or metadata change time: file's ownership, location, file type and permission settings changed time. Parent folder renaming won't affect, moving the file does affect, renaming the file does affect. We need this to track file's location changes, like to understand when it was moved to archive, to track task's angry level etc

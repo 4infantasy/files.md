@@ -47,17 +47,17 @@ var (
 )
 
 const (
-	maxTitleLength          = 100
-	maxTitleLengthForMobile = 33 // Fits regular mobile screen
-	inlineResultsCacheTime  = 15 // Seconds
-	btnsPerRow              = 3
-	quickBtnsPerRow         = 4
-	maxBtns                 = 50
-	maxBtnsInChecklist      = 10 // For _read_ and _watch_ checklists, so we're less likely to be overwhelmed :)
-	maxGroupedBtnsInMoveTo  = 6
-	maxInlineResults        = 20
-	maxMsgLength            = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2
-	maxMsgsToSendAtOnce     = 5    // For lengthy messages
+	maxHeaderLength          = 100
+	maxHeaderLengthForMobile = 33 // Fits regular mobile screen
+	inlineResultsCacheTime   = 15 // Seconds
+	btnsPerRow               = 3
+	quickBtnsPerRow          = 4
+	maxBtns                  = 50
+	maxBtnsInChecklist       = 10 // For _read_ and _watch_ checklists, so we're less likely to be overwhelmed :)
+	maxGroupedBtnsInMoveTo   = 6
+	maxInlineResults         = 20
+	maxMsgLength             = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2
+	maxMsgsToSendAtOnce      = 5    // For lengthy messages
 
 	// On mobile phones buttons shrink to the message width, and sometimes it's too narrow, so we make the message wider
 	wideSpacer = "<code>            ⁠</code>"
@@ -564,7 +564,7 @@ func (b *Bot) answerSearch(u Update) error {
 		if note.ParentDir == fs.DirRoot {
 			path = note.Name
 		}
-		article := tgbotapi.NewInlineQueryResultArticleHTML(strconv.Itoa(id), note.Title, path)
+		article := tgbotapi.NewInlineQueryResultArticleHTML(strconv.Itoa(id), note.Header, path)
 		results = append(results, article)
 	}
 
@@ -637,7 +637,7 @@ func (b *Bot) answerFileRequest(msg string) error {
 		}
 
 		// Just an informative message
-		_, _ = b.tg.Send(b.userID, fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(filename)), nil, tg.MarkupHTML)
+		_, _ = b.tg.Send(b.userID, fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Header(filename)), nil, tg.MarkupHTML)
 
 		return b.ShowToday(nil)
 	}
@@ -670,7 +670,7 @@ func (b *Bot) createOrAdd(dir, filename, content string) error {
 	return nil
 }
 
-func (b *Bot) extractTitleAndContent(msg string, maxTitleLen int) (string, string, error) {
+func (b *Bot) extractHeaderAndBody(msg string, maxHeaderLen int) (string, string, error) {
 	if len(msg) == 0 {
 		return "", "", fmt.Errorf("extract title: empty msg")
 	}
@@ -687,8 +687,8 @@ func (b *Bot) extractTitleAndContent(msg string, maxTitleLen int) (string, strin
 		}
 	}
 
-	if utf8.RuneCountInString(title) > maxTitleLen {
-		title = txt.Substr(title, 0, maxTitleLen) + "..."
+	if utf8.RuneCountInString(title) > maxHeaderLen {
+		title = txt.Substr(title, 0, maxHeaderLen) + "..."
 	}
 
 	sanitizedTitle := fs.SanitizeFilename(title)
@@ -717,7 +717,7 @@ func (b *Bot) restoreMsg(dir, filename string) (string, error) {
 		return "", fmt.Errorf("can't restore msg for '%s': %w", filename, err)
 	}
 
-	title := fs.Title(filename)
+	title := fs.Header(filename)
 	nonTruncatedTitle := strings.TrimRight(title, "...")
 	sanitizedContent := strings.ToLower(fs.SanitizeFilename(msg))
 	contentHasNoTitle := !strings.HasPrefix(sanitizedContent, strings.ToLower(nonTruncatedTitle))
@@ -933,7 +933,7 @@ func (b *Bot) recentCmdBtn(msgIndex int) *tg.Btn {
 		return nil
 	}
 
-	name := fmt.Sprintf("%s %s", icon, fs.Title(unhashedTarget))
+	name := fmt.Sprintf("%s %s", icon, fs.Header(unhashedTarget))
 	btn := tg.NewBtn(name, tg.NewCmd(recentCmd, args))
 	return &btn
 }
@@ -974,7 +974,7 @@ func (b *Bot) ShowToday(_ []string) error {
 				}
 			}
 
-			if len([]rune(title)) >= maxTitleLengthForMobile || txt.HasImage(task) {
+			if len([]rune(title)) >= maxHeaderLengthForMobile || txt.HasImage(task) {
 				cmd := tg.NewCmd(consts.CmdShowLongItem, []string{fs.Hash(fs.TodayFilename), fs.Hash(task)})
 				btn := tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), title), cmd)
 				kb.AddRow(btn)
@@ -1016,7 +1016,7 @@ func (b *Bot) ShowToday(_ []string) error {
 			}
 		}
 
-		if len([]rune(title)) >= maxTitleLengthForMobile || txt.HasImage(block) {
+		if len([]rune(title)) >= maxHeaderLengthForMobile || txt.HasImage(block) {
 			cmd := tg.NewCmd(consts.CmdShowLongItemFromInbox, []string{strconv.Itoa(msgIndex)})
 			btn := tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), title), cmd)
 			kb.AddRow(btn)
@@ -1079,10 +1079,10 @@ func (b *Bot) showLaterTasks(_ []string) error {
 	var kb tg.Keyboard
 	for _, file := range files {
 		var btn tg.Btn
-		name := i18n.AddEmoji(fs.UnsanitizeFilename(file.Title))
+		name := i18n.AddEmoji(fs.UnsanitizeFilename(file.Header))
 		if file.IsMultiline {
 			cmd := tg.NewCmd(consts.CmdShowMultilineTask, []string{fs.DirLater, fs.Hash(file.Name)})
-			btn = tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), fs.UnsanitizeFilename(file.Title)), cmd)
+			btn = tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), fs.UnsanitizeFilename(file.Header)), cmd)
 		} else {
 			cmd := tg.NewCmd(consts.CmdComplete, []string{fs.DirLater, fs.Hash(file.Name)})
 			btn = tg.NewBtn(name, cmd)
@@ -1127,7 +1127,7 @@ func (b *Bot) todayLabel(msgsCount ...int) string {
 		hasPomodoroInToday = exists && !checked
 	}
 	if hasPomodoroInToday {
-		statusBar = i18n.Emoji(fs.Title(fs.PomodoroTask))
+		statusBar = i18n.Emoji(fs.Header(fs.PomodoroTask))
 	}
 
 	tasks := txt.IncompleteChecklistItems(todayMD)
@@ -1170,7 +1170,7 @@ func (b *Bot) showFiles(_ []string) error {
 	var fileBtns []tg.Btn
 	for _, file := range mdFiles {
 		cmd := tg.NewCmd(consts.CmdShowFile, []string{fs.DirRoot, fs.Hash(file.Name)})
-		btn := tg.NewBtn(fmt.Sprintf("%s", fs.UnsanitizeFilename(file.Title)), cmd)
+		btn := tg.NewBtn(fmt.Sprintf("%s", fs.UnsanitizeFilename(file.Header)), cmd)
 		fileBtns = append(fileBtns, btn)
 	}
 	fileBtnsByRows := slice.Chunk(fileBtns, btnsPerRow)
@@ -1203,7 +1203,7 @@ func (b *Bot) showDirs(_ []string) error {
 	var dirBtns []tg.Btn
 	for _, dir := range dirs {
 		cmd := tg.NewCustomCmd("", []string{dir.Name}, tg.CmdTypeInlineQueryCurrentChat)
-		btn := tg.NewBtn(fmt.Sprintf("%s %s", i18n.Emoji("dir"), dir.Title), cmd)
+		btn := tg.NewBtn(fmt.Sprintf("%s %s", i18n.Emoji("dir"), dir.Header), cmd)
 		dirBtns = append(dirBtns, btn)
 	}
 
@@ -1284,7 +1284,7 @@ func (b *Bot) showMoveFromToday(_ []string) error {
 	var kb tg.Keyboard
 	for _, file := range files {
 		cmd := tg.NewCmd(consts.CmdShowMoveToFromToday, []string{fs.Hash(file.Name)})
-		kb.AddRow(tg.NewBtn(file.Title, cmd))
+		kb.AddRow(tg.NewBtn(file.Header, cmd))
 	}
 
 	kb.AddRow(tg.NewRow(
@@ -1477,7 +1477,7 @@ func (b *Bot) showMultilineTask(params []string) error {
 		),
 	})
 
-	md := fmt.Sprintf("**%s**\n%s", fs.Title(filename), content)
+	md := fmt.Sprintf("**%s**\n%s", fs.Header(filename), content)
 	err = b.showMD(md, kb)
 	if err != nil {
 		return fmt.Errorf("show task: %w", err)
@@ -1607,7 +1607,7 @@ func (b *Bot) showFile(params []string) error {
 	row = append(row, tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil)))
 	kb := tg.NewKeyboard([]tg.Row{row})
 
-	md := fmt.Sprintf("**%s**\n\n%s", fs.Title(filename), content)
+	md := fmt.Sprintf("**%s**\n\n%s", fs.Header(filename), content)
 	err = b.showMD(md, kb)
 	if err != nil {
 		return fmt.Errorf("show file: %w", err)
@@ -1645,7 +1645,7 @@ func (b *Bot) showChecklist(params []string) error {
 
 	kb := tg.NewKeyboard(nil)
 	for _, item := range items {
-		if len([]rune(item)) >= maxTitleLengthForMobile {
+		if len([]rune(item)) >= maxHeaderLengthForMobile {
 			cmd := tg.NewCmd(consts.CmdShowLongItem, []string{fs.Hash(checklist), fs.Hash(item)})
 			btn := tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), item), cmd)
 			kb.AddRow(btn)
@@ -1727,7 +1727,7 @@ func (b *Bot) moveToDirFromToday(params []string) error {
 	isNotesDir := len(notesDir) == 1
 	if isNotesDir {
 		// We can tolerate this, as this is informative logging
-		_ = journal.AddRecord(b.fs, fmt.Sprintf("📌 %s", fs.Title(filename)), b.cfg.Timezone())
+		_ = journal.AddRecord(b.fs, fmt.Sprintf("📌 %s", fs.Header(filename)), b.cfg.Timezone())
 	}
 
 	if toDir != fs.DirLater {
@@ -1738,7 +1738,7 @@ func (b *Bot) moveToDirFromToday(params []string) error {
 	}
 
 	b.delAllKeyboards()
-	msg := txt.Emoji(i18n.Emoji("dir"), fmt.Sprintf(i18n.Tr("Moved to <b>%s</b>"), fs.Title(toDir)))
+	msg := txt.Emoji(i18n.Emoji("dir"), fmt.Sprintf(i18n.Tr("Moved to <b>%s</b>"), fs.Header(toDir)))
 	// Just an informative messages
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
@@ -1773,9 +1773,9 @@ func (b *Bot) moveToDir(params []string) error {
 	err = b.moveFromInbox(func(content string, timestamp time.Time) error {
 		var sanitizedTitle string
 		if toDir == fs.DirToday || toDir == fs.DirLater {
-			sanitizedTitle, content, err = b.extractTitleAndContent(content, maxTitleLengthForMobile)
+			sanitizedTitle, content, err = b.extractHeaderAndBody(content, maxHeaderLengthForMobile)
 		} else {
-			sanitizedTitle, content, err = b.extractTitleAndContent(content, maxTitleLength)
+			sanitizedTitle, content, err = b.extractHeaderAndBody(content, maxHeaderLength)
 		}
 		if err != nil {
 			return fmt.Errorf("move to dir from chat: can't extract title and content: %w", err)
@@ -1787,7 +1787,7 @@ func (b *Bot) moveToDir(params []string) error {
 		isNotesDir := len(notesDir) == 1
 		if isNotesDir {
 			// We can tolerate this, as this is informative logging
-			_ = journal.AddRecord(b.fs, fmt.Sprintf("📌 %s", fs.Title(filename)), b.cfg.Timezone())
+			_ = journal.AddRecord(b.fs, fmt.Sprintf("📌 %s", fs.Header(filename)), b.cfg.Timezone())
 		}
 
 		return b.createOrAdd(toDir, filename, content)
@@ -1802,7 +1802,7 @@ func (b *Bot) moveToDir(params []string) error {
 
 	b.delAllKeyboards()
 	if toDir != fs.DirToday {
-		msg := txt.Emoji(i18n.Emoji("dir"), fmt.Sprintf(i18n.Tr("Moved to <b>%s</b>"), fs.Title(toDir)))
+		msg := txt.Emoji(i18n.Emoji("dir"), fmt.Sprintf(i18n.Tr("Moved to <b>%s</b>"), fs.Header(toDir)))
 		// Just an informative messages
 		_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 	}
@@ -1912,7 +1912,7 @@ func (b *Bot) completeChecklistItem(params []string) error {
 		}
 	} else {
 		// We can tolerate failure of writing to journal, since that's not single source of truth
-		_ = journal.AddRecord(b.fs, fmt.Sprintf("✅ %s", fs.Title(item)), b.cfg.Timezone())
+		_ = journal.AddRecord(b.fs, fmt.Sprintf("✅ %s", fs.Header(item)), b.cfg.Timezone())
 	}
 
 	if checklist == fs.LaterFilename {
@@ -1989,7 +1989,7 @@ func (b *Bot) moveToExistingFile(params []string) error {
 	b.db.SetRecentCommandParams([]string{fs.ShortHash(existingFilename)})
 
 	b.delAllKeyboards()
-	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(existingFilename)))
+	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Header(existingFilename)))
 	// Just an informative messages
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
@@ -2042,7 +2042,7 @@ func (b *Bot) moveToExistingNote(params []string) error {
 	}
 
 	b.delAllKeyboards()
-	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(toFilename)))
+	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Header(toFilename)))
 	// Just an informative messages
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
@@ -2086,7 +2086,7 @@ func (b *Bot) moveToDirChecklist(params []string) error {
 				}
 			}
 		} else {
-			sanitizedTitle, content, err := b.extractTitleAndContent(content, maxTitleLengthForMobile)
+			sanitizedTitle, content, err := b.extractHeaderAndBody(content, maxHeaderLengthForMobile)
 			if err != nil {
 				return fmt.Errorf("move to checklistDir: %w", err)
 			}
@@ -2141,7 +2141,7 @@ func (b *Bot) moveToNewFile(params []string) error {
 	err = b.moveFromInbox(func(content string, t time.Time) error {
 		content = strings.TrimSpace(content)
 		//if len(content) == 0 {
-		//	content = fs.Title(filename)
+		//	content = fs.Header(filename)
 		//	err = b.fs.Write(fs.DirRoot, filename, content)
 		//	if err != nil {
 		//		return fmt.Errorf("move to new file: can't write content of '%s': %w", filename, err)
@@ -2156,7 +2156,7 @@ func (b *Bot) moveToNewFile(params []string) error {
 		//}
 
 		// We can tolerate this
-		//_ = journal.AddRecord(b.fs, fmt.Sprintf("📄 %s", fs.Title(filename)), b.cfg.Timezone())
+		//_ = journal.AddRecord(b.fs, fmt.Sprintf("📄 %s", fs.Header(filename)), b.cfg.Timezone())
 
 		b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
 		b.db.SetRecentCommandParams([]string{fs.ShortHash(newFilenameFromUserInput)})
@@ -2168,7 +2168,7 @@ func (b *Bot) moveToNewFile(params []string) error {
 		return fmt.Errorf("move to new file: can't read content from chat: %w", err)
 	}
 
-	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Title(newFilenameFromUserInput)))
+	msg := txt.Emoji(i18n.Emoji("file"), fmt.Sprintf(i18n.Tr("Saved to <b>%s</b>"), fs.Header(newFilenameFromUserInput)))
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
@@ -2274,7 +2274,7 @@ func (b *Bot) addToRecentFileOrNoteFromShortcut(params []string) error {
 		return nil
 	}
 
-	msg := fmt.Sprintf(i18n.Tr("Added to <b>%s</b>"), fs.Title(existingFilename))
+	msg := fmt.Sprintf(i18n.Tr("Added to <b>%s</b>"), fs.Header(existingFilename))
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	return b.ShowToday(nil)
@@ -2318,7 +2318,7 @@ func (b *Bot) completeFromChat(params []string) error {
 	}
 
 	err = b.moveFromInbox(func(content string, timestamp time.Time) error {
-		sanitizedTitle, _, err := b.extractTitleAndContent(content, maxTitleLength)
+		sanitizedTitle, _, err := b.extractHeaderAndBody(content, maxHeaderLength)
 		if err != nil {
 			return fmt.Errorf("complete: %w", err)
 		}
@@ -2630,7 +2630,7 @@ func (b *Bot) moveToFileBtns(msgIndex int) ([]tg.Btn, error) {
 		return tg.NewBtn(title, tg.NewCmd(consts.CmdMoveToExistingFile, params))
 	}
 	for _, file := range files {
-		buttons = append(buttons, newBtn(file.Title, fs.ShortHash(file.Name)))
+		buttons = append(buttons, newBtn(file.Header, fs.ShortHash(file.Name)))
 	}
 
 	return buttons, nil
@@ -2671,7 +2671,7 @@ func (b *Bot) toChecklistKeyboard(filenameHash string) (*tg.Keyboard, error) {
 
 	kb := tg.NewKeyboard(nil)
 	for _, dir := range dirs {
-		kb.AddRow(newBtn(dir.Name, dir.Title))
+		kb.AddRow(newBtn(dir.Name, dir.Header))
 	}
 
 	return kb, nil
@@ -2958,7 +2958,7 @@ func (b *Bot) shareNote(params []string) error {
 	}
 
 	for _, channel := range b.cfg.Channels() {
-		probablyInvalidMD := fmt.Sprintf("**%s/%s**\n\n%s", fs.Title(dir), fs.Title(filename), content)
+		probablyInvalidMD := fmt.Sprintf("**%s/%s**\n\n%s", fs.Header(dir), fs.Header(filename), content)
 		probablyInvalidMD, images, _ := txt.ExtractTextImgsLinks(probablyInvalidMD)
 		// Sending a gallery of images if there are any
 		if len(images) > 0 {
@@ -3005,7 +3005,7 @@ func checklistTitle(checklist string) string {
 	title := stripChecklistChars.ReplaceAllString(checklist, "$1")
 	title = strings.TrimPrefix(strings.TrimSuffix(title, "_"), "_")
 
-	return fs.Title(title)
+	return fs.Header(title)
 }
 
 func angerEmoji(file fs.File) string {

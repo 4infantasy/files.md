@@ -3847,7 +3847,7 @@ func TestExtractTitleAndContent_EmptyMessage(t *testing.T) {
 
 	bot := NewBot(-1, nil, nil, nil, nil)
 
-	title, content, err := bot.extractTitleAndContent("", 33)
+	title, content, err := bot.extractHeaderAndBody("", 33)
 	r.Error(err)
 	r.Contains(err.Error(), "extract title: empty msg")
 	r.Equal("", title)
@@ -3859,10 +3859,10 @@ func TestExtractTitleAndContent_SimpleMessage(t *testing.T) {
 
 	bot := NewBot(-1, nil, nil, nil, nil)
 
-	msg := "Simple Title"
-	title, content, err := bot.extractTitleAndContent(msg, 33)
+	msg := "Simple Header"
+	title, content, err := bot.extractHeaderAndBody(msg, 33)
 	r.NoError(err)
-	r.Equal("Simple Title", title)
+	r.Equal("Simple Header", title)
 	r.Equal("", content)
 }
 
@@ -3871,10 +3871,10 @@ func TestExtractTitleAndContent_MultilineMessage(t *testing.T) {
 
 	bot := NewBot(-1, nil, nil, nil, nil)
 
-	msg := "Title Line\nThis is the content"
-	title, content, err := bot.extractTitleAndContent(msg, 33)
+	msg := "Header Line\nThis is the content"
+	title, content, err := bot.extractHeaderAndBody(msg, 33)
 	r.NoError(err)
-	r.Equal("Title Line", title)
+	r.Equal("Header Line", title)
 	r.Equal("This is the content", content)
 }
 
@@ -3887,7 +3887,7 @@ func TestExtractTitleAndContent_TitleExceedsMaxLength(t *testing.T) {
 	msg := longTitle + "\nContent below"
 	expectedTitle := txt.Substr(txt.Ucfirst(longTitle), 0, 33) + "..."
 
-	title, content, err := bot.extractTitleAndContent(msg, 33)
+	title, content, err := bot.extractHeaderAndBody(msg, 33)
 	r.NoError(err)
 	r.Equal(expectedTitle, title)
 	r.Equal("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nContent below", content)
@@ -3898,10 +3898,10 @@ func TestExtractTitleAndContent_TitleSameAsContent(t *testing.T) {
 
 	bot := NewBot(-1, nil, nil, nil, nil)
 
-	msg := "Identical Title"
-	title, content, err := bot.extractTitleAndContent(msg, 33)
+	msg := "Identical Header"
+	title, content, err := bot.extractHeaderAndBody(msg, 33)
 	r.NoError(err)
-	r.Equal("Identical Title", title)
+	r.Equal("Identical Header", title)
 	r.Equal("", content)
 }
 
@@ -3910,11 +3910,11 @@ func TestExtractTitleAndContent_ContentStartsWithTitle(t *testing.T) {
 
 	bot := NewBot(-1, nil, nil, nil, nil)
 
-	msg := "Title Line\nTitle Line\nAdditional content"
-	title, content, err := bot.extractTitleAndContent(msg, 33)
+	msg := "Header Line\nHeader Line\nAdditional content"
+	title, content, err := bot.extractHeaderAndBody(msg, 33)
 	r.NoError(err)
-	r.Equal("Title Line", title)
-	r.Equal("Title Line\nAdditional content", content)
+	r.Equal("Header Line", title)
+	r.Equal("Header Line\nAdditional content", content)
 }
 
 func TestExtractTitleAndContent_TitleNeedsSanitization(t *testing.T) {
@@ -3922,12 +3922,12 @@ func TestExtractTitleAndContent_TitleNeedsSanitization(t *testing.T) {
 
 	bot := NewBot(-1, nil, nil, nil, nil)
 
-	msg := "Invalid/Title?Name\nContent here"
+	msg := "Invalid/Header?Name\nContent here"
 
-	title, content, err := bot.extractTitleAndContent(msg, 33)
+	title, content, err := bot.extractHeaderAndBody(msg, 33)
 	r.NoError(err)
-	r.Equal("Invalid／Title？Name", title)
-	r.Equal("Invalid/Title?Name\nContent here", content)
+	r.Equal("Invalid／Header？Name", title)
+	r.Equal("Invalid/Header?Name\nContent here", content)
 }
 
 func TestMoveToExistingNote_Success(t *testing.T) {

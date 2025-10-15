@@ -63,7 +63,7 @@ func ScheduleReport(scheduledTasks []userconfig.Schedule) string {
 		schedule[day] = append(schedule[day], task)
 	}
 	for _, task := range scheduledTasks {
-		addToSchedule(formatTaskDate(task.ScheduledAt), fs.Title(task.Filename))
+		addToSchedule(formatTaskDate(task.ScheduledAt), fs.Header(task.Filename))
 	}
 
 	var report string

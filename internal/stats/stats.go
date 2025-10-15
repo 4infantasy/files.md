@@ -23,7 +23,7 @@ func TodayReport(userFS *fs.FS, db any, userID int64) (string, error) {
 
 	var stats []string
 	for _, file := range files {
-		stats = append(stats, fmt.Sprintf("%s <b>%s</b>", emoji(file), fs.Title(file)))
+		stats = append(stats, fmt.Sprintf("%s <b>%s</b>", emoji(file), fs.Header(file)))
 	}
 
 	archivedFiles, err := userFS.FilesAndDirs(fs.DirArchive)
@@ -84,7 +84,7 @@ func doneToday(userFS *fs.FS, db any, userID int64, withScheduled bool) ([]strin
 
 	var done []string
 	for _, todayFile := range todayFiles {
-		done = append(done, todayFile.Title)
+		done = append(done, todayFile.Header)
 	}
 
 	return done, nil

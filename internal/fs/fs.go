@@ -76,7 +76,7 @@ type FS struct {
 type File struct {
 	Name        string // Filename with extension
 	Hash        string
-	Title       string
+	Header      string
 	Ctime       int64
 	IsMultiline bool
 	IsDir       bool
@@ -320,7 +320,7 @@ func (fs FS) FilesAndDirs(dir string) ([]File, error) {
 		file := NewFile(
 			entry.Name(),
 			Hash(entry.Name()),
-			Title(entry.Name()),
+			Header(entry.Name()),
 			Ctime(entry),
 			entry.Size() > 0,
 			entry.IsDir(),
@@ -374,8 +374,8 @@ func (fs FS) md5(filename string) string {
 	return hex.EncodeToString(hash[:])[:11]
 }
 
-func Filename(title string) string {
-	return txt.Ucfirst(title) + MDExt
+func Filename(header string) string {
+	return txt.Ucfirst(header) + MDExt
 }
 
 func IsChecklistItem(filename string) bool {
@@ -448,8 +448,8 @@ func (fs FS) SearchFiles(query string) ([]File, error) {
 	var matchedNotes []File
 	for _, note := range notes {
 		isWildcard := len(search) == 0
-		isSubstring := strings.Contains(strings.ToLower(note.Title), search)
-		isSimilar := txt.Similar(strings.ToLower(note.Title), search) > minSearchSimilarity
+		isSubstring := strings.Contains(strings.ToLower(note.Header), search)
+		isSimilar := txt.Similar(strings.ToLower(note.Header), search) > minSearchSimilarity
 		if isWildcard || isSubstring || isSimilar {
 			matchedNotes = append(matchedNotes, note)
 		}
