@@ -296,11 +296,11 @@ class SearchModal {
             let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.dataset.text);
+                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').textContent);
                 messagesToRemove = selectedMessages;
             } else {
                 const btn = document.querySelector(`.message[data-text="${this.selectedMsgText}"] button`);
-                msgs = [btn.closest('.message').dataset.text];
+                msgs = [btn.closest('.message').querySelector('.message-content').textContent];
                 messagesToRemove = [btn.closest('.message')];
             }
 
