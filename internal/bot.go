@@ -854,9 +854,12 @@ func (b *Bot) showMoveTo(params []string) error {
 		userMoveToBtns = append(userMoveToBtns, *recentBtn)
 	}
 
-	showTodayCmd := tg.NewCmd(consts.CmdShowToday, []string{})
-	showTodayLabel := "👌"
-	userMoveToBtns = append(userMoveToBtns, tg.NewBtn(showTodayLabel, showTodayCmd))
+	// This command is "do nothing and leave an item in the inbox"
+	if !b.cfg.TasksOnlyMode() {
+		showTodayCmd := tg.NewCmd(consts.CmdShowToday, []string{})
+		showTodayLabel := "👌"
+		userMoveToBtns = append(userMoveToBtns, tg.NewBtn(showTodayLabel, showTodayCmd))
+	}
 
 	userBtnsByRows := slice.Chunk(userMoveToBtns, btnsPerRow)
 	for _, row := range userBtnsByRows {
