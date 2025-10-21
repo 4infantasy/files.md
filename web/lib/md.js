@@ -132,8 +132,10 @@ async function addHeaderAndText(path, header, text, atStart = false) {
     if (!existingContent.includes(header)) {
         if (existingContent === "") {
             result = `${header}\n${formattedContent}`;
-        } else {
+        } else if (atStart) {
             result = `${header}\n${formattedContent}\n\n${existingContent}`;
+        } else {
+            result = `${existingContent}\n\n${header}\n${formattedContent}`;
         }
     } else {
         const lines = existingContent.split("\n");
@@ -141,7 +143,7 @@ async function addHeaderAndText(path, header, text, atStart = false) {
 
         // Find the header line
         for (let i = 0; i < lines.length; i++) {
-            if (lines[i] === header) {
+            if (lines[i].startsWith(header)) {
                 headerIndex = i;
                 break;
             }
