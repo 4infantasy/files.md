@@ -1084,8 +1084,8 @@ async function syncCurrentEditor(syncWithServer = true) {
                 // TODO inmemory lastmodified should be reloaded
                 if (inMemoryLastModified !== localLastModified) {
                     log(files);
-                    await openFile(INBOX_PATH);
                     isMessingWithCurrentEditor = false;
+                    await openFile(INBOX_PATH);
                     return;
                 }
             } catch (e) {
