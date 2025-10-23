@@ -1254,6 +1254,8 @@ async function syncCurrentEditor(syncWithServer = true) {
         isSaving = false;
     }
 
+    isMessingWithCurrentEditor = false;
+
     if (syncWithServer) {
         try {
             await syncLocalFileWithServer(path);
@@ -1261,8 +1263,6 @@ async function syncCurrentEditor(syncWithServer = true) {
             console.error('Error during sync with server:', error);
         }
     }
-
-    isMessingWithCurrentEditor = false;
 }
 
 function hash(str) {
