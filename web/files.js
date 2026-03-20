@@ -352,6 +352,8 @@ async function syncLocalFileWithServer(path) {
     log(`Saved server file for ${path} with timestamp ${serverFile.lastModified}`);
     saveServerFiles();
     if (path === editor.path) {
+        // If we don't reset flag, we get deadlock from the calling function
+        isMessingWithCurrentEditor = false
         log('Opening file after sync');
         await openFile(path);
     }
@@ -1128,13 +1130,13 @@ async function syncCurrentEditor(syncWithServer = true) {
             try {
                 await syncLocalFileWithServer(INBOX_PATH);
             } catch (error) {
-                isMessingWithCurrentEditor = false;
                 console.error('Error during sync with server:', error);
             }
         }
 
         // We had a bug when this was released before syncLocalFileWithServer.
         // Sync local file with server produced concurent requests and race coditions with writing timestamps.
+        // The concurent request is not because we have RC in syncLocalFileWithServer, rather, we have unfinished network routine, and next current function call can cause another network routine
         isMessingWithCurrentEditor = false;
 
         return;
@@ -1292,13 +1294,13 @@ async function syncCurrentEditor(syncWithServer = true) {
         try {
             await syncLocalFileWithServer(path);
         } catch (error) {
-            isMessingWithCurrentEditor = false;
             console.error('Error during sync with server:', error);
         }
     }
 
     // We had a bug when this was released before syncLocalFileWithServer.
     // Sync local file with server produced concurent requests and race coditions with writing timestamps.
+    // The concurent request is not because we have RC in syncLocalFileWithServer, rather, we have unfinished network routine, and next current function call can cause another network routine
     isMessingWithCurrentEditor = false;
 }
 
