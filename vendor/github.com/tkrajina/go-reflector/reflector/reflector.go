@@ -565,7 +565,7 @@ func (of *ObjField) Tags() (map[string]string, error) {
 	return ParseTag(string(tag))
 }
 
-// TagsString returns the complete tags string (everything inside ``)
+// TagsString returns the complete tags string (everything inside “)
 func (of *ObjField) TagsString() (string, error) {
 	if err := of.assertValid(); err != nil {
 		return "", err

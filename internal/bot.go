@@ -251,56 +251,57 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		consts.CmdShowHelp:            b.showHelp,
 		consts.CmdDownload:            b.download,
 		// Button's commands (callbacks)
-		consts.CmdShowRenameFile:              b.showRenameFile,
-		consts.CmdShowMultilineTask:           b.showMultilineTask,
-		consts.CmdShowLongItem:                b.showLongItem,
-		consts.CmdShowLongItemFromInbox:       b.showLongItemFromInbox,
-		consts.CmdShowFile:                    b.showFile,
-		consts.CmdShowChecklist:               b.showChecklist,
-		consts.CmdCompleteListItem:            b.completeListItem,
-		consts.CmdShowChecklistItem:           b.showChecklistItem,
-		consts.CmdShowScheduleForDay:          b.showToADay,
-		consts.CmdShowMoveToDirOrFile:         b.showMoveToFileOrDir,
-		consts.CmdShowMoveToChecklist:         b.showToChecklist,
-		consts.CmdMoveToExistingDir:           b.moveToDir,
-		consts.CmdMoveToChecklist:             b.moveToChecklist,
-		consts.CmdCompleteChecklistItem:       b.completeChecklistItem,
-		consts.CmdMoveToExistingDirFromToday:  b.moveToDirFromToday,
-		consts.CmdRequestNewDir:               b.requestNewDirName,
-		consts.CmdMoveToNewDir:                b.moveToNewDir,
-		consts.CmdMoveToExistingFile:          b.moveToExistingFile,
-		consts.CmdMoveToExistingNote:          b.moveToExistingNote,
-		consts.CmdMoveToNewFile:               b.moveToNewFile,
-		consts.CmdMoveToDirChecklist:          b.moveToDirChecklist,
-		consts.CmdMoveToRead:                  b.moveToRead,
-		consts.CmdMoveToWatch:                 b.moveToWatch,
-		consts.CmdMoveToShop:                  b.moveToShop,
-		consts.CmdMoveToNewChecklist:          b.moveToNewChecklist,
-		consts.CmdMoveToJournal:               b.moveToJournal,
-		consts.CmdMoveToLater:                 b.moveToLater,
-		consts.CmdSchedule:                    b.schedule,
-		consts.CmdScheduleForTmrw:             b.scheduleForTmrw,
-		consts.CmdComplete:                    b.complete,
-		consts.CmdCompleteFromInbox:           b.completeFromChat,
-		consts.CmdPostpone:                    b.postpone,
-		consts.CmdPomodoro:                    b.togglePomodoro,
-		consts.CmdShowScheduleForDayRecurring: b.showToADayRecurring,
-		consts.CmdShowQuickBtnsSettings:       b.showQuickBtnsSettings,
-		consts.CmdShowMoveToBtnsSettings:      b.showMoveToBtnsSettings,
-		consts.CmdAddToQuickBtns:              b.addToQuickBtns,
-		consts.CmdDelFromQuickBtns:            b.delFromQuickBtns,
-		consts.CmdAddToMoveToBtns:             b.addToMoveToBtns,
-		consts.CmdDelFromMoveToBtns:           b.delFromMoveToBtns,
-		consts.CmdAddToJournalShortcut:        b.addToJournalFromShortcut,
-		consts.CmdAddToRecentFileShortcut:     b.addToRecentFileOrNoteFromShortcut,
-		consts.CmdRename:                      b.rename,
-		consts.CmdTasksOnlyMode:               b.setTasksOnlyMode,
-		consts.CmdNotesOnlyMode:               b.setNotesOnlyMode,
-		consts.CmdJournalOnlyMode:             b.setJournalOnlyMode,
-		consts.CmdFullMode:                    b.setFullMode,
-		consts.CmdChatMode:                    b.setChatOnlyMode,
-		consts.CmdCompleteHabit:               b.completeHabit,
-		consts.CmdShare:                       b.shareNote,
+		consts.CmdShowRenameFile:                  b.showRenameFile,
+		consts.CmdShowMultilineTask:               b.showMultilineTask,
+		consts.CmdShowLongItem:                    b.showLongItem,
+		consts.CmdShowLongItemFromInbox:           b.showLongItemFromInbox,
+		consts.CmdShowFile:                        b.showFile,
+		consts.CmdShowChecklist:                   b.showChecklist,
+		consts.CmdCompleteListItem:                b.completeListItem,
+		consts.CmdShowChecklistItem:               b.showChecklistItem,
+		consts.CmdShowScheduleForDay:              b.showToADay,
+		consts.CmdShowMoveToDirOrFile:             b.showMoveToFileOrDir,
+		consts.CmdShowMoveToChecklist:             b.showToChecklist,
+		consts.CmdMoveToExistingDir:               b.moveToDir,
+		consts.CmdMoveToChecklist:                 b.moveToChecklist,
+		consts.CmdCompleteChecklistItem:           b.completeChecklistItem,
+		consts.CmdMoveToExistingDirFromToday:      b.moveToDirFromToday,
+		consts.CmdRequestNewDir:                   b.requestNewDirName,
+		consts.CmdMoveToNewDir:                    b.moveToNewDir,
+		consts.CmdMoveToExistingFile:              b.moveToExistingFile,
+		consts.CmdMoveToExistingNote:              b.moveToExistingNote,
+		consts.CmdMoveToNewFile:                   b.moveToNewFile,
+		consts.CmdMoveToDirChecklist:              b.moveToDirChecklist,
+		consts.CmdMoveToRead:                      b.moveToRead,
+		consts.CmdMoveToWatch:                     b.moveToWatch,
+		consts.CmdMoveToShop:                      b.moveToShop,
+		consts.CmdMoveToNewChecklist:              b.moveToNewChecklist,
+		consts.CmdMoveToJournal:                   b.moveToJournal,
+		consts.CmdMoveToLater:                     b.moveToLater,
+		consts.CmdSchedule:                        b.schedule,
+		consts.CmdScheduleForTmrw:                 b.scheduleForTmrw,
+		consts.CmdComplete:                        b.complete,
+		consts.CmdCompleteFromInbox:               b.completeFromChat,
+		consts.CmdPostpone:                        b.postpone,
+		consts.CmdPomodoro:                        b.togglePomodoro,
+		consts.CmdShowScheduleForDayRecurring:     b.showToADayRecurring,
+		consts.CmdShowQuickBtnsSettings:           b.showQuickBtnsSettings,
+		consts.CmdShowMoveToBtnsSettings:          b.showMoveToBtnsSettings,
+		consts.CmdAddToQuickBtns:                  b.addToQuickBtns,
+		consts.CmdDelFromQuickBtns:                b.delFromQuickBtns,
+		consts.CmdAddToMoveToBtns:                 b.addToMoveToBtns,
+		consts.CmdDelFromMoveToBtns:               b.delFromMoveToBtns,
+		consts.CmdAddToJournalShortcut:            b.addToJournalFromShortcut,
+		consts.CmdAddToJournalAndContinueShortcut: b.addToJournalAndContinue,
+		consts.CmdAddToRecentFileShortcut:         b.addToRecentFileOrNoteFromShortcut,
+		consts.CmdRename:                          b.rename,
+		consts.CmdTasksOnlyMode:                   b.setTasksOnlyMode,
+		consts.CmdNotesOnlyMode:                   b.setNotesOnlyMode,
+		consts.CmdJournalOnlyMode:                 b.setJournalOnlyMode,
+		consts.CmdFullMode:                        b.setFullMode,
+		consts.CmdChatMode:                        b.setChatOnlyMode,
+		consts.CmdCompleteHabit:                   b.completeHabit,
+		consts.CmdShare:                           b.shareNote,
 		// Used for button-like separators
 		consts.CmdDoNothing: func(s []string) error { return nil },
 	}
@@ -2223,6 +2224,23 @@ func (b *Bot) moveToJournal(params []string) error {
 	}
 
 	return b.ShowToday(nil)
+}
+
+func (b *Bot) addToJournalAndContinue(params []string) error {
+	content := params[0]
+
+	err := journal.AddRecord(b.fs, content, b.cfg.Timezone())
+	if err != nil {
+		return fmt.Errorf("failed to move to journal: can't add note: %w", err)
+	}
+
+	// Don't return — continue to save to inbox as well.
+	msgIndex, err := b.saveToInbox(content, b.cfg.Timezone())
+	if err != nil {
+		return fmt.Errorf("save to inbox: %w", err)
+	}
+
+	return b.showMoveTo([]string{strconv.Itoa(msgIndex)})
 }
 
 func (b *Bot) addToJournalFromShortcut(params []string) error {
