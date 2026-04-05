@@ -19,7 +19,6 @@ type BotConfig struct {
 	TokensDir      string `default:"/tmp" envconfig:"TOKENS_DIR"`
 	TokensSalt     string `envconfig:"TOKENS_SALT"`
 	ServerLogFile  string `default:"/tmp/server.log" envconfig:"SERVER_LOG_FILE"`
-	AuthToken      string `default:"" envconfig:"AUTH_TOKEN"`
 }
 
 var BotCfg BotConfig

@@ -1,7 +1,7 @@
 <img src="https://github.com/zakirullin/files.md/raw/main/web/icon.png" alt="Files.md Bot logo" title="Files.md Bot" align="right" height="76" />
 
 # What is it?
-A simple application for your personal Second Brain/Zettelkasten.
+A radically simple application for your personal Second Brain/Zettelkasten.
 
 Just enough functionality for you to do the actual work.
 
@@ -20,10 +20,18 @@ After some time I've got the insight.
 Software Development and brain related notes suddenly connected.  
 I wrote an article on [Cogitnive Load in Software Development](github.com/zakirullin/cognitive-load).  
 Many considered it a good write-up.  
-That's the final goal - to **think deeply**, **to connect knowledge across domains** and **to write texts**.
+That's the final goal is to:
+- **think deeply**  
+- **connect knowledge across domains**  
+- **to write insightful texts**  
+- 
+To achieve all that, **you'll have to use your brain**. Not advanced workflows or AI automations.  
 
-Anything else is entertainment.  
-You don't need fancy views or advanced workflows. Start with one folder.  
+## Init Server
+```bash
+TOKENS_SALT=your-secret-salt-here (TODO salt)
+$ make init_server host=<YOUR_SSH_HOST>
+```
 
 ## Repository structure
 `/cmd/server` - entrypoint for telegram bot (stable release)  
