@@ -1,30 +1,30 @@
 <img src="https://github.com/zakirullin/files.md/raw/main/web/icon.png" alt="Files.md Bot logo" title="Files.md Bot" align="right" height="76" />
 
 # What is it?
-A radically simple application for your personal Second Brain/Zettelkasten.
-
-Just enough functionality for you to do the actual work.
+A radically simple application for your personal knowledge base.
 
 You can store whole your life in `.md` files:
-- 📝 Notes, Files
+- 📝 Notes, Projects
 - ✅ Tasks, Checklists
 - 💚 Journal, Habits
 
-## What is this for?
-1) I used files.md to grow my knowledge base about Software Development and Brain.  
-2) I added new notes to the knowledge base. One idea per note.  
-made connections between notes.    
-3) I spend time travelling through notes and thinking it through.
-4) Software Development and brain related notes suddenly connected in mo.
-5) It clicked, I got the insight.  
-6) I wrote an article on [Cogitnive Load in Software Development](github.com/zakirullin/cognitive-load).
+## Why?
+I'll give you a concrete example.
 
-Many considered it a good write-up.  
+1) I used `files.md` to grow my knowledge base about Software Development and Brain.
+2) I added new notes to the knowledge base. One idea per note.
+3) I made connections between notes. Everything should be connected, just as in our brain.
+4) I spend time travelling through notes and thinking it through.
+5) Software development and brain-related notes suddenly appeared to be very related.
+6) I got the insight.
+7) I wrote an article about [Cogitnive Load in Software Development](github.com/zakirullin/cognitive-load).
 
-So, the final goal is:
+Many considered it a great write-up.  
+
+The process helped me to:
 - **think deeply**  
+- **write insightful texts**
 - **connect knowledge across domains**  
-- **to write insightful texts**
 
 To achieve all that, **you'll have to use your brain**. Not advanced workflows or AI automations.  
 
