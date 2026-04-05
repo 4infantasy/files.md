@@ -2,17 +2,16 @@
 
 # What is it?
 <img src="https://github.com/zakirullin/files.md/raw/main/web/files.md.png" alt="Files.md screenshot" title="Files.md"/>
+A simple application for your `.md` files.
 
-A radically simple application for your personal files.
-
-You can store whole your life in `.md` files:
+You can store whole your life:
 - 📝 Notes, Projects
 - ✅ Tasks, Checklists
 - 💚 Journal, Habits
 
-## Why?
-I'll give you a concrete example.
+All in plain `.md` files, locally.  
 
+## Why?
 1) I used `files.md` to grow my knowledge base about Software Development and Brain.
 2) I added new notes to the knowledge base. One idea per note.
 3) I made connections between notes. Everything should be connected, just as in our brain.
