@@ -1,5 +1,5 @@
 // TODO gzip
-package server
+package sync
 
 import (
 	"encoding/json"

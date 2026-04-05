@@ -25,18 +25,18 @@ import (
 
 	"github.com/zakirullin/files.md/config"
 	"github.com/zakirullin/files.md/i18n"
+	"github.com/zakirullin/files.md/pkg/slice"
+	"github.com/zakirullin/files.md/pkg/tg"
+	"github.com/zakirullin/files.md/pkg/txt"
 	"github.com/zakirullin/files.md/server/consts"
 	"github.com/zakirullin/files.md/server/fs"
 	"github.com/zakirullin/files.md/server/habits"
 	"github.com/zakirullin/files.md/server/journal"
 	"github.com/zakirullin/files.md/server/plugins"
 	"github.com/zakirullin/files.md/server/sched"
-	"github.com/zakirullin/files.md/server/server"
 	"github.com/zakirullin/files.md/server/stats"
+	"github.com/zakirullin/files.md/server/sync"
 	"github.com/zakirullin/files.md/server/userconfig"
-	"github.com/zakirullin/files.md/pkg/slice"
-	"github.com/zakirullin/files.md/pkg/tg"
-	"github.com/zakirullin/files.md/pkg/txt"
 )
 
 var (
@@ -2817,7 +2817,7 @@ func (b *Bot) addToFile(dir, filename, content string) error {
 }
 
 func (b *Bot) openInApp(_ []string) error {
-	token := server.GenOneTimeToken(b.userID)
+	token := sync.GenOneTimeToken(b.userID)
 	onetimeURL := fmt.Sprintf("%s?token=%s", config.BotCfg.AppHost, token)
 	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n.Tr("Open in app"), tg.NewURLCmd(onetimeURL))})
 

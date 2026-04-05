@@ -1,6 +1,6 @@
 // Package webserver provides a server for habits tracking functionality through Telegram miniapps.
 // SSLs certificates are handled automatically via LetsEncrypt.
-package server
+package sync
 
 import (
 	"crypto/tls"

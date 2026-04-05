@@ -20,7 +20,7 @@ import (
 	"github.com/zakirullin/files.md/server/db"
 	"github.com/zakirullin/files.md/server/fs"
 	"github.com/zakirullin/files.md/server/sched/worker"
-	"github.com/zakirullin/files.md/server/server"
+	"github.com/zakirullin/files.md/server/sync"
 	"github.com/zakirullin/files.md/server/userconfig"
 	"github.com/zakirullin/files.md/pkg/tg"
 	"github.com/zakirullin/files.md/pkg/txt"
@@ -49,10 +49,10 @@ func main() {
 	telegram := tg.NewTG(api)
 
 	// Save all renames and deletes to an append-only log.
-	fs.LogRename = server.LogRename
-	fs.LogDelete = server.LogDelete
+	fs.LogRename = sync.LogRename
+	fs.LogDelete = sync.LogDelete
 	// If today or inbox was changed in web app, we need to send the updated items to the bot.
-	server.OnTodayUpdate = func(userID int64) { updateToday(telegram, userID) }
+	sync.OnTodayUpdate = func(userID int64) { updateToday(telegram, userID) }
 
 	// Due tasks scheduler
 	ticker := time.NewTicker(5 * time.Second)
@@ -84,7 +84,7 @@ func main() {
 	// TODO apphost?
 	// Launch habits server if needed
 	if config.BotCfg.ApiHost != "" {
-		go server.Serve(
+		go sync.Serve(
 			config.BotCfg.ApiHost,
 			config.BotCfg.AppHost,
 			config.BotCfg.ServerCertDir,
