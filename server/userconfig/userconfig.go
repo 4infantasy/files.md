@@ -71,7 +71,7 @@ func NewConfig(userFS *fs.FS, userID int64, filename string) *Config {
 }
 
 func (c *Config) CreateDefaultIfNotExists() error {
-	exists, err := c.userFS.Exists(fs.DirRoot, c.filename)
+	exists, err := c.userFS.Exists(fs.DirUserRoot, c.filename)
 	if err != nil {
 		return fmt.Errorf("can't check whether config exists: %w", err)
 	}
@@ -290,7 +290,7 @@ func (c *Config) Channels() []int64 {
 }
 
 func (c *Config) read(path string) (config, error) {
-	exists, err := c.userFS.Exists(fs.DirRoot, path)
+	exists, err := c.userFS.Exists(fs.DirUserRoot, path)
 	if err != nil {
 		return DefaultConfig, fmt.Errorf("config load: %w", err)
 	}
@@ -299,7 +299,7 @@ func (c *Config) read(path string) (config, error) {
 		return DefaultConfig, nil
 	}
 
-	content, err := c.userFS.Read(fs.DirRoot, c.filename)
+	content, err := c.userFS.Read(fs.DirUserRoot, c.filename)
 	if err != nil {
 		return DefaultConfig, fmt.Errorf("config load: %w", err)
 	}
@@ -319,7 +319,7 @@ func (c *Config) write(cfg config) error {
 		return fmt.Errorf("config save: can't marshal config: %w", err)
 	}
 
-	err = c.userFS.Write(fs.DirRoot, c.filename, string(bytes))
+	err = c.userFS.Write(fs.DirUserRoot, c.filename, string(bytes))
 	if err != nil {
 		return fmt.Errorf("config save: can't write config file: %w", err)
 	}

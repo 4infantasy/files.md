@@ -848,8 +848,8 @@ func TestFiles(t *testing.T) {
 	r.Equal("📄 Your files:"+wideSpacer, tgram.SentTexts[0])
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		[]tg.Btn{
-			tg.NewBtn("Doc1", tg.NewCmd("file", []string{fs.DirRoot, "c1253521ac7"})),
-			tg.NewBtn("Doc2", tg.NewCmd("file", []string{fs.DirRoot, "64572c3093f"})),
+			tg.NewBtn("Doc1", tg.NewCmd("file", []string{fs.DirUserRoot, "c1253521ac7"})),
+			tg.NewBtn("Doc2", tg.NewCmd("file", []string{fs.DirUserRoot, "64572c3093f"})),
 		},
 		[]tg.Btn{
 			tg.NewBtn("🔎 Search", tg.NewCustomCmd("search", nil, "iq")),
@@ -2145,7 +2145,7 @@ func TestSchedule(t *testing.T) {
 	r.NoError(err)
 	r.Empty(tasksForToday)
 
-	laterMD, err := userFS.Read(fs.DirRoot, fs.LaterFilename)
+	laterMD, err := userFS.Read(fs.DirUserRoot, fs.LaterFilename)
 	r.NoError(err)
 
 	items, _ := txt.ChecklistItems(laterMD)
@@ -2188,7 +2188,7 @@ func TestScheduleNoRepeat(t *testing.T) {
 	r.NoError(err)
 	r.Empty(tasksForToday)
 
-	laterMD, err := userFS.Read(fs.DirRoot, fs.LaterFilename)
+	laterMD, err := userFS.Read(fs.DirUserRoot, fs.LaterFilename)
 	r.NoError(err)
 
 	items, _ := txt.ChecklistItems(laterMD)
@@ -4404,7 +4404,7 @@ func TestScheduleForTmrw(t *testing.T) {
 	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("sc_tmrw", []string{"0"})))
 	r.NoError(err)
 
-	laterMD, err := userFS.Read(fs.DirRoot, fs.LaterFilename)
+	laterMD, err := userFS.Read(fs.DirUserRoot, fs.LaterFilename)
 	r.NoError(err)
 
 	items, _ := txt.ChecklistItems(laterMD)

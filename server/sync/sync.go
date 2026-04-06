@@ -83,7 +83,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 	for _, path := range request.Deleted {
 		// Paths that are coming from client start with /, make them relative
 		path = strings.TrimPrefix(path, "/")
-		err = userFS.Del(fs.DirRoot, path)
+		err = userFS.Del(fs.DirUserRoot, path)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				continue
@@ -119,7 +119,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(clientFile.Path, "/")
 		relativePath := strings.TrimPrefix(path, "/")
 
-		serverModifiedTime, err := userFS.Mtime(fs.DirRoot, relativePath)
+		serverModifiedTime, err := userFS.Mtime(fs.DirUserRoot, relativePath)
 		var clientContent string
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			slog.Error("Sync error: syncTexts: error reading file", "path", path, "error", err)
@@ -134,7 +134,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 			fileWasModifiedOnServer := serverModifiedTime > clientFile.LastModified
 			if fileWasModifiedOnServer {
 				// Change on both client and server.
-				serverContent, err := userFS.Read(fs.DirRoot, relativePath)
+				serverContent, err := userFS.Read(fs.DirUserRoot, relativePath)
 				if err != nil {
 					slog.Error("Sync error: syncTexts: error reading modified on server file '%s': %v", path, err)
 					continue
@@ -155,7 +155,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Write the clientContent to the server at path.
-		err = userFS.Write(fs.DirRoot, relativePath, clientContent)
+		err = userFS.Write(fs.DirUserRoot, relativePath, clientContent)
 		if err != nil {
 			slog.Error("Sync error: syncTexts: error writing file '%s': %v", path, err)
 			logSync(fmt.Sprintf("Sync texts: error writing file '%s': %v", path, err), r)
@@ -168,7 +168,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Based on known client dirs timestamps, send newly updated or created files.
-	serverTimestamps, err := userFS.Mtimes(fs.DirRoot, fs.MDExt, ".txt")
+	serverTimestamps, err := userFS.Mtimes(fs.DirUserRoot, fs.MDExt, ".txt")
 	if err != nil {
 		slog.Error("Sync error: syncTexts: error getting server timestamps", "error", err)
 		http.Error(w, fmt.Sprintf("Failed to get timestamps: %v", err), http.StatusInternalServerError)
@@ -176,7 +176,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Include config file timestamp, so it will be sent to the client if stale.
-	configCtime, err := userFS.Mtime(fs.DirRoot, config.ServerCfg.ConfigFilename)
+	configCtime, err := userFS.Mtime(fs.DirUserRoot, config.ServerCfg.ConfigFilename)
 	// We can ignore the error since config.json is not used on client in any way, pure for read-only purposes.
 	if err == nil {
 		serverTimestamps[config.ServerCfg.ConfigFilename] = configCtime
@@ -199,7 +199,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		requestDirTime, exists := request.Timestamps[dir]
 		if !exists || serverFileTime > requestDirTime {
 			// Client needs this file - read its content
-			content, err := userFS.Read(fs.DirRoot, path)
+			content, err := userFS.Read(fs.DirUserRoot, path)
 			if err != nil {
 				slog.Error("Sync error: syncTexts: error reading file", "path", path, "error", err)
 				logSync(fmt.Sprintf("Error reading file %s: %v", path, err), r)
@@ -279,14 +279,14 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	relativePath := strings.TrimPrefix(path, "/")
 
 	// TODO if no clientFile, severContent = ""
-	serverContent, err := userFS.Read(fs.DirRoot, relativePath)
+	serverContent, err := userFS.Read(fs.DirUserRoot, relativePath)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		slog.Error("Sync error: syncText: error reading clientFile", "path", path, "error", err)
 		http.Error(w, "Error reading server clientFile", http.StatusBadRequest)
 		return
 	}
 
-	serverLastModified, err := userFS.Mtime(fs.DirRoot, relativePath)
+	serverLastModified, err := userFS.Mtime(fs.DirUserRoot, relativePath)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			slog.Error("Sync error: syncText: error getting ctime for clientFile '%s': %v", path, err)
@@ -338,7 +338,7 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if shouldUpdateOnServer {
-		err = userFS.Write(fs.DirRoot, relativePath, content)
+		err = userFS.Write(fs.DirUserRoot, relativePath, content)
 		if err != nil {
 			slog.Error("Sync error: syncText: error writing clientFile '%s': %v", path, err)
 			logSync(fmt.Sprintf("Error writing clientFile '%s': %v", path, err), r)
@@ -351,7 +351,7 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	serverLastModified, err = userFS.Mtime(fs.DirRoot, relativePath)
+	serverLastModified, err = userFS.Mtime(fs.DirUserRoot, relativePath)
 	// TODO what if 0?
 	logSync(fmt.Sprintf("Final server timestamp for '%s': %d", path, serverLastModified), r)
 

@@ -61,7 +61,7 @@ func findUserID(token string) (int64, bool) {
 		return 0, false
 	}
 
-	data, err := tokens.Read(fs.DirRoot, hashToken(token))
+	data, err := tokens.Read(fs.DirUserRoot, hashToken(token))
 	if err != nil {
 		return 0, false
 	}
@@ -203,7 +203,7 @@ func issueNewPermanentToken(r *http.Request) (string, bool) {
 		slog.Error("Failed to create file system for tokens", "error", err)
 		return "", false
 	}
-	err = tokens.Write(fs.DirRoot, hashToken(token), strconv.FormatInt(data.userID, 10))
+	err = tokens.Write(fs.DirUserRoot, hashToken(token), strconv.FormatInt(data.userID, 10))
 	if err != nil {
 		return "", false
 	}

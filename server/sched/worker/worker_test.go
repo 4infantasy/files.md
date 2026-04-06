@@ -167,7 +167,7 @@ func TestMoveDueTasksFromArchive(t *testing.T) {
 	err = MoveDueTasks("/", "config.json", fsBackend, tgram)
 	r.NoError(err)
 
-	todayMD, err := userFS.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := userFS.Read(fs.DirUserRoot, fs.TodayFilename)
 	r.NoError(err)
 
 	items, _ := txt.ChecklistItems(todayMD)
@@ -194,7 +194,7 @@ func TestMoveDueTasksFromLater(t *testing.T) {
 	r.NoError(err)
 	err = userFS.CreateDirsIfNotExist()
 	r.NoError(err)
-	_ = userFS.Write(fs.DirRoot, fs.LaterFilename, "- [ ] due task")
+	_ = userFS.Write(fs.DirUserRoot, fs.LaterFilename, "- [ ] due task")
 
 	cfg := userconfig.NewConfig(userFS, -1, "config.json")
 	_ = cfg.CreateDefaultIfNotExists()
@@ -212,7 +212,7 @@ func TestMoveDueTasksFromLater(t *testing.T) {
 	err = MoveDueTasks("/", "config.json", fsBackend, tgram)
 	r.NoError(err)
 
-	todayMD, err := userFS.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := userFS.Read(fs.DirUserRoot, fs.TodayFilename)
 	r.NoError(err)
 
 	items, _ := txt.ChecklistItems(todayMD)

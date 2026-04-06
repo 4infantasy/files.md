@@ -36,7 +36,7 @@ var (
 )
 
 const (
-	DirRoot     = "/"
+	DirUserRoot = "/"
 	DirArchive  = "archive"
 	DirToday    = "today"
 	DirLater    = "later"
@@ -136,7 +136,7 @@ func (fs FS) CreateDirsIfNotExist(dirs ...string) error {
 		}
 	}
 	for _, dir := range dirs {
-		if dir == DirRoot {
+		if dir == DirUserRoot {
 			continue
 		}
 
@@ -276,11 +276,9 @@ func (fs FS) Rename(oldDir, oldFilename, newDir, newFilename string) error {
 }
 
 func (fs FS) Unhash(dir, filenameHash string) (string, error) {
-	if dir == DirRoot && filenameHash == DirRoot {
-		return DirRoot, nil
+	if dir == DirUserRoot && filenameHash == DirUserRoot {
+		return DirUserRoot, nil
 	}
-
-	// TODO add safety checks (what safety checks?)
 
 	filenames, err := fs.FilesAndDirs(dir)
 	if err != nil {
@@ -341,14 +339,14 @@ func (fs FS) FilesAndDirs(dir string) ([]File, error) {
 }
 
 func (fs FS) Dirs() ([]File, error) {
-	files, err := fs.FilesAndDirs(DirRoot)
+	files, err := fs.FilesAndDirs(DirUserRoot)
 	if err != nil {
 		return nil, fmt.Errorf("can't get dirs: %w", err)
 	}
 
 	var dirs []File
 	for _, file := range files {
-		filePath, err := fs.SafePath(DirRoot, file.Name)
+		filePath, err := fs.SafePath(DirUserRoot, file.Name)
 		if err != nil {
 			return nil, fmt.Errorf("can't get dirs: unsafe path '%s': %w", filePath, errUnsafePath)
 		}
@@ -406,7 +404,7 @@ func (fs FS) SearchFiles(query string) ([]File, error) {
 	}
 
 	var supposedDir, search string
-	dirExists, err := fs.Exists(DirRoot, query)
+	dirExists, err := fs.Exists(DirUserRoot, query)
 	if err != nil {
 		return nil, fmt.Errorf("search notes: %w", err)
 	}
@@ -422,14 +420,14 @@ func (fs FS) SearchFiles(query string) ([]File, error) {
 
 	// Find match by notes directory name
 	var searchInDirs []string
-	notesDirs, err := fs.FilesAndDirs(DirRoot)
+	notesDirs, err := fs.FilesAndDirs(DirUserRoot)
 	if err != nil {
 		return nil, fmt.Errorf("search notes: %w", err)
 	}
 	notesDirs = OnlyNoteDirs(notesDirs)
-	notesDirs = append(notesDirs, NewFile(DirRoot, "", DirRoot, 0, false, true, ""))
-	notesDirs = append(notesDirs, NewFile(DirJournal, Hash(DirJournal), DirJournal, 0, false, true, DirRoot))
-	notesDirs = append(notesDirs, NewFile(DirInsights, Hash(DirInsights), DirInsights, 0, false, true, DirRoot))
+	notesDirs = append(notesDirs, NewFile(DirUserRoot, "", DirUserRoot, 0, false, true, ""))
+	notesDirs = append(notesDirs, NewFile(DirJournal, Hash(DirJournal), DirJournal, 0, false, true, DirUserRoot))
+	notesDirs = append(notesDirs, NewFile(DirInsights, Hash(DirInsights), DirInsights, 0, false, true, DirUserRoot))
 	for _, noteDir := range notesDirs {
 		if strings.HasPrefix(noteDir.Name, supposedDir) {
 			searchInDirs = append(searchInDirs, noteDir.Name)

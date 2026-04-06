@@ -19,7 +19,7 @@ var (
 )
 
 func (b *Bot) saveToInbox(content string, timezone *time.Location) (int, error) {
-	exists, err := b.fs.Exists(fs.DirRoot, fs.InboxFilename)
+	exists, err := b.fs.Exists(fs.DirUserRoot, fs.InboxFilename)
 	if err != nil {
 		return 0, fmt.Errorf("saveToChat: %w", err)
 	}
@@ -28,7 +28,7 @@ func (b *Bot) saveToInbox(content string, timezone *time.Location) (int, error) 
 
 	var md string
 	if exists {
-		md, err = b.fs.Read(fs.DirRoot, fs.InboxFilename)
+		md, err = b.fs.Read(fs.DirUserRoot, fs.InboxFilename)
 		if err != nil {
 			return 0, fmt.Errorf("saveToChat: %w", err)
 		}
@@ -70,7 +70,7 @@ func (b *Bot) saveToInbox(content string, timezone *time.Location) (int, error) 
 
 	md += content
 
-	if err := b.fs.Write(fs.DirRoot, fs.InboxFilename, md); err != nil {
+	if err := b.fs.Write(fs.DirUserRoot, fs.InboxFilename, md); err != nil {
 		return 0, fmt.Errorf("saveToChat: %w", err)
 	}
 
@@ -86,7 +86,7 @@ func (b *Bot) moveFromInbox(
 	collapse bool,
 	msgIndices ...int,
 ) error {
-	key, err := b.fs.SafePath(fs.DirRoot, "")
+	key, err := b.fs.SafePath(fs.DirUserRoot, "")
 	if err != nil {
 		return fmt.Errorf("failed to get safe path: %w", err)
 	}
@@ -95,7 +95,7 @@ func (b *Bot) moveFromInbox(
 	lock.Lock()
 	defer lock.Unlock()
 
-	content, err := b.fs.Read(fs.DirRoot, fs.InboxFilename)
+	content, err := b.fs.Read(fs.DirUserRoot, fs.InboxFilename)
 	if err != nil {
 		return err
 	}
@@ -216,7 +216,7 @@ func (b *Bot) moveFromInbox(
 	}
 	modifiedContent := strings.TrimSpace(strings.Join(newBlocks, "\n"))
 
-	return b.fs.Write(fs.DirRoot, fs.InboxFilename, modifiedContent)
+	return b.fs.Write(fs.DirUserRoot, fs.InboxFilename, modifiedContent)
 }
 
 // readBlocks parses content into logical blocks

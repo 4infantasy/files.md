@@ -92,6 +92,8 @@ func RenamesLog(userID, afterTimestamp int64) map[string]string {
 		}
 
 		// TODO exclude ../ from log to prevent Filename Traversal attack
+		// Or do we need it? Log rename only logs bot's renames, which are bounded by user folders.
+		// And if an attacker get access to the log, he would be able to read files anyway.
 
 		if !strings.HasPrefix(oldPath, userPathPrefix) || !strings.HasPrefix(newPath, userPathPrefix) {
 			continue

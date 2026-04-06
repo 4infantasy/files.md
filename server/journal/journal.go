@@ -22,7 +22,7 @@ var (
 // AddRecord adds a record for the current day.
 // Creates a file if there's no one for the current month
 func AddRecord(userFS *fs.FS, record string, timezone *time.Location) error {
-	key, err := userFS.SafePath(fs.DirRoot, "")
+	key, err := userFS.SafePath(fs.DirUserRoot, "")
 	if err != nil {
 		return fmt.Errorf("failed to get safe path: %w", err)
 	}
@@ -78,7 +78,7 @@ func AddEmoji(userFS *fs.FS, emoji string, timezone *time.Location) error {
 		return nil
 	}
 
-	key, err := userFS.SafePath(fs.DirRoot, "")
+	key, err := userFS.SafePath(fs.DirUserRoot, "")
 	if err != nil {
 		return fmt.Errorf("failed to get safe path: %w", err)
 	}

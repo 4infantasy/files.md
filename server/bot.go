@@ -151,7 +151,7 @@ func (b *Bot) Reply(u Update) error {
 			channelName = "UnknownChannel"
 		}
 
-		return b.addToFile(fs.DirRoot, fs.Filename(channelName), u.MsgText())
+		return b.addToFile(fs.DirUserRoot, fs.Filename(channelName), u.MsgText())
 	}
 
 	// Handle plugins.
@@ -396,7 +396,7 @@ func (b *Bot) saveFromTextMsg(u Update) error {
 		if shouldCollapse {
 			// We just write at the end of our append-only chat file,
 			// that would concat the current message with the previous one.
-			err := b.createOrAdd(fs.DirRoot, fs.InboxFilename, msg)
+			err := b.createOrAdd(fs.DirUserRoot, fs.InboxFilename, msg)
 			if err != nil {
 				return fmt.Errorf("save collapsed: %w", err)
 			}
@@ -444,7 +444,7 @@ func (b *Bot) saveFromImage(u Update) error {
 	if updateHasTime {
 		_, shouldCollapse := collapseToMsg(b.userID, msgTime)
 		if shouldCollapse {
-			err := b.createOrAdd(fs.DirRoot, fs.InboxFilename, content)
+			err := b.createOrAdd(fs.DirUserRoot, fs.InboxFilename, content)
 			if err != nil {
 				return fmt.Errorf("save collapsed: %w", err)
 			}
@@ -562,7 +562,7 @@ func (b *Bot) answerSearch(u Update) error {
 	var results []interface{}
 	for id, note := range matchedNotes {
 		path := fmt.Sprintf("<code>%s/%s</code>", note.ParentDir, note.Name)
-		if note.ParentDir == fs.DirRoot {
+		if note.ParentDir == fs.DirUserRoot {
 			path = note.Name
 		}
 		article := tgbotapi.NewInlineQueryResultArticleHTML(strconv.Itoa(id), note.DisplayName, path)
@@ -594,7 +594,7 @@ func (b *Bot) answerFileRequest(msg string) error {
 	dirAndFilename := strings.Split(msg, "/")
 	var dir, filename string
 	if len(dirAndFilename) == 1 {
-		dir = fs.DirRoot
+		dir = fs.DirUserRoot
 		filename = strings.TrimSpace(dirAndFilename[0])
 	} else if len(dirAndFilename) == 2 {
 		dir = strings.TrimSpace(dirAndFilename[0])
@@ -616,7 +616,7 @@ func (b *Bot) answerFileRequest(msg string) error {
 		}
 
 		err = b.moveFromInbox(func(content string, timestamp time.Time) error {
-			if dir == fs.DirRoot {
+			if dir == fs.DirUserRoot {
 				// We have a file
 				b.db.SetRecentCommand(consts.CmdMoveToExistingFile)
 				b.db.SetRecentCommandParams([]string{fs.ShortHash(filename)})
@@ -772,7 +772,7 @@ func (b *Bot) showMD(probablyInvalidMD string, kb *tg.Keyboard) error {
 	probablyInvalidMD, images, links := txt.ExtractTextImgsLinks(probablyInvalidMD)
 
 	for label, link := range links {
-		dir := fs.DirRoot
+		dir := fs.DirUserRoot
 		link = strings.TrimSpace(link)
 		parts := strings.SplitN(link, "/", 2)
 		if len(parts) == 2 {
@@ -919,12 +919,12 @@ func (b *Bot) recentCmdBtn(msgIndex int) *tg.Btn {
 	icon := "⭐️"
 	if recentCmd == consts.CmdMoveToExistingFile {
 		var err error
-		unhashedTarget, err = b.fs.Unhash(fs.DirRoot, targetFilenameHash)
+		unhashedTarget, err = b.fs.Unhash(fs.DirUserRoot, targetFilenameHash)
 		if err != nil {
 			return nil
 		}
 	} else if recentCmd == consts.CmdMoveToExistingNote {
-		dir, err := b.fs.Unhash(fs.DirRoot, args[1])
+		dir, err := b.fs.Unhash(fs.DirUserRoot, args[1])
 		if err != nil {
 			return nil
 		}
@@ -958,7 +958,7 @@ func (b *Bot) ShowToday(_ []string) error {
 	var kb tg.Keyboard
 
 	// Adding tasks from Today.txt
-	todayChecklistMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	todayChecklistMD, err := b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("show today: can't read today file: %w", err)
 	}
@@ -991,7 +991,7 @@ func (b *Bot) ShowToday(_ []string) error {
 	}
 
 	// Adding records from chat
-	content, err := b.fs.Read(fs.DirRoot, fs.InboxFilename)
+	content, err := b.fs.Read(fs.DirUserRoot, fs.InboxFilename)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("show today: can't read chat file: %w", err)
 	}
@@ -1096,7 +1096,7 @@ func (b *Bot) showLaterTasks(_ []string) error {
 	}
 
 	// Adding tasks from Later.txt
-	laterChecklistMD, err := b.fs.Read(fs.DirRoot, fs.LaterFilename)
+	laterChecklistMD, err := b.fs.Read(fs.DirUserRoot, fs.LaterFilename)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("show later: can't read later file: %w", err)
 	}
@@ -1124,7 +1124,7 @@ func (b *Bot) todayLabel(msgsCount ...int) string {
 	var statusBar string
 
 	hasPomodoroInToday := false
-	todayMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	if err == nil {
 		_, isCompleted := txt.ChecklistItems(todayMD)
 		checked, exists := isCompleted[fs.PomodoroTask]
@@ -1164,7 +1164,7 @@ func (b *Bot) todayLabel(msgsCount ...int) string {
 }
 
 func (b *Bot) showFiles(_ []string) error {
-	files, err := b.fs.FilesAndDirs(fs.DirRoot)
+	files, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
 		return fmt.Errorf("show files: can't get files: %w", err)
 	}
@@ -1173,7 +1173,7 @@ func (b *Bot) showFiles(_ []string) error {
 	mdFiles := fs.ExcludeConfig(fs.OnlyMDFiles(files))
 	var fileBtns []tg.Btn
 	for _, file := range mdFiles {
-		cmd := tg.NewCmd(consts.CmdShowFile, []string{fs.DirRoot, fs.Hash(file.Name)})
+		cmd := tg.NewCmd(consts.CmdShowFile, []string{fs.DirUserRoot, fs.Hash(file.Name)})
 		btn := tg.NewBtn(fmt.Sprintf("%s", fs.UnsanitizeFilename(file.DisplayName)), cmd)
 		fileBtns = append(fileBtns, btn)
 	}
@@ -1198,7 +1198,7 @@ func (b *Bot) showFiles(_ []string) error {
 }
 
 func (b *Bot) showDirs(_ []string) error {
-	files, err := b.fs.FilesAndDirs(fs.DirRoot)
+	files, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
 		return fmt.Errorf("show dirs: can't get dirs: %w", err)
 	}
@@ -1233,7 +1233,7 @@ func (b *Bot) showDirs(_ []string) error {
 }
 
 func (b *Bot) showChecklists(_ []string) error {
-	checklists, err := b.fs.FilesAndDirs(fs.DirRoot)
+	checklists, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
 		return fmt.Errorf("show checklists: %w", err)
 	}
@@ -1257,7 +1257,7 @@ func (b *Bot) showChecklists(_ []string) error {
 }
 
 func (b *Bot) showPostpone(_ []string) error {
-	todayMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	tasks, _ := txt.ChecklistItems(todayMD)
 
 	var kb tg.Keyboard
@@ -1309,23 +1309,23 @@ func (b *Bot) postpone(params []string) error {
 	// TODO Remove input expectations if dir is not today (?)
 	taskHash := params[0]
 
-	todayMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	if err != nil {
 		return fmt.Errorf("postpone: can't read today file: %w", err)
 	}
 
 	todayMD, task := txt.RemoveChecklistItem(todayMD, taskHash)
 
-	laterMD, err := b.fs.Read(fs.DirRoot, fs.LaterFilename)
+	laterMD, err := b.fs.Read(fs.DirUserRoot, fs.LaterFilename)
 	if err != nil {
 		return fmt.Errorf("postpone: can't read later file: %w", err)
 	}
-	err = b.fs.Write(fs.DirRoot, fs.LaterFilename, txt.AddChecklistItem(laterMD, task, false))
+	err = b.fs.Write(fs.DirUserRoot, fs.LaterFilename, txt.AddChecklistItem(laterMD, task, false))
 	if err != nil {
 		return fmt.Errorf("postpone: can't write later file: %w", err)
 	}
 
-	err = b.fs.Write(fs.DirRoot, fs.TodayFilename, todayMD)
+	err = b.fs.Write(fs.DirUserRoot, fs.TodayFilename, todayMD)
 	if err != nil {
 		return fmt.Errorf("postpone: can't write today file: %w", err)
 	}
@@ -1335,7 +1335,7 @@ func (b *Bot) postpone(params []string) error {
 
 // TODO add tests
 func (b *Bot) showRename(_ []string) error {
-	todayMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("rename: can't read today file: %w", err)
 	}
@@ -1383,14 +1383,14 @@ func (b *Bot) rename(params []string) error {
 	itemHash := params[1]
 	newItemNameFromUserInput := params[2]
 
-	md, err := b.fs.Read(fs.DirRoot, checklist)
+	md, err := b.fs.Read(fs.DirUserRoot, checklist)
 	if err != nil {
 		return fmt.Errorf("rename: can't read checklist %s: %w", checklist, err)
 	}
 	md, _ = txt.RemoveChecklistItem(md, itemHash)
 	md = txt.AddChecklistItem(md, newItemNameFromUserInput, false)
 
-	err = b.fs.Write(fs.DirRoot, checklist, md)
+	err = b.fs.Write(fs.DirUserRoot, checklist, md)
 	if err != nil {
 		return fmt.Errorf("rename: can't write checklist %s: %w", checklist, err)
 	}
@@ -1501,12 +1501,12 @@ func (b *Bot) showLongItem(params []string) error {
 	checklistHash := params[0]
 	itemHash := params[1]
 
-	checklist, err := b.fs.Unhash(fs.DirRoot, checklistHash)
+	checklist, err := b.fs.Unhash(fs.DirUserRoot, checklistHash)
 	if err != nil {
 		return fmt.Errorf("complete checklist item: can't unhash checklist %s: %w", checklistHash, err)
 	}
 
-	checklistMD, err := b.fs.Read(fs.DirRoot, checklist)
+	checklistMD, err := b.fs.Read(fs.DirUserRoot, checklist)
 	if err != nil {
 		return fmt.Errorf("complete checklist item: can't read checklist %s: %w", checklist, err)
 	}
@@ -1541,7 +1541,7 @@ func (b *Bot) showLongItemFromInbox(params []string) error {
 		return fmt.Errorf("show long item: can't parse msgIndex from params: %w", err)
 	}
 
-	inboxMD, err := b.fs.Read(fs.DirRoot, fs.InboxFilename)
+	inboxMD, err := b.fs.Read(fs.DirUserRoot, fs.InboxFilename)
 	if err != nil {
 		return fmt.Errorf("show long item: can't read inbox file: %w", err)
 	}
@@ -1581,7 +1581,7 @@ func (b *Bot) showFile(params []string) error {
 	dirHash := params[0]
 	filenameHash := params[1]
 
-	dir, err := b.fs.Unhash(fs.DirRoot, dirHash)
+	dir, err := b.fs.Unhash(fs.DirUserRoot, dirHash)
 	if err != nil {
 		return fmt.Errorf("show file: can't find dir: %w", err)
 	}
@@ -1629,12 +1629,12 @@ func (b *Bot) showFile(params []string) error {
 func (b *Bot) showChecklist(params []string) error {
 	checklistHash := params[0]
 
-	checklist, err := b.fs.Unhash(fs.DirRoot, checklistHash)
+	checklist, err := b.fs.Unhash(fs.DirUserRoot, checklistHash)
 	if err != nil {
 		return fmt.Errorf("show checklist: %w", err)
 	}
 
-	md, err := b.fs.Read(fs.DirRoot, checklist)
+	md, err := b.fs.Read(fs.DirUserRoot, checklist)
 	if err != nil {
 		return fmt.Errorf("show checklist: %w", err)
 	}
@@ -1701,7 +1701,7 @@ func (b *Bot) moveToDirFromToday(params []string) error {
 	fromDirHash := params[1]
 	fromFilenameHash := params[2]
 
-	oldDir, err := b.fs.Unhash(fs.DirRoot, fromDirHash)
+	oldDir, err := b.fs.Unhash(fs.DirUserRoot, fromDirHash)
 	if err != nil {
 		return fmt.Errorf("move: can't unhash old dir: %w", err)
 	}
@@ -1715,7 +1715,7 @@ func (b *Bot) moveToDirFromToday(params []string) error {
 		newFilename = params[3]
 	}
 
-	toDir, err := b.fs.Unhash(fs.DirRoot, toDirHash)
+	toDir, err := b.fs.Unhash(fs.DirUserRoot, toDirHash)
 	if err != nil {
 		return fmt.Errorf("move: can't unhash new dir %s: %w", toDir, err)
 	}
@@ -1763,7 +1763,7 @@ func (b *Bot) moveToDir(params []string) error {
 		msgIndices = append(msgIndices, msgIndex)
 	}
 
-	toDir, err := b.fs.Unhash(fs.DirRoot, toDirHash)
+	toDir, err := b.fs.Unhash(fs.DirUserRoot, toDirHash)
 	canCreateMissingDir := slices.Contains([]string{fs.DirArchive, fs.DirHabits}, toDirHash)
 	if err != nil {
 		if canCreateMissingDir {
@@ -1842,7 +1842,7 @@ func (b *Bot) moveToChecklist(params []string) error {
 }
 
 func (b *Bot) addToChecklist(checklistHash string, msgIndex int) (string, error) {
-	checklist, err := b.fs.Unhash(fs.DirRoot, checklistHash)
+	checklist, err := b.fs.Unhash(fs.DirUserRoot, checklistHash)
 	// Create known checklist if it doesn't exist
 	if err != nil {
 		supportedChecklists := []string{
@@ -1857,7 +1857,7 @@ func (b *Bot) addToChecklist(checklistHash string, msgIndex int) (string, error)
 		for _, supportedChecklist := range supportedChecklists {
 			if fs.Hash(supportedChecklist) == checklistHash || supportedChecklist == checklistHash {
 				checklist = supportedChecklist
-				err = b.fs.Write(fs.DirRoot, checklist, "")
+				err = b.fs.Write(fs.DirUserRoot, checklist, "")
 				if err != nil {
 					return "", fmt.Errorf("add to checklist: can't create checklist %s: %w", checklist, err)
 				}
@@ -1871,7 +1871,7 @@ func (b *Bot) addToChecklist(checklistHash string, msgIndex int) (string, error)
 		}
 	}
 
-	checklistMD, err := b.fs.Read(fs.DirRoot, checklist)
+	checklistMD, err := b.fs.Read(fs.DirUserRoot, checklist)
 	if err != nil {
 		return "", fmt.Errorf("add to checklist: can't read checklist %s: %w", checklist, err)
 	}
@@ -1880,7 +1880,7 @@ func (b *Bot) addToChecklist(checklistHash string, msgIndex int) (string, error)
 	err = b.moveFromInbox(func(content string, timestamp time.Time) error {
 		item = content
 		md := txt.AddChecklistItem(checklistMD, content, false)
-		return b.fs.Write(fs.DirRoot, checklist, md)
+		return b.fs.Write(fs.DirUserRoot, checklist, md)
 	}, true, msgIndex)
 	if err != nil {
 		return "", fmt.Errorf("move to checklist: can't move from chat: %w", err)
@@ -1893,18 +1893,18 @@ func (b *Bot) completeChecklistItem(params []string) error {
 	checklistHash := params[0]
 	itemHash := params[1]
 
-	checklist, err := b.fs.Unhash(fs.DirRoot, checklistHash)
+	checklist, err := b.fs.Unhash(fs.DirUserRoot, checklistHash)
 	if err != nil {
 		return fmt.Errorf("complete checklist item: can't unhash checklist %s: %w", checklistHash, err)
 	}
 
-	checklistMD, err := b.fs.Read(fs.DirRoot, checklist)
+	checklistMD, err := b.fs.Read(fs.DirUserRoot, checklist)
 	if err != nil {
 		return fmt.Errorf("complete checklist item: can't read checklist %s: %w", checklist, err)
 	}
 
 	md, item := txt.CompleteChecklistItem(checklistMD, itemHash)
-	err = b.fs.Write(fs.DirRoot, checklist, md)
+	err = b.fs.Write(fs.DirUserRoot, checklist, md)
 	if err != nil {
 		return fmt.Errorf("complete checklist item: can't complete item from chat: %w", err)
 	}
@@ -1948,7 +1948,7 @@ func (b *Bot) moveToNewDir(params []string) error {
 	msgIndicesStr := params[0]
 	dir := strings.ToLower(fs.SanitizeFilename(params[1]))
 
-	exists, err := b.fs.Exists(fs.DirRoot, dir)
+	exists, err := b.fs.Exists(fs.DirUserRoot, dir)
 	if err != nil {
 		return fmt.Errorf("move to new dir from caht: %w", err)
 	}
@@ -1977,13 +1977,13 @@ func (b *Bot) moveToExistingFile(params []string) error {
 		msgIndices = append(msgIndices, msgIndex)
 	}
 
-	existingFilename, err := b.fs.Unhash(fs.DirRoot, existingFilenameHash)
+	existingFilename, err := b.fs.Unhash(fs.DirUserRoot, existingFilenameHash)
 	if err != nil {
 		return fmt.Errorf("move to file: can't unhash existing file '%s': %w", existingFilenameHash, err)
 	}
 
 	err = b.moveFromInbox(func(content string, timestamp time.Time) error {
-		return b.addToFile(fs.DirRoot, existingFilename, content)
+		return b.addToFile(fs.DirUserRoot, existingFilename, content)
 	}, true, msgIndices...)
 	if err != nil {
 		return fmt.Errorf("move to file: can't add to existing file '%s': %w", existingFilename, err)
@@ -2016,10 +2016,10 @@ func (b *Bot) moveToExistingNote(params []string) error {
 
 	var toDir string
 	if toDirHash == "" {
-		toDir = fs.DirRoot
+		toDir = fs.DirUserRoot
 	} else {
 		var err error
-		toDir, err = b.fs.Unhash(fs.DirRoot, toDirHash)
+		toDir, err = b.fs.Unhash(fs.DirUserRoot, toDirHash)
 		if err != nil {
 			return fmt.Errorf("move to existing note: %w", err)
 		}
@@ -2065,7 +2065,7 @@ func (b *Bot) moveToDirChecklist(params []string) error {
 	}
 	checklistDirHash := params[1]
 
-	checklistDir, err := b.fs.Unhash(fs.DirRoot, checklistDirHash)
+	checklistDir, err := b.fs.Unhash(fs.DirUserRoot, checklistDirHash)
 	// Default directories can be created later
 	canCreateMissingDir := slices.Contains([]string{fs.DirWatch, fs.DirShop, fs.DirRead}, checklistDirHash)
 	if err != nil {
@@ -2132,13 +2132,13 @@ func (b *Bot) moveToNewFile(params []string) error {
 	}
 	newFilenameFromUserInput := fs.Filename(params[1])
 
-	//filename, err := b.fs.Unhash(fs.DirRoot, msgIndex)
+	//filename, err := b.fs.Unhash(fs.DirUserRoot, msgIndex)
 	//if err != nil {
 	//	return fmt.Errorf("move to new file: can't unhash existing file '%s': %w", msgIndex, err)
 	//}
 	//
 	//// Save existing filename to content in case the content of new file is empty (i.e. not multiline)
-	//content, err := b.fs.Read(fs.DirRoot, filename)
+	//content, err := b.fs.Read(fs.DirUserRoot, filename)
 	//if err != nil {
 	//	return fmt.Errorf("move to new file: can't read file '%s': %w", filename, err)
 	//}
@@ -2146,7 +2146,7 @@ func (b *Bot) moveToNewFile(params []string) error {
 		content = strings.TrimSpace(content)
 		//if len(content) == 0 {
 		//	content = fs.DisplayName(filename)
-		//	err = b.fs.Write(fs.DirRoot, filename, content)
+		//	err = b.fs.Write(fs.DirUserRoot, filename, content)
 		//	if err != nil {
 		//		return fmt.Errorf("move to new file: can't write content of '%s': %w", filename, err)
 		//	}
@@ -2154,7 +2154,7 @@ func (b *Bot) moveToNewFile(params []string) error {
 
 		// TODO check for safety
 		// TODO won't we lost some text here in case of multiline?
-		//err = b.fs.Rename(fs.DirRoot, filename, fs.DirRoot, newFilenameFromUserInput)
+		//err = b.fs.Rename(fs.DirUserRoot, filename, fs.DirUserRoot, newFilenameFromUserInput)
 		//if err != nil {
 		//	return fmt.Errorf("move to new file: can't create empty file: %w", err)
 		//}
@@ -2166,7 +2166,7 @@ func (b *Bot) moveToNewFile(params []string) error {
 		b.db.SetRecentCommandParams([]string{fs.ShortHash(newFilenameFromUserInput)})
 
 		// TODO add if exists
-		return b.fs.Write(fs.DirRoot, newFilenameFromUserInput, content)
+		return b.fs.Write(fs.DirUserRoot, newFilenameFromUserInput, content)
 	}, false, msgIndex)
 	if err != nil {
 		return fmt.Errorf("move to new file: can't read content from chat: %w", err)
@@ -2186,7 +2186,7 @@ func (b *Bot) moveToNewChecklist(params []string) error {
 
 	dir := strings.ToLower(supposedName)
 	dir = fmt.Sprintf("_%s_", dir)
-	exists, err := b.fs.Exists(fs.DirRoot, dir)
+	exists, err := b.fs.Exists(fs.DirUserRoot, dir)
 	if err != nil {
 		return fmt.Errorf("move to new checklist: %w", err)
 	}
@@ -2268,17 +2268,17 @@ func (b *Bot) addToRecentFileOrNoteFromShortcut(params []string) error {
 	var existingFilename string
 	if cmd == consts.CmdMoveToExistingFile {
 		var err error
-		existingFilename, err = b.fs.Unhash(fs.DirRoot, args[0])
+		existingFilename, err = b.fs.Unhash(fs.DirUserRoot, args[0])
 		if err != nil {
 			return fmt.Errorf("failed to move to recent file or note: can't unhash filename: %w", err)
 		}
 
-		err = b.addToFile(fs.DirRoot, existingFilename, content)
+		err = b.addToFile(fs.DirUserRoot, existingFilename, content)
 		if err != nil {
 			return fmt.Errorf("failed to move to recent file: can't add note: %w", err)
 		}
 	} else if cmd == consts.CmdMoveToExistingNote {
-		dir, err := b.fs.Unhash(fs.DirRoot, args[1])
+		dir, err := b.fs.Unhash(fs.DirUserRoot, args[1])
 		if err != nil {
 			return fmt.Errorf("failed to move to recent note: can't unhash dir: %w", err)
 		}
@@ -2359,7 +2359,7 @@ func (b *Bot) completeListItem(params []string) error {
 	dirHash := params[0]
 	filenameHash := params[1]
 
-	dir, err := b.fs.Unhash(fs.DirRoot, dirHash)
+	dir, err := b.fs.Unhash(fs.DirUserRoot, dirHash)
 	if err != nil {
 		return fmt.Errorf("complete: can't unhash dir %s: %w", dir, err)
 	}
@@ -2392,7 +2392,7 @@ func (b *Bot) showChecklistItem(params []string) error {
 	dirHash := params[0]
 	filenameHash := params[1]
 
-	dir, err := b.fs.Unhash(fs.DirRoot, dirHash)
+	dir, err := b.fs.Unhash(fs.DirUserRoot, dirHash)
 	if err != nil {
 		return fmt.Errorf("show checklist item: can't unhash dir %s: %w", dir, err)
 	}
@@ -2634,7 +2634,7 @@ func (b *Bot) showToChecklist(params []string) error {
 }
 
 func (b *Bot) moveToFileBtns(msgIndex int) ([]tg.Btn, error) {
-	files, err := b.fs.FilesAndDirs(fs.DirRoot)
+	files, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
 		return nil, fmt.Errorf("to doc keyboard: %w", err)
 	}
@@ -2663,7 +2663,7 @@ func (b *Bot) moveToDirBtns(msgIndex int) ([]tg.Btn, error) {
 		return tg.NewBtn(emojifiedDir, tg.NewCmd(consts.CmdMoveToExistingDir, []string{fs.ShortHash(dir), strconv.Itoa(msgIndex)}))
 	}
 
-	dirs, err := b.fs.FilesAndDirs(fs.DirRoot)
+	dirs, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
 		return nil, fmt.Errorf("to note keyboard: %w", err)
 	}
@@ -2683,7 +2683,7 @@ func (b *Bot) toChecklistKeyboard(filenameHash string) (*tg.Keyboard, error) {
 		return tg.NewBtn(title, tg.NewCmd(consts.CmdMoveToDirChecklist, []string{filenameHash, dir}))
 	}
 
-	dirs, err := b.fs.FilesAndDirs(fs.DirRoot)
+	dirs, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
 		return nil, fmt.Errorf("to checklist keyboard: %w", err)
 	}
@@ -2701,7 +2701,7 @@ func (b *Bot) toChecklistKeyboard(filenameHash string) (*tg.Keyboard, error) {
 func (b *Bot) togglePomodoro(_ []string) error {
 	// Check if Pomodoro is already running
 	hasPomodoroInToday := false
-	todayMD, err := b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	todayMD, err := b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	if err == nil {
 		_, isCompleted := txt.ChecklistItems(todayMD)
 		_, hasPomodoroInToday = isCompleted[fs.PomodoroTask]
@@ -2716,7 +2716,7 @@ func (b *Bot) togglePomodoro(_ []string) error {
 
 	if hasPomodoroInToday {
 		todayMD, _ = txt.RemoveChecklistItem(todayMD, fs.PomodoroTask)
-		err = b.fs.Write(fs.DirRoot, fs.TodayFilename, todayMD)
+		err = b.fs.Write(fs.DirUserRoot, fs.TodayFilename, todayMD)
 		if err != nil {
 			return fmt.Errorf("toggle pomodoro: failed to delete pomodoro file: %w", err)
 		}
@@ -2734,12 +2734,12 @@ func (b *Bot) togglePomodoro(_ []string) error {
 		return b.ShowToday(nil)
 	}
 
-	//todayMD, err = b.fs.Read(fs.DirRoot, fs.TodayFilename)
+	//todayMD, err = b.fs.Read(fs.DirUserRoot, fs.TodayFilename)
 	//if err != nil {
 	//	return fmt.Errorf("toggle pomodoro: failed to show pomodoro hint message %w", err)
 	//}
 	// Create Pomodoro task
-	err = b.fs.Write(fs.DirRoot, fs.TodayFilename, txt.AddChecklistItem(todayMD, fs.PomodoroTask, false))
+	err = b.fs.Write(fs.DirUserRoot, fs.TodayFilename, txt.AddChecklistItem(todayMD, fs.PomodoroTask, false))
 
 	_, err = b.tg.Send(b.userID, i18n2.PomodoroStarted, nil, tg.MarkupHTML)
 	if err != nil {
@@ -2963,7 +2963,7 @@ func (b *Bot) shareNote(params []string) error {
 	dirHash := params[0]
 	filenameHash := params[1]
 
-	dir, err := b.fs.Unhash(fs.DirRoot, dirHash)
+	dir, err := b.fs.Unhash(fs.DirUserRoot, dirHash)
 	if err != nil {
 		return fmt.Errorf("share note: can't find dir: %w", err)
 	}
