@@ -968,7 +968,7 @@ func (b *Bot) showMoveTo(params []string) error {
 
 	b.delAllKeyboards()
 
-	msg := b.tr("Saved!")
+	msg := b.tr("Saved to <b>inbox</b>!")
 	if b.cfg.TasksOnlyMode() {
 		msg = b.tr("Saved to <b>today</b>!")
 	}
