@@ -75,7 +75,6 @@ class MemDir {
 }
 
 let memFSRoot = null;
-let isMemFS = false;
 function getMemFSRoot() {
     if (memFSRoot) return memFSRoot;
 
@@ -98,7 +97,7 @@ function getMemFSRoot() {
     return memFSRoot;
 }
 
-async function getOPFSDirHandle() {
+async function getInMemDirHandle() {
     // OPFS requires a secure context (https or localhost), not available on file://
     try {
         const root = await navigator.storage.getDirectory();

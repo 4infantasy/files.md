@@ -1087,7 +1087,7 @@ async function openFile(path, saveToHistory = true, el = 'editor-textarea') {
 // If currentEditor is changed during the execution of this function, we'll have RC.
 // So, wherever we change currentEditor reference, we should lock via isSyncingCurrentEditor.
 async function syncCurrentEditor(syncWithServer = true) {
-    if (files === undefined || isWelcome || debug || currentEditor.path === undefined) {
+    if (files === undefined || debug || currentEditor.path === undefined) {
         return;
     }
 

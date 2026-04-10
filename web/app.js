@@ -3,22 +3,20 @@
 // We read and save files using Local File System API (or in-memory FS in case of Safari).
 // We sync both text and media files with the server if there's a token key in local storage.
 
-let isInbox = false;
-let isWelcome = false;
-let debug = false;
-// let debug = {dir: '', file: 'Sim.md', loaded: false};
-
 const sidebar = document.getElementById('sidebar');
-const sidebarContainer = document.getElementById('sidebar-container');
 const content = document.getElementById('content')
 
 const TODAY_PATH = '/Today.txt';
 const LATER_PATH = '/Later.txt';
 const DONE_PATH = '/archive/Done.txt';
 const LOG_PATH = '/archive/Log.txt';
-
 const OPEN_INBOX_AFTER_IDLE = 1 * 60 * 60 * 1000; // ms
+
 let openInboxIdleTimer = null;
+let isInbox = false;
+let isMemFS = false;
+let debug = false;
+// let debug = {dir: '', file: 'File.md', loaded: false};
 
 async function init() {
     // Authorize if we have one-time token in URL.
@@ -58,10 +56,10 @@ async function init() {
     const hasSavedLocalDir = savedDirHandle instanceof FileSystemDirectoryHandle;
     if (!hasSavedLocalDir) {
         document.getElementById('open-folder').style.display = 'inline';
-        isWelcome = false;
+        isMemFS = false;
         // document.getElementById('open-chat-modal').style.display = 'inline';
     } else {
-        isWelcome = false;
+        isMemFS = false;
         document.getElementById('open-folder').style.display = 'none';
         // document.getElementById('open-chat-modal').style.display = 'inline';
     }
@@ -445,7 +443,7 @@ async function openDir() {
     // await migrateFromOPFSToLocal();
     files = await loadLocalFiles(dirHandle)
 
-    isWelcome = false;
+    isMemFS = false;
     renderSidebar();
     await openInbox();
 }
@@ -615,7 +613,7 @@ async function removeSavedRootDirHandle() {
 async function getRootDirHandle() {
     const savedDirHandle = await getSavedRootDirHandle();
     if (!(savedDirHandle instanceof FileSystemDirectoryHandle)) {
-        return await getOPFSDirHandle();
+        return await getInMemDirHandle();
     }
 
     return savedDirHandle;
@@ -630,7 +628,7 @@ window.addEventListener('focus', async () => {
     }
 
     // We don't want to do heavy stuff when chat is open.
-    if (isInbox || isWelcome) {
+    if (isInbox || isMemFS) {
         return false;
     }
 
