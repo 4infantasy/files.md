@@ -44,42 +44,42 @@ synch:
 report:
 	cd tests && npx playwright show-report
 
-init_server: # create directories and configuration files on the service
-	ssh $(host) "\
-		mkdir -p /app/storage && \
-		mkdir -p /var/log/files.md && \
-		mkdir -p /opt/files.md && \
-		mkdir -p /opt/files.md/tokens && \
-		chown -R www-data:www-data /app && \
-		chown -R www-data:www-data /var/log/files.md && \
-		chown -R www-data:www-data /opt/files.md && \
-		echo 'BOT_API_TOKEN=' > /app/.env && \
-		echo 'STORAGE_DIR=/app/storage' >> /app/.env && \
-		echo 'CERT_DIR=/opt/files.md' >> /app/.env && \
-		echo 'TOKENS_DIR=/opt/files.md/tokens' >> /app/.env && \
-		echo 'LOG_FILE=/var/log/files.md/server.log' >> /app/.env && \
-		chown www-data:www-data /app/.env && \
-		( \
-			echo '[Unit]' > /etc/systemd/system/server.service && \
-			echo 'Description=Files.md Server' >> /etc/systemd/system/server.service && \
-			echo 'After=network.target' >> /etc/systemd/system/server.service && \
-			echo '' >> /etc/systemd/system/server.service && \
-			echo '[Service]' >> /etc/systemd/system/server.service && \
-			echo 'User=www-data' >> /etc/systemd/system/server.service && \
-			echo 'ExecStart=/app/server' >> /etc/systemd/system/server.service && \
-			echo 'WorkingDirectory=/app' >> /etc/systemd/system/server.service && \
-			echo 'Environment=TOKENS_SALT=your-secret-salt-here' >> /etc/systemd/system/server.service && \
-			echo 'Restart=always' >> /etc/systemd/system/server.service && \
-			echo 'RestartSec=5' >> /etc/systemd/system/server.service && \
-			echo 'StandardOutput=append:/app/log' >> /etc/systemd/system/server.service && \
-			echo 'StandardError=append:/app/err' >> /etc/systemd/system/server.service && \
-			echo 'AmbientCapabilities=CAP_NET_BIND_SERVICE' >> /etc/systemd/system/server.service && \
-			echo '' >> /etc/systemd/system/server.service && \
-			echo '[Install]' >> /etc/systemd/system/server.service && \
-			echo 'WantedBy=multi-user.target' >> /etc/systemd/system/server.service \
-		) || echo 'Failed to write service file. Check permissions.'; \
-		echo 'Directories created and permissions set successfully.' \
-	"
+define ENV_FILE
+BOT_API_TOKEN=
+STORAGE_DIR=/app/storage
+CERT_DIR=/opt/files.md
+TOKENS_DIR=/opt/files.md/tokens
+LOG_FILE=/var/log/files.md/server.log
+endef
+
+define SERVICE_FILE
+[Unit]
+Description=Files.md Server
+After=network.target
+
+[Service]
+User=www-data
+ExecStart=/app/server
+WorkingDirectory=/app
+Environment=TOKENS_SALT=$(salt)
+Restart=always
+RestartSec=5
+StandardOutput=append:/app/log
+StandardError=append:/app/err
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+endef
+
+# make init_server host=root@1.2.3.4 salt=my-secret-salt
+export ENV_FILE SERVICE_FILE
+init_server: # create directories and configuration files on the server
+	ssh $(host) 'sudo mkdir -p /app/storage /var/log/files.md /opt/files.md /opt/files.md/tokens && \
+		sudo chown -R www-data:www-data /app /var/log/files.md /opt/files.md'
+	echo "$$ENV_FILE" | ssh $(host) 'sudo tee /app/.env > /dev/null && sudo chown www-data:www-data /app/.env'
+	echo "$$SERVICE_FILE" | ssh $(host) 'sudo tee /etc/systemd/system/server.service > /dev/null'
+	@echo 'Directories created and permissions set successfully.'
 
 deploy_systemd: # deploy as systemd service, TODO make timestamps hussle in separate dir, add js/css minify before release
 	@GREEN='\e[32m'; \

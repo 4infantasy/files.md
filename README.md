@@ -82,8 +82,7 @@ Bot's artifacts can be seen in `./storage/<USER_ID>` folder
 
 ## Init Server
 ```bash
-TOKENS_SALT=your-secret-salt-here (TODO salt)
-$ make init_server host=<YOUR_SSH_HOST>
+$ make init_server host=<YOUR_SSH_HOST> salt=<YOUR_SECRET_SALT>
 ```
 
 ## Repository structure
