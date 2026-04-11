@@ -21,7 +21,7 @@ Maybe. But this time:
 - Works offline
 - Local first, you own all your files
 - Fully open source, you can tweak it however you want
-- Radically simple code. **One person or an LLM can fit the whole project in head**
+- Extremely simple code. **One person or an LLM can fit the whole project in head**
 - Portable, no build systems, just open `web/index.html` 
 - Out of the box synchronization
 - The server is just one binary (or use iCloud/Dropbox/Google Drive for sync)
@@ -82,18 +82,12 @@ We're used to sending messages to friends, now we're going to send stuff to the 
 ## Useful scripts for your files
 All scripts are in `cmd/` and can be run **inside your files directory**. Install [Go](https://go.dev/doc/install) first.
 
-Convert `[[wikilinks]]` to standard markdown links `[Name](/path.md)`:
-```
-go run /abs/path/to/files.md/cmd/tomdlinks/tomdlinks.go --dry-run .
-```
+Convert `[[wikilinks]]` to standard markdown links `[Name](/path.md)` (`--dry-run` available):
 ```
 go run /abs/path/to/files.md/cmd/tomdlinks/tomdlinks.go .
 ```
 
-Insert backlinks into notes (adds links back to referencing files):
-```
-go run /abs/path/to/files.md/cmd/backlink/backlink.go --dry-run
-```
+Insert backlinks into notes — adds links back to referencing files (`--dry-run` available):
 ```
 go run /abs/path/to/files.md/cmd/backlink/backlink.go
 ```
