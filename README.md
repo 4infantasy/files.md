@@ -26,8 +26,6 @@ Maybe. But this time:
 - Out of the box synchronization
 - The server is just one binary (or use iCloud/Dropbox/Google Drive for sync)
 - Telegram bot for on-the-go access to your files
-- Oh, and there’s also tasks, checklists, a journal, and habit tracking
-- All stored in plain `.md` files
 
 ## Are there enough features and plugins?
 Enough to do the real work.  
@@ -47,7 +45,7 @@ All this activity helped me to:
 - **Think in systems and see the bigger picture**
 - **Write insightful texts**
 
-To achieve all that, **you'll have to use your brain**. Not advanced templates or AI workflows.  
+To achieve all that, **you'll have to use your brain**, not advanced templates or AI workflows.  
 
 ## How to take notes 🗒️
 You read a book, you stumble upon an interesting idea.  
@@ -101,21 +99,24 @@ We're used to sending messages to friends, now we're going to send stuff to the 
 ## Useful scripts for your files
 All scripts are in `cmd` and can be run **inside your files directory**. Install [Go](https://go.dev/doc/install) first.
 
-Parse `Whoop` CSV export and print a 10-day journal summary. Put your whoop csv files into a `whoop/` folder:
+### Add Whoop metrics to journal
 ```
 go run /abs/path/to/files.md/cmd/whoop/whoop.go
 ```
 
-Convert `[[wikilinks]]` to standard markdown links `[Name](/path.md)` (`--dry-run` available):
+### Convert wikilinks to markdown links
+Convert `[[wikilinks]]` to standard `[Name](/path.md)` (`--dry-run` available):
 ```
 go run /abs/path/to/files.md/cmd/tomdlinks/tomdlinks.go .
 ```
 
-Insert backlinks into notes - adds links back to referencing files (`--dry-run` available):
+### Insert backlinks
+Adds links back to referencing files (`--dry-run` available):
 ```
 go run /abs/path/to/files.md/cmd/backlink/backlink.go
 ```
 
+### Shift journal timestamps
 Shift timestamps in journal files by N hours (useful after timezone change):
 ```
 go run /abs/path/to/files.md/cmd/shifttime/shifttime.go
