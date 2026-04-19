@@ -63,7 +63,7 @@ func Serve(apiHost, appHost, certDir, logFilename string) {
 	}
 	srv.Handler = router(serverLogger)
 
-	err = srv.ListenAndServeTLS("", "") // Key and cert provided automatically by autocert
+	err := srv.ListenAndServeTLS("", "") // Key and cert provided automatically by autocert
 	if err != nil {
 		panic(err)
 	}

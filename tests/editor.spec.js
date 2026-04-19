@@ -162,6 +162,92 @@ test('should handle text selection for word-wrap content', async ({page}) => {
     }
 });
 
+test('opening link in editor2 should not clobber main editor when stale editor2 has out-of-sync content', async ({page}) => {
+    await page.evaluate(async () => {
+        // Seed OPFS once, so external modifications aren't clobbered by repeated setup.
+        const seedRoot = await navigator.storage.getDirectory();
+        const hapDir = await seedRoot.getDirectoryHandle('hap', {create: true});
+        const lifeDir = await seedRoot.getDirectoryHandle('life', {create: true});
+
+        const write = async (dir, name, content) => {
+            const handle = await dir.getFileHandle(name, {create: true});
+            const writable = await handle.createWritable();
+            await writable.write(content);
+            await writable.close();
+        };
+
+        await write(hapDir, 'Dream.md', 'Dream body [Awareness](Awareness.md)');
+        await write(hapDir, 'Awareness.md', 'Awareness body');
+        await write(lifeDir, 'Pilaf.md', 'Pilaf recipe');
+        await write(lifeDir, 'Recipes.md', 'Recipes list [Pilaf](Pilaf.md)');
+
+        window.getRootDirHandle = async function () {
+            return await navigator.storage.getDirectory();
+        };
+    });
+
+    await page.evaluate(() => {
+        init(document.getElementById('editor'));
+    });
+
+    await page.waitForTimeout(500);
+
+    const nodeSel = (name) => `#tree .tj_description:text-is('${name}')`;
+    const expand = async (dir) => {
+        const locator = page.locator(nodeSel(dir));
+        const isExpanded = await locator.evaluate(el => el.classList.contains('expanded'));
+        if (!isExpanded) {
+            await locator.click();
+            await page.waitForTimeout(100);
+        }
+    };
+
+    // 1) Open Recipes in the main editor
+    await expand('life');
+    await page.click(nodeSel('Recipes'));
+    await page.waitForTimeout(300);
+
+    // 2) Click Pilaf link — opens Pilaf in editor2
+    await page.evaluate(() => editor.hmdReadLink('Pilaf'));
+    await page.waitForTimeout(500);
+
+    // 3) Press Escape — editor2 is hidden but editor2.path stays = life/Pilaf.md
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // 4) Modify Pilaf on disk from outside the editor (simulates server sync)
+    await page.evaluate(async () => {
+        const root = await navigator.storage.getDirectory();
+        const lifeDir = await root.getDirectoryHandle('life');
+        const handle = await lifeDir.getFileHandle('Pilaf.md');
+        const writable = await handle.createWritable();
+        await writable.write('Pilaf recipe UPDATED externally');
+        await writable.close();
+    });
+    await page.waitForTimeout(200);
+
+    // 5) Open Dream in main editor
+    await expand('hap');
+    await page.click(nodeSel('Dream'));
+    await page.waitForTimeout(300);
+
+    // 6) Click Awareness link — should open in editor2
+    await page.evaluate(() => editor.hmdReadLink('Awareness'));
+    await page.waitForTimeout(1000);
+
+    // Main editor must still hold Dream, not be poisoned with Pilaf content.
+    const state = await page.evaluate(() => ({
+        editorPath: editor.path,
+        editorContent: editor.getValue(),
+        editor2Path: editor2.path,
+        editor2Content: editor2.getValue(),
+    }));
+    expect(state.editorPath).toBe('/hap/Dream.md');
+    expect(state.editorContent).toBe('# Dream\nDream body [Awareness](Awareness.md)');
+    expect(state.editor2Path).toBe('/hap/Awareness.md');
+    expect(state.editor2Content).toBe('# Awareness\nAwareness body');
+});
+
 test('should handle partical text selection for word-wrap content', async ({page}) => {
     await page.click('#sidebar >> text=Welcome');
     await page.waitForTimeout(500);

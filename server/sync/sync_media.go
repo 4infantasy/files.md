@@ -36,9 +36,6 @@ func SyncMedias(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO ../.. Attacks (fixed with fs.FS?)
-	logSync(fmt.Sprintf("Media sync syncMediasRequest for folder: '%s', last sync: %d", fs.DirMedia, syncMediasRequest.Timestamp), r)
-
 	userFS, err := fs.NewUserFS(userID(r))
 	if err != nil {
 		slog.Error("Sync error: syncMedias: error creating media FS", "error", err)
