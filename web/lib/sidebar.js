@@ -1463,6 +1463,9 @@ function buildFileMenu(item, filePath) {
     const parentDir = filePath.substring(0, filePath.length - fileName.length - 1) || '/';
     const isCurrent = currentEditor.path === filePath;
 
+    addNewFileItem(item, parentDir);
+    addNewDirItem(item, parentDir);
+
     item('Rename', async () => {
         const displayName = fileName.endsWith('.md') ? fileName.slice(0, -3) : fileName;
         const newName = prompt('Rename file:', displayName);
@@ -1508,7 +1511,4 @@ function buildFileMenu(item, filePath) {
             alert('Delete failed: ' + (err && err.message ? err.message : err));
         }
     });
-
-    addNewFileItem(item, parentDir);
-    addNewDirItem(item, parentDir);
 }
