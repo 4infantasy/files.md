@@ -14,7 +14,7 @@ You can store whole your life:
 All in plain `.md` files, locally. LLM-friendly.
 
 Try it out: [app.files.md](https://app.files.md).  
-Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot).  
+There's also a [Telegram bot](https://t.me/FilesMDBot).  
 
 ## Another note-taking app?
 Maybe. But this time: 
@@ -71,10 +71,8 @@ There's another path.
 ## How to take notes 🗒️
 Leonardo da Vinci, Charles Darwin, Jules Verne and many others took notes using just pen and paper.  
 
-You don't need to learn advanced tools to start taking notes.  
-
-It's even better if you reuse something familiar.  
-
+You don't need to learn advanced tools to start taking notes.
+It's even better if you reuse something familiar.
 For me that was chatting with friends.  
 
 Only this time, I was sending messages to the bot:  
