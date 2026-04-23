@@ -37,10 +37,19 @@ test.beforeEach(async ({page}, testInfo) => {
 });
 
 async function setup(page) {
-    await page.addInitScript((workerIndex) => {
+    await page.addInitScript(() => {
         localStorage.setItem('apiUrl', 'http://localhost:8080');
-        localStorage.setItem('token', workerIndex);
-    }, currentWorkerIndex);
+    });
+
+    // Token is read from a cookie by the server; set it on the shared
+    // `localhost` domain so it's sent with both the app's (localhost:3000)
+    // and the API's (localhost:8080) requests.
+    await page.context().addCookies([{
+        name: 'token',
+        value: currentWorkerIndex,
+        domain: 'localhost',
+        path: '/',
+    }]);
 
     await page.goto('/index.html');
 
@@ -158,6 +167,8 @@ test('sync existing files from client', async ({ page }) => {
         window.dispatchEvent(new Event('focus'));
     });
 
+
+    await page.pause();
     await page.waitForTimeout(500);
 
     // Check that existing files from client are synced
@@ -218,9 +229,7 @@ test('changed on both client and serve, should merge', async ({ page }) => {
     await clickAndExpectContent(page, 'file', '# File\ntest content');
 
     // Disable sync
-    await page.addInitScript((workerIndex) => {
-        localStorage.removeItem('token')
-    }, currentWorkerIndex);
+    await page.context().clearCookies({ name: 'token' });
 
     // Modify on server
     await createFileOnServer('File.md', 'test content\nadded from server');
@@ -232,9 +241,12 @@ test('changed on both client and serve, should merge', async ({ page }) => {
     await page.keyboard.type('addded from client');
 
     // Enable sync
-    await page.addInitScript((workerIndex) => {
-        localStorage.setItem('token', workerIndex);
-    }, currentWorkerIndex);
+    await page.context().addCookies([{
+        name: 'token',
+        value: currentWorkerIndex,
+        domain: 'localhost',
+        path: '/',
+    }]);
 
     await page.waitForTimeout(2000);
     await expectFileOnServer(page, 'File.md', 'test content\nadded from server\naddded from client');

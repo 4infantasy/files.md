@@ -28,7 +28,7 @@ e2eh: # headed e2e tests
 e2es: # run single test, e2es test="name"
 	cd tests && npm run test -- $(if $(test),-g "$(test)")
 
-e2esh: # run single test headed
+e2esh: # run single test headed, e2esh test="name"
 	cd tests && npm run test:headed -- $(if $(test),-g "$(test)")
 
 sync:
