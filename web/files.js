@@ -1646,11 +1646,11 @@ async function removeCurrentFile() {
     if (nextFilePath) {
         await openFile(nextFilePath);
     } else {
-        showRandomFile();
+        openRandomFile();
     }
 }
 
-async function showRandomFile() {
+async function openRandomFile() {
     if (debug) {
         await openFile(debug.dir, debug.file);
         return;

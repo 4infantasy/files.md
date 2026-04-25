@@ -1417,8 +1417,8 @@ function buildFolderMenu(item, dirPath) {
                 currentEditor.path = undefined;
             }
             await renderSidebar();
-            if (editorWasInside && typeof showRandomFile === 'function') {
-                showRandomFile();
+            if (editorWasInside && typeof openRandomFile === 'function') {
+                openRandomFile();
             }
         } catch (err) {
             console.error('removeDir failed', err);
