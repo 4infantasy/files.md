@@ -46,17 +46,27 @@
                  *
                  * (This is a debounced function)
                  */
-                this.updateStyle = core_1.debounce(function () {
-                    if (!_this.enabled)
-                        return;
-                    var cm = _this.cm;
-                    var measures = _this.measure();
-                    var css = _this.makeCSS(measures);
-                    if (css === _this._lastCSS)
-                        return;
-                    _this.styleEl.textContent = _this._lastCSS = css;
-                    cm.refresh();
-                }, 100);
+                // PATCHED: Request-Animation-Frame-throttle instead of timed debounce. tableID is
+                // line-number-based (hypermd.js: "T" + line), so any line shift
+                // above a table changes the CSS string and the table line is
+                // re-rendered with a new id. With a 100ms debounce the new column
+                // DOM lived for ~100ms without matching CSS — visible flicker.
+                // requestAnimationFrame batches bursty updates (many `update`
+                // events collapse into one) AND runs before the browser paints,
+                // so the new <style> is applied in the same frame as the render.
+                var rafScheduled = false;
+                this.updateStyle = function () {
+                    if (rafScheduled) return;
+                    rafScheduled = true;
+                    requestAnimationFrame(function () {
+                        rafScheduled = false;
+                        if (!_this.enabled) return;
+                        var measures = _this.measure();
+                        var css = _this.makeCSS(measures);
+                        if (css === _this._lastCSS) return;
+                        _this.styleEl.textContent = _this._lastCSS = css;
+                    });
+                };
                 /** CodeMirror renderLine event handler */
                 this._procLine = function (cm, line, el) {
                     if (!el.querySelector('.cm-hmd-table-sep'))
