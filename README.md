@@ -240,7 +240,7 @@ You don't have to think about the structure, it is predefined.
 Scheme is also available at [files.md/llms.txt](https://files.md/llms.txt).  
 You can copy-paste it into `CLAUDE.md` or `AGENTS.md`, so that your AI agent would understand the structure.  
 
-## Hotkeys
+## Hotkeys 🎹
 
 | Hotkey                     | Action                         |
 |----------------------------|--------------------------------|
