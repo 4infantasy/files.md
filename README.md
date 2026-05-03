@@ -139,6 +139,7 @@ Use your brain to think through the notes. Apply and experience the knowledge.
 
 Not through intellectual work and taking notes.  
 No amount of self-help books can heal emotional wounds.  
+Reading without action is entertainment. A form of procrastination.  
 What can help is psychotherapy, rescripting and chair work. Meditation.  
 **Healing happens by feeling.**    
 
