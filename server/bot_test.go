@@ -715,6 +715,16 @@ func TestCompleteTask_Incomplete_WithTimestamp_WithHeader(t *testing.T) {
 	require.Equal(t, "#### 1 January, Thursday\n- [x] `09:30` New task", got)
 }
 
+// Both todayBlockHash and CompleteChecklistItem hash the first line after
+// the marker, so the box must still flip even when the block has
+// continuation lines attached.
+func TestCompleteTask_Multiline_FlipsBox(t *testing.T) {
+	block := "- [ ] `00:00` First task\nsome continuation"
+	got := completeTask(t, block, block)
+	require.Contains(t, got, "- [x] `00:00` First task")
+	require.NotContains(t, got, "- [ ] `00:00` First task")
+}
+
 func TestCompleteTask_AlreadyCompleted_IsNoOp(t *testing.T) {
 	got := completeTask(t, "- [x] Done task", "- [x] Done task")
 	require.Equal(t, "- [x] Done task", got)

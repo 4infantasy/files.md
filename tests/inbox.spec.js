@@ -153,7 +153,7 @@ test('move to file does not prepend a timestamp', async ({page}) => {
 
     await page.click(`#tree .tree-item:has-text('today')`);
     await page.waitForSelector('#inbox');
-    await page.keyboard.type('500k заявок в неделю от водителей');
+    await page.keyboard.type('Attention is all you need');
     await page.waitForTimeout(300);
     await page.keyboard.press('Enter');
     await page.waitForSelector('.message');
@@ -168,7 +168,7 @@ test('move to file does not prepend a timestamp', async ({page}) => {
     await page.click(`#tree .tree-item:has-text('Notes')`);
     await page.waitForTimeout(200);
     const content = await page.evaluate(() => document.querySelector('.CodeMirror').CodeMirror.getValue());
-    expect(content).toContain('500k заявок в неделю от водителей');
+    expect(content).toContain('Attention is all you need');
     // The body must not be prefixed with `HH:MM` — that's reserved for the
     // chat→journal flow, not move-to-file (web/lib/md.js:addHeaderAndText).
     expect(content).not.toMatch(/`\d{2}:\d{2}`\s*500k/);
@@ -186,7 +186,7 @@ test('move to recent file does not prepend a timestamp', async ({page}) => {
 
     await page.click(`#tree .tree-item:has-text('today')`);
     await page.waitForSelector('#inbox');
-    await page.keyboard.type('500k заявок в неделю от водителей');
+    await page.keyboard.type('Attention is all you need');
     await page.waitForTimeout(300);
     await page.keyboard.press('Enter');
     await page.waitForSelector('.message');
@@ -199,7 +199,7 @@ test('move to recent file does not prepend a timestamp', async ({page}) => {
     await page.waitForTimeout(200);
     const fileContent = await page.evaluate(() =>
         document.querySelector('.CodeMirror').CodeMirror.getValue());
-    expect(fileContent).toContain('500k заявок в неделю от водителей');
+    expect(fileContent).toContain('Attention is all you need');
     expect(fileContent).not.toMatch(/`\d{2}:\d{2}`\s*500k/);
 });
 

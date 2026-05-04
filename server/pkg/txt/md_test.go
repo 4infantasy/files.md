@@ -382,6 +382,21 @@ func TestCompleteChecklistItemWithWhitespace(t *testing.T) {
 	r.Equal("spaced task", foundItem)
 }
 
+// The Today.md flow hashes the FIRST line of a multi-line block (see
+// todayBlockHash), and CompleteChecklistItem walks the file line-by-line
+// hashing the same first-line content — so the box must still flip even
+// when the matched marker has continuation lines hanging off it.
+func TestCompleteChecklistItem_FlipsBox_WithContinuationLines(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] `00:00` First task\nsome continuation"
+	result, foundItem := CompleteChecklistItem(md, Hash("`00:00` First task"))
+
+	r.Contains(result, "- [x] `00:00` First task")
+	r.NotContains(result, "- [ ] `00:00` First task")
+	r.Equal("`00:00` First task", foundItem)
+}
+
 func TestRemoveChecklistItemByText(t *testing.T) {
 	r := require.New(t)
 
