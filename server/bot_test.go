@@ -1738,6 +1738,37 @@ func TestShowMoveTo(t *testing.T) {
 	r.Equal(kb, tgram.LastSentKeyboard)
 }
 
+func TestShowMoveFromTodayAndInbox(t *testing.T) {
+	r := require.New(t)
+
+	savedNow := now
+	defer func() { now = savedNow }()
+	now = func() time.Time {
+		return time.Date(2025, 6, 29, 9, 0, 0, 0, time.UTC)
+	}
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+	r.NoError(userFS.Write(
+		fs.DirUserRoot, fs.ChatFilename,
+		"#### 29 June, Sunday\n- [ ] `09:00` Inbox body\n- [x] `09:05` Completed body\n",
+	))
+
+	tgram := tg.NewFakeTG()
+	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
+	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("move", nil)))
+	r.NoError(err)
+
+	inboxHash := inboxMsgHash(t, userFS, 0)
+	r.Equal(tg.NewKeyboard([]tg.Row{
+		tg.NewBtn("💬 Inbox body", tg.NewCmd("s_move", []string{inboxHash})),
+		tg.NewRow(
+			tg.NewBtn("Rename", tg.NewCmd("rename", []string{})),
+			tg.NewBtn("OK", tg.NewCmd("home", []string{})),
+		),
+	}), tgram.LastSentKeyboard)
+}
+
 func TestMoveFromTodayAndInbox_ToLater(t *testing.T) {
 	r := require.New(t)
 

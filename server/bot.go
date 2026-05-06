@@ -131,6 +131,7 @@ const (
 	CmdShowFiles                       = "files"
 	CmdShowDirs                        = "dirs"
 	CmdShowPostpone                    = "postpone"
+	CmdShowMoveExisting                = "move"
 	CmdShowMoveTo                      = "s_move"
 	CmdShowRename                      = "rename"
 	CmdShowRenameFile                  = "rename_file"
@@ -190,7 +191,6 @@ const (
 	CmdFullMode                        = "full"
 	CmdChatMode                        = "chat"
 	CmdInlineQuerySearchEveryWhere     = "search"
-	CmdInlineQuerySearchInDir          = "search_dir"
 	CmdWebAppHabits                    = "habits"
 	CmdRandomNote                      = "random_note"
 	CmdAddToJournalShortcut            = "j"
@@ -335,6 +335,7 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		CmdShowWatchChecklist: b.showWatch,
 		CmdShowShopChecklist:  b.showShop,
 		CmdShowSchedule:       b.showSchedule,
+		CmdShowMoveExisting:   b.showMoveExisting,
 		CmdShowSettings:       b.showSettings,
 		CmdShowTimezone:       b.showTimezone,
 		CmdSetTimezone:        b.setTimezone,
@@ -1314,6 +1315,43 @@ func (b *Bot) showPostpone(_ []string) error {
 	err = b.showHTML(b.tr("🦥 Select a task to postpone:"), &kb)
 	if err != nil {
 		return fmt.Errorf("show postpone: %w", err)
+	}
+
+	return nil
+}
+
+func (b *Bot) showMoveExisting(_ []string) error {
+	var kb tg.Keyboard
+
+	// Show today inbox items
+	inboxContent, err := b.fs.Read(fs.DirUserRoot, fs.ChatFilename)
+	if err == nil {
+		blocks := readChatMsgs(inboxContent)
+		for _, block := range blocks {
+			if inboxHeaderRegex.MatchString(block) {
+				continue
+			}
+			// Skip already-completed entries — they're about to be swept anyway.
+			if strings.HasPrefix(block, "- [x] ") || strings.HasPrefix(block, "- [X] ") {
+				continue
+			}
+			preview := strings.SplitN(stripInboxEntryPrefix(block), "\n", 2)[0]
+			if len([]rune(preview)) > maxHeaderLengthForMobile {
+				preview = string([]rune(preview)[:maxHeaderLengthForMobile]) + "…"
+			}
+			cmd := tg.NewCmd(CmdShowMoveTo, []string{chatBlockHash(block)})
+			kb.AddRow(tg.NewBtn("💬 "+preview, cmd))
+		}
+	}
+
+	kb.AddRow(tg.NewRow(
+		tg.NewBtn(b.tr("Rename"), tg.NewCmd(CmdShowRename, []string{})),
+		tg.NewBtn(b.tr("OK"), tg.NewCmd(CmdShowHome, []string{})),
+	))
+
+	err = b.showHTML(b.tr("🦥 Select an item to move:"), &kb)
+	if err != nil {
+		return fmt.Errorf("show move from today: %w", err)
 	}
 
 	return nil
