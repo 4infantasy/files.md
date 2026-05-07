@@ -58,20 +58,15 @@ Maybe. But this time:
 Pin the bot in your contact list, so that it is easily accessible.  
 
 ## How to take notes 🗒️
-Leonardo da Vinci, Charles Darwin, Jules Verne and many others took notes using just pen and paper.
-
-You don't need to learn anything new to start taking notes.   
-It is going to be a well-familiar pattern: chatting.  
-
-We are going to send messages to the bot (or to the web app):  
+Send a message to the chat:  
 
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Telegram Bot" title="Telegram Bot" width="350"/>
 </div>
 
-That's it, the `.md` note is saved in the `brain` directory.  
+The note is saved in the `brain` directory.  
 
-Later you can open [app.files.md](https://app.files.md) and make some connections between new and old notes.  
+Later you can open [app.files.md](https://app.files.md) and make connections between notes.  
 
 - You can start with no structure at all, 0 folders
 - One idea per note
@@ -79,9 +74,7 @@ Later you can open [app.files.md](https://app.files.md) and make some connection
 - Related notes should be linked between each other
 - **Notes should be revisited and thought through**
 
-That's all you need to take notes.
-
-My friends and I have been using this setup for five years and it works well.
+My friends and I have been using this setup for five years, and it works well.
 
 Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot) (other messengers will follow).
 
