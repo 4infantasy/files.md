@@ -125,7 +125,6 @@ func router(serverLogger *log.Logger) *http.ServeMux {
 	r.HandleFunc("/syncTexts", corsMiddleware(panicMiddleware(tokenMiddleware(gzipMiddleware(SyncFilenames)))))
 	r.HandleFunc("/syncText", corsMiddleware(panicMiddleware(tokenMiddleware(gzipMiddleware(SyncFile)))))
 	r.HandleFunc("/syncMedias", corsMiddleware(panicMiddleware(tokenMiddleware(gzipMiddleware(SyncMediaFilenames)))))
-	r.HandleFunc("/syncMedia", corsMiddleware(panicMiddleware(tokenMiddleware(gzipMiddleware(SyncMedia)))))
 
 	// For now it is possible to see other user's habits, but is it a big deal?
 	// TODO use X-Telegram-Init-Data header to verify requests
