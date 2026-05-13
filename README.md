@@ -157,7 +157,7 @@ Use your brain to think through the notes.
 - How can you see the world differently, given this new knowledge?  
 - How can you act differently?  
 
-**If you don't plan to use this new knowledge right now, don't create a note**.  
+**If you don't plan to use new knowledge right now, don't create a note**.  
 
 ## Notes can prevent experience
 - Reading and taking notes can easily fool us into believing that we understand a text
