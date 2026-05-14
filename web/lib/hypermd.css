@@ -292,10 +292,15 @@
     /*PATCHED*/
     /*color: #666;*/
     color: var(--col-tx-alt);
-    padding-left: 3px;
     /*padding-right: 5px;*/
     /*text-indent: 0;*/
     /*margin-left: 4px;*/
+}
+
+/* Padding only on the leading > marker, not on every quoted token, otherwise
+   inline elements like links pick up a 3px gap before each token. */
+.cm-s-hypermd-light span.cm-formatting-quote {
+    padding-left: 3px;
 }
 
 /*PATCHED*/
