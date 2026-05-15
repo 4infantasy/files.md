@@ -509,6 +509,12 @@ function hideEditor2() {
     editor2Container.classList.remove('show');
     restoreEditorPos();
 
+    // Clear editor2's path so a subsequent openFile for the same path
+    // doesn't take the isSameFile short-circuit (which skips re-init and
+    // would leave the panel visually empty after editor1 re-init nuked
+    // editor2's wrapper).
+    if (typeof editor2 !== 'undefined') editor2.path = undefined;
+
     setTimeout(() => {
         editor2Container.style.display = 'none';
         editor.refresh(); // IT seems we have to refresh once size changes.

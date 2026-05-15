@@ -284,6 +284,79 @@ test('opening link in editor2 should not clobber main editor when stale editor2 
     expect(state.editor2Content).toBe('# Awareness\nAwareness body');
 });
 
+test('reopen link in editor2 after escape + switch shows target content, not empty', async ({page}) => {
+    // Bug: open note1, click link to note2 (editor2 opens). Press Esc.
+    // Open note3 in editor1. Open note1 in editor1. Click link to note2 -
+    // editor2 used to come up empty instead of showing note2.
+    await page.evaluate(async () => {
+        const root = await navigator.storage.getDirectory();
+        const write = async (name, content) => {
+            const handle = await root.getFileHandle(name, {create: true});
+            const writable = await handle.createWritable();
+            await writable.write(content);
+            await writable.close();
+        };
+        await write('Note1.md', 'Note1 body [Note2](Note2.md)');
+        await write('Note2.md', 'Note2 body');
+        await write('Note3.md', 'Note3 body');
+
+        window.getTemporaryStorageDirHandle = async function () {
+            return await navigator.storage.getDirectory();
+        };
+    });
+
+    await page.evaluate(() => {
+        init(document.getElementById('editor'));
+    });
+    await page.waitForTimeout(500);
+
+    const nodeSel = (name) => `#tree .tree-item:text-is('${name}')`;
+    // Click the rendered Note2 link inside the main editor's content
+    // (not editor2, where #editor2-container also has cm-link spans).
+    const note2LinkInEditor1 = page.locator('#editor-container .cm-link:has-text("Note2")').first();
+
+    // 1) Open Note1 in the main editor
+    await page.click(nodeSel('Note1'));
+    await page.waitForTimeout(300);
+
+    // 2) Click Note2 link - opens Note2 in editor2
+    await note2LinkInEditor1.click();
+    await page.waitForTimeout(500);
+
+    // 3) Press Escape - editor2 hidden, editor2.path stays = /Note2.md
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // 4) Open Note3 in the main editor (sidebar click)
+    await page.click(nodeSel('Note3'));
+    await page.waitForTimeout(300);
+
+    // 5) Re-open Note1 in main editor (sidebar click)
+    await page.click(nodeSel('Note1'));
+    await page.waitForTimeout(300);
+
+    // 6) Click Note2 link again - editor2 should show Note2 body, not empty.
+    await note2LinkInEditor1.click();
+    await page.waitForTimeout(1000);
+
+    // Assert on the rendered DOM of editor2's container, not editor2.getValue().
+    // getValue() returns the logical buffer of the (possibly detached) editor
+    // instance and can pass even when the wrapper was nuked from the DOM by an
+    // earlier editor1 re-init - which is exactly the bug.
+    const state = await page.evaluate(() => ({
+        editorPath: editor.path,
+        editor2Path: editor2.path,
+        editor2Content: editor2.getValue(),
+        editor2HasWrapper: !!document.querySelector('#editor2-container .CodeMirror'),
+        editor2DomText: (document.querySelector('#editor2-container .CodeMirror-code')?.innerText || '').trim(),
+    }));
+    expect(state.editorPath).toMatch(/Note1\.md$/);
+    expect(state.editor2Path).toMatch(/Note2\.md$/);
+    expect(state.editor2HasWrapper).toBe(true);
+    expect(state.editor2DomText).toContain('Note2 body');
+    expect(state.editor2Content).toBe('# Note2\nNote2 body');
+});
+
 test('should handle partical text selection for word-wrap content', async ({page}) => {
     test.skip(!process.env.RUN_SELECTION, 'pixel-dependent; run with RUN_SELECTION=1');
     await page.click('#sidebar >> text=Welcome');

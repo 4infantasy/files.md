@@ -3,7 +3,7 @@
 # Files.md  
 A simple application for your `.md` files.
 
-<img src="https://github.com/zakirullin/files.md/raw/main/web/img/app.png" alt="Files.md screenshot" title="Files.md"/>
+<img src="https://github.com/zakirullin/files.md/raw/main/web/img/appv2.png" alt="Files.md screenshot" title="Files.md"/>
 
 You can store whole your life:
 - 📌 Notes
@@ -14,16 +14,6 @@ You can store whole your life:
 All in plain `.md` files, local-first. LLM-friendly.  
 
 Try it out: [app.files.md](https://app.files.md)  
-
-## Grow your knowledge base 🌱
-
-<div align="center">
-    <br/>
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/base.png"/>
-    <br/>
-</div>
-
-**Connect ideas. Let them compound. Think through.**
 
 ## Another note taking app? 
 Maybe. But this time:
@@ -49,7 +39,6 @@ Maybe. But this time:
 - Occasionally hit force-refresh (`Cmd+Shift+R`) to get new updates.  
 
 ## Dump your thoughts
-
 Open the chat and send a message:
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png"  width="350"/>
@@ -62,7 +51,26 @@ Select where to save:
 
 You can save notes, journal and checklists.
 
+## Save things in the chatbot
+Open the chat and send a message:
+<div align="center">
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Telegram Bot" title="Telegram Bot" width="350"/>
+</div>
+
+Move it anywhere later:
+<div align="center">
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/actions.png" alt="Telegram Bot" title="Telegram Bot" width="350"/>
+</div>
+
+With this flow you can save anything.
+
+[Telegram Bot](https://t.me/FilesMDBot)
+
+**Other messengers will follow**
+
 ## How to grow your knowledge base 
+**Connect ideas. Let them compound. Think through.**
+
 1) I used [app.files.md](https://app.files.md) to grow my knowledge about brain and software development
 2) I added new notes to either `brain` or `dev` folders. One idea per note
 3) I made connections between the relevant notes in the web app (typed `[` and selected a relevant note)
@@ -87,23 +95,6 @@ To achieve all that, **you'll have to use your brain**, not advanced templates o
 - **Revisit your notes and think through**
 
 My friends and I have been using this simple setup for five years, and it works well.
-
-## Save things in the chatbot
-Open the chat and send a message:
-<div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Telegram Bot" title="Telegram Bot" width="350"/>
-</div>
-
-Move it anywhere later:
-<div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/actions.png" alt="Telegram Bot" title="Telegram Bot" width="350"/>
-</div>
-
-With this flow you can save anything.
-
-[Telegram Bot](https://t.me/FilesMDBot)  
-
-**Other messengers will follow**
 
 ## Second Brain?
 I'll quote [I Deleted My Second Brain](https://www.joanwestenberg.com/i-deleted-my-second-brain-692aa40d59d5f06dd5131e43/):
@@ -162,12 +153,11 @@ Although, you're free to use whatever structure you want.
 
 - Chat: `Chat.md`
 - Notes: `brain/Note.md`, `<category>/*.md`
-- Projects: `My project.md`, `*.md`
 - Checklists: `Read.md`, `Watch.md`, `Shop.md`, `MyChecklist_.md`
 - Journal: `journal/2024.08 August.md`
 - Tasks: `Later.md`
 - Habits: `habits/Ate consciously.md`, `habits/*.md`
-- Media: `media/*` (png, jpg, webp, gif)
+- Images: `media/*` (png, jpg, webp, gif)
 - Archive: `archive/*.md`
 - Config: `config.json`
 
