@@ -131,6 +131,13 @@
             // className="cm-formatting cm-formatting-link cm-link cm-hmd-barelink">[[</span><span
             // className="cm-string cm-url cm-hmd-barelink">media/2025-07-06T10-42-31-614Z.png</span><span
             // className="cm-formatting cm-formatting-link cm-link cm-hmd-barelink">]]</span></span>
+            // PATCHED, require `[[` to sit IMMEDIATELY after `!` - otherwise
+            // `! [[wikilink]]` (with a space) and similar non-image lines get
+            // mistakenly folded into a broken <img>.
+            const lineText = cm.getLine(stream.lineNo);
+            if (lineText.substring(token.end, token.end + 2) !== "[[") {
+                return null;
+            }
             let urlRE = /\burl\b/;
 
             let lineNo = stream.lineNo;
