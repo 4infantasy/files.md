@@ -361,6 +361,12 @@
     font-family: 'IBM Plex Mono', monospace !important;
 }
 
+/* Sharp corners on every selectable row - brutalist motif. Kills the 5px
+   radius set on the base tree-item in sidebar.css. */
+.tree-container li span.tree-item {
+    border-radius: 0 !important;
+}
+
 .tree-container li span.tree-item:hover {
     background-color: var(--color-neo-orange) !important;
     color: #1A1A1A !important;
@@ -386,6 +392,7 @@
 #move-results .focused {
     background-color: var(--color-neo-orange) !important;
     color: #1A1A1A !important;
+    border-radius: 0 !important;
 }
 
 /* Chat panel: brutal-palette overrides for the few spots in chat.css
@@ -414,5 +421,47 @@
    keep their own explicit line-heights set above so they don't inherit. */
 .cm-s-hypermd-light .CodeMirror-line {
     line-height: 1.9 !important;
+}
+
+/* Empty-chat hero ("Free your head" / "Drop whatever's on your mind here"):
+   render in Inter to match brutal's header treatment - Space Mono looks
+   too cramped at this large display size. */
+.empty-title,
+.empty-desc {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Sharp corners everywhere - core brutalist motif. Covers the search/move
+   modals + their inputs, the chat panel and its input, individual chat
+   messages and their content/action surfaces, the quick-action icons, the
+   link-insert autocomplete dropdown, and the sidebar's right-click menu. */
+#search, #move,
+#search-input, #move-input,
+#inbox,
+#inbox-input,
+.message,
+.message:first-child,
+.message:last-child,
+.message:only-child,
+.message-content,
+.message-actions,
+.action-btn,
+.complete-btn,
+.btn-label,
+.CodeMirror-hints,
+.CodeMirror-hint,
+.sidebar-ctx-menu {
+    border-radius: 0 !important;
+}
+
+/* Selection inside the link-insert dropdown and sidebar context menu uses
+   the same neo-orange as every other "thing under the pointer" surface. */
+.CodeMirror-hint-active {
+    background-color: var(--color-neo-orange) !important;
+    color: #1A1A1A !important;
+}
+.sidebar-ctx-menu-item:hover {
+    background: var(--color-neo-orange) !important;
+    color: #1A1A1A !important;
 }
 } /* end @media (prefers-color-scheme: light) */
