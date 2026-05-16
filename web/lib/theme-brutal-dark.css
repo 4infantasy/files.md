@@ -22,8 +22,8 @@
     --color-neo-orange: #B86A40;
     --col-tx: #E8E3D8 !important;
     --col-tx-alt: #A8A192 !important;
-    --col-bg: #1F1D1A !important;
-    --col-bg-alt: #28251F !important;
+    --col-bg: #262624 !important;
+    --col-bg-alt: #1F1D1A !important;
     --col-inline-code: #1F1D1A !important; /* dark text on sage chip */
     --col-inline-code-bg: #2E2B25 !important;
     --col-link: #E8E3D8 !important;
@@ -380,9 +380,24 @@
     line-height: 1.9 !important;
 }
 
+/* Empty-chat hero styled like an editor H1 - Inter, uppercase, heavy
+   weight, tracking, with a hard rule under the title. */
 .empty-title,
 .empty-desc {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.empty-title {
+    font-weight: 800 !important;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--col-border);
+    margin-bottom: 20px !important;
+}
+.empty-desc {
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    color: var(--color-neo-orange) !important;
 }
 
 #search, #move,

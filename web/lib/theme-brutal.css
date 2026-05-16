@@ -449,11 +449,25 @@
 }
 
 /* Empty-chat hero ("Free your head" / "Drop whatever's on your mind here"):
-   render in Inter to match brutal's header treatment - Space Mono looks
-   too cramped at this large display size. */
+   styled like an editor H1 - Inter, uppercase, heavy weight, tracking,
+   with a hard rule under the title. Description gets the same uppercase
+   tracking at a lighter weight so it reads as a subtitle. */
 .empty-title,
 .empty-desc {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.empty-title {
+    font-weight: 800 !important;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--col-border);
+    margin-bottom: 20px !important;
+}
+.empty-desc {
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    color: var(--color-neo-orange) !important;
 }
 
 /* Sharp corners everywhere - core brutalist motif. Covers the search/move
