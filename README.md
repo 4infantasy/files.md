@@ -44,9 +44,9 @@ Open the chat and send a message:
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png"  width="350"/>
 </div>
 
-Select where to save:
+Choose where to save (can do later):
 <div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note2.png" width="400"/>
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note2.png" width="350"/>
 </div>
 
 You can save notes, journal and checklists.
@@ -73,7 +73,7 @@ With this flow you can save anything.
 
 1) I used [app.files.md](https://app.files.md) to grow my knowledge about brain and software development
 2) I added new notes to either `brain` or `dev` folders. One idea per note
-3) I made connections between the relevant notes in the web app (typed `[` and selected a relevant note)
+3) I made connections between the relevant notes in the web app (type `[`)  
 4) Everything is connected, just as in our brain
 5) **I spent time travelling through the notes and thinking it through**
 6) At some point, `brain` and `dev` notes appeared very related
@@ -115,13 +115,8 @@ _Second Brain gets better and better._
 
 However, **the first brain never actually gets smarter.**  
 And that's an issue - in the AI age, your first brain is as valuable as ever.  
-Use your brain to think through the notes.  
 
-- How this new knowledge can sharpen your judgment or expand your taxonomy?
-- How can you see the world differently, given this new knowledge?  
-- How can you act differently?  
-
-**If you don't plan to use new knowledge right now, don't create a note**.  
+**Use your brain to think through the notes**. 
 
 ## Notes can prevent experience
 - Reading and taking notes can easily fool us into believing that we understand a text
