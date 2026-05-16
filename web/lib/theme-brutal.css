@@ -253,6 +253,12 @@
     color: var(--col-tx) !important;
 }
 
+/* Hide the `>` formatting marker - the blue left bar already conveys
+   "this is a quote", the arrow is redundant noise. */
+.cm-s-hypermd-light span.cm-formatting-quote {
+    display: none !important;
+}
+
 /* Inline code: lime-green chip with bold mono text and a thin dark
    outline. Padding/font-size match the default theme so the chip stays
    compact instead of bloating into a button-sized block. */
