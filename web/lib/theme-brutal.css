@@ -33,12 +33,15 @@
     --col-accent: #000;
 }
 
-/* Checkbox icon: dark glyph on cream paper. Scoped to `.hmd-hidden-token`
-   so app.css's `:not(.hmd-hidden-token) { background-image: none }` rule
-   can still cancel the image when the cursor is on the line - otherwise
-   you'd see both the graphic AND the raw `- [ ]` text on the active line. */
+/* Checkbox icon: dark glyph PNG colorized to neo-blue via filter so it
+   visually matches the ordered-list number color. Scoped to
+   `.hmd-hidden-token` so app.css's `:not(.hmd-hidden-token)
+   { background-image: none }` rule can still cancel the image when the
+   cursor is on the line - otherwise you'd see both the graphic AND the
+   raw `- [ ]` text on the active line. */
 .cm-s-hypermd-light span.cm-formatting-task.hmd-hidden-token {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAwCAMAAAA8VkqRAAAAclBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACa4vOeAAAAJXRSTlMADcjpDswcLZOzsvOYBvWdbtvTX0D69+ORa1dRJCDtuaF7ZDkoQyuUXgAAAMhJREFUOMvt0reywjAUhOFjKxmcrgMZboL//V8Rm6GwkNUx0LClvhkVZ1fEZoqHqMwO7wuUSb0YxcJKxtLpxIt2SzJRykkQp5RgdAjaIKRJCEn6gWdA9OzRoqLVRscQnc9bdtXX/eyurOF7N3erLVDPwCGHxoVwamH1LwGUBfBbhrCvoLlMitL9DY8trLtJg7qoCj18VAN1OYE/YJBuDe1RJtBVo5wbqPb+GL5yWG1GLX0YZYw5iQ93yQ/yAHfZzu5qt/mxr97VFS15JGSVM0C6AAAAAElFTkSuQmCC") !important;
+    filter: brightness(0) saturate(100%) invert(28%) sepia(96%) saturate(3700%) hue-rotate(225deg) brightness(100%) contrast(101%);
 }
 
 @media (prefers-color-scheme: light) {
@@ -190,8 +193,22 @@
     font-weight: 400;
 }
 
+/* Ordered-list numbers: render in the sans-serif header font + neo-blue
+   accent so they read as labels, not slabs of mono text. Light/dark
+   themes get a clean look for free because their body font is already
+   sans-serif; in brutal the body is Space Mono so we have to override. */
 .cm-s-hypermd-light span.cm-formatting-list-ol {
-    color: var(--col-tx-alt) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: var(--color-neo-blue) !important;
+    font-weight: 700 !important;
+}
+
+/* Unordered-list dash: match the neo-blue accent used by ordered-list
+   numbers and the colorized checkbox - keeps every list-marker style
+   on the same hue. Overrides app.css's `.cm-formatting-list-ul`
+   slate-grey rule (same specificity, brutal loads later). */
+.cm-formatting-list-ul {
+    color: var(--color-neo-blue) !important;
 }
 
 /* Heavy bold - brutalist emphasis. */
