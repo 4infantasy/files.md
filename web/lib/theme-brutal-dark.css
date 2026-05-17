@@ -9,7 +9,7 @@
 @media (prefers-color-scheme: dark) {
 :root {
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    --font-mono-brutal: 'Space Mono', 'IBM Plex Mono', ui-monospace, 'Courier New', Courier, monospace;
+    --font-mono-brutal: ui-monospace, SFMono-Regular, "Cascadia Code", "IBM Plex Mono", "Roboto Mono", "DejaVu Sans Mono", "Liberation Mono", Menlo, Monaco, "Consolas", "Source Code Pro", monospace;
     --color-neo-bg: #1F1D1A;
     --color-neo-text: #E8E3D8;
     --color-neo-border: #C8C2B5;
@@ -286,7 +286,6 @@
     border: 1px solid var(--color-neo-orange) !important;
     border-radius: 4px !important;
     padding: 0.2em 0.5em !important;
-    font-weight: 600 !important;
     font-size: 0.9em !important;
     position: relative;
     top: -1px;
