@@ -866,6 +866,13 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
         state.trailingSpace = 0;
         state.trailingSpaceNewLine = false;
 
+        // PATCHED, reset inline link state at every new line. Without this,
+        // an unclosed `[` leaves `state.linkText = true` and the parser
+        // treats every subsequent line as "inside link text" until it
+        // finds a `]` - which strips the `formatting-link` token from
+        // existing links downstream and breaks their fold-link rendering.
+        state.linkText = false;
+        state.linkHref = false;
         if (!state.localState) {
           state.f = state.block;
           if (state.f != htmlBlock) {
