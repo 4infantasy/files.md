@@ -256,8 +256,9 @@
 }
 
 .cm-s-hypermd-light pre.HyperMD-quote-1.hmd-inactive-line {
-    text-indent: -5px !important;
+    text-indent: -8px !important;
 }
+
 
 /* Code chip: dark tile with muted-burnt-amber text and matching border -
    reuses the same `--color-neo-orange` hover hue (tree-item hover,
