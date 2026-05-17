@@ -236,33 +236,48 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
                 //#endregion
                 //#region Extra markdown inline extenson
                 if (inMarkdownInline) {
+                    // PATCHED: `// ` line-comment support. Emits two tokens:
+                    //   1. `formatting hmd-comment-marker` for `// ` (3 chars)
+                    //   2. `hmd-comment` for the rest of the line
+                    // so themes can color both and hide just the marker on
+                    // inactive lines. Header/quote classes are inherited so
+                    // font/size styling carries through the comment span and
+                    // the cursor doesn't jump between mismatched metrics.
+                    //
+                    // At SOL we mirror markdown.js's per-line state reset
+                    // ourselves: if our checks intercept and return early,
+                    // rawMode.token never runs and state.header/state.quote
+                    // would otherwise stay stale from the previous line.
+                    if (bol) {
+                        state.hmdInComment = false;
+                        state.header = 0;
+                        state.quote = 0;
+                    }
+
+                    if (state.hmdInComment) {
+                        stream.skipToEnd();
+                        state.hmdInComment = false;
+                        var contClasses = 'hmd-comment';
+                        if (state.header) contClasses += ' header header-' + state.header;
+                        if (state.quote) contClasses += ' quote quote-' + state.quote;
+                        return contClasses;
+                    }
+
                     // transform unformatted URL into link
                     if (!state.hmdLinkType && (stream.match(urlRE) || stream.match(emailRE))) {
                         return "url";
                     }
-                    // PATCHED: `// ` line-comment marker. Match only when the
-                    // `//` is at start-of-line (or right after whitespace) AND
-                    // followed by a space, so URL schemes like `http://...`
-                    // aren't touched. Consume the rest of the line as one
-                    // `hmd-comment` token; preserve any active markdown
-                    // context (header, quote) so font/size styling continues
-                    // through the comment - otherwise the cursor jumps
-                    // because of metric changes between styled spans.
+
                     if (stream.peek() === '/' &&
                         stream.string.charAt(stream.pos + 1) === '/' &&
                         stream.string.charAt(stream.pos + 2) === ' ' &&
                         (stream.pos === 0 || /\s/.test(stream.string.charAt(stream.pos - 1)))) {
-                        stream.skipToEnd();
-                        // Only inherit header/quote classes when we're mid-line.
-                        // At stream.start === 0 the markdown mode hasn't yet had
-                        // a chance to reset its per-line state, so values there
-                        // are stale from the previous line.
-                        var extra = '';
-                        if (stream.start > 0) {
-                            if (state.header) extra += ' header header-' + state.header;
-                            if (state.quote) extra += ' quote quote-' + state.quote;
-                        }
-                        return ('hmd-comment' + extra).trim();
+                        stream.pos += 3; // consume '// '
+                        state.hmdInComment = true;
+                        var markerClasses = 'formatting hmd-comment-marker';
+                        if (state.header) markerClasses += ' header header-' + state.header;
+                        if (state.quote) markerClasses += ' quote quote-' + state.quote;
+                        return markerClasses;
                     }
                 }
                 //#endregion

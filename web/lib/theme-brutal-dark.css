@@ -305,10 +305,11 @@
     padding-left: 20px !important;
 }
 
-.cm-hmd-comment {
+.cm-hmd-comment,
+.cm-hmd-comment-marker {
     color: var(--color-neo-orange) !important;
 }
-.cm-s-hypermd-light pre.hmd-inactive-line .hmd-comment-marker {
+.cm-s-hypermd-light pre.hmd-inactive-line .cm-hmd-comment-marker {
     display: none;
 }
 
