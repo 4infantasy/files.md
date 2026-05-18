@@ -95,7 +95,7 @@ That's it.
 3) I made connections between the relevant notes in the web app (type `[`)  
 4) Everything is connected, just as in our brain
 5) **I spent time travelling through the notes and thinking it through**
-6) At some point, `brain` and `dev` notes appeared very related
+6) At one point, some `brain` and `dev` notes appeared very related
 7) This connection between two different domains produced an insight
 8) I wrote an article based on that insight: [Cognitive Load in Software Development](https://github.com/zakirullin/cognitive-load)
 
