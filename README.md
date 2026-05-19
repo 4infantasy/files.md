@@ -6,7 +6,7 @@ Free, quiet space for thinking. Private, **no data is sent to server**.
 
 <img src="https://github.com/zakirullin/files.md/raw/main/web/img/appdark.png" alt="Files.md screenshot" title="Files.md"/>
 
-You can store whole your life:
+You can store your whole life:
 - 📌 Notes
 - 📝 Documents, Projects
 - 💚 Journal, Habits
