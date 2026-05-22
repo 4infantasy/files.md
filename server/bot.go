@@ -2536,7 +2536,7 @@ func (b *Bot) moveToDirBtns(msgHash string) ([]tg.Btn, error) {
 
 	dirs, err := b.fs.FilesAndDirs(fs.DirUserRoot)
 	if err != nil {
-		return nil, fmt.Errorf("to note keyboard: %w", err)
+		return nil, fmt.Errorf("To File keyboard: %w", err)
 	}
 	dirs = fs.OnlyNoteDirs(fs.OnlyDirs(dirs))
 	dirs = fs.SortByCtimeDesc(dirs)

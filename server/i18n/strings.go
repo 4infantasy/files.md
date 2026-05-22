@@ -12,7 +12,7 @@ const (
 	StrToLater         = "⏳ To later"
 	StrToADay          = "📆 To a day"
 	StrToChecklist     = "☑️ To Checklist"
-	StrToFile          = "📄 To Note"
+	StrToFile          = "📄 To File"
 	StrToJournal       = "💚 To Journal"
 	StrToRead          = "📚 To Read"
 	StrToShop          = "🛒 To Shop"
