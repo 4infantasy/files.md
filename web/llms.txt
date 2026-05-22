@@ -7,7 +7,7 @@ All files are plain Markdown (.md) stored locally.
 
 ```
 /
-├── *.md                  # Notes
+├── *.md                  # Projects, big notes
 ├── <category>/           # Note directories (brain/, happiness/, ...)
 │   └── *.md              # Notes, e.g. brain/Memory.md
 │

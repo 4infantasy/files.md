@@ -91,15 +91,15 @@
 }
 
 .message:first-child {
-    border-radius: 10px 10px 0 0;
+    border-radius: 6px 6px 0 0;
 }
 
 .message:last-child {
-    border-radius: 0 0 10px 10px;
+    border-radius: 0 0 6px 6px;
 }
 
 .message:only-child {
-    border-radius: 10px;
+    border-radius: 6px;
 }
 
 .message:hover:not(:has(.complete-btn:hover)) {
