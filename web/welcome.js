@@ -238,8 +238,8 @@ const WELCOME_FILES = {
             "Create headers with `# header`.\nAdd more # symbols for smaller headers: `## smaller header`.\n" +
             "\n" +
             "## Text Formatting\n" +
-            "- **Bold text** using `**bold**` or `__bold__` **(Cmd/Ctrl + B)**\n" +
-            "- *Italic text* using `*italic*` or `_italic_` **(Cmd/Ctrl + I)**\n" +
+            "- **Bold text** using `**bold**`**\n" +
+            "- *Italic text* using `*italic*`**\n" +
             "- ***Bold and italic*** using `***text***`\n" +
             "- ~~Strikethrough~~ using `~~text~~`\n" +
             "- `Inline code` using backticks\n" +
