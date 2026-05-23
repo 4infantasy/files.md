@@ -1,0 +1,21 @@
+services:
+  files-md:
+    build: .
+    image: files-md
+    ports:
+      - "80:8080"
+      # - "443:443"
+    volumes:
+      - storage:/app/storage
+      - tokens:/app/tokens
+    environment:
+      API_URL: http://localhost
+      APP_URL: http://localhost
+      STORAGE_DIR: /app/storage
+      TOKENS_DIR: /app/tokens
+      CERT_DIR: "" # Provide a dir if you want HTTPS enabled, e.g. /opt/certs
+    restart: unless-stopped
+
+volumes:
+  storage:
+  tokens:

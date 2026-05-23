@@ -1,7 +1,23 @@
-.PHONY: server
+.PHONY: server docker_build docker_run
 
 server:
 	go run ./cmd/server
+
+docker_build: # build container image (override with `make docker_build DOCKER=podman`)
+	$(DOCKER) build -t files-md --build-arg VERSION=$$(git rev-parse --short HEAD) .
+
+docker_run: # run container, host 80 -> container 8080
+	$(DOCKER) run --rm -it -p 80:8080 \
+		-v files-md-storage:/app/storage \
+		-v files-md-tokens:/app/tokens \
+		-e API_URL=http://localhost \
+		-e APP_URL=http://localhost \
+		-e STORAGE_DIR=/app/storage \
+		-e TOKENS_DIR=/app/tokens \
+		-e CERT_DIR= \
+		files-md
+
+DOCKER ?= docker
 
 test:
 	go test ./...

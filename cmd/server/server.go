@@ -22,12 +22,10 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(fmt.Sprintf("Error loading .env file: %s\n", err))
+	if err := godotenv.Load(); err != nil {
+		fmt.Printf("No .env file found, relying on process environment: %s\n", err)
 	}
-	err = config.LoadBotConfig()
-	if err != nil {
+	if err := config.LoadBotConfig(); err != nil {
 		panic(fmt.Sprintf("Error loading cfg: %s\n", err))
 	}
 	// Save all renames and deletes to an append-only log.
