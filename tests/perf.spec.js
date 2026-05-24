@@ -164,3 +164,49 @@ test('sidebar render with 1000 files in one folder', async ({page}) => {
 
     console.log(`renderSidebar (1000 files): ${median(samples).toFixed(1)} ms (samples: ${samples.map(s => s.toFixed(0)).join(', ')})`);
 });
+
+test('open file with 50 images', async ({page}) => {
+    await page.evaluate(() => {
+        window.getTemporaryStorageDirHandle = async function() {
+            const root = await navigator.storage.getDirectory();
+            const mediaDir = await root.getDirectoryHandle('media', {create: true});
+            // 1x1 transparent PNG decoded to a Uint8Array. Tiny, but real
+            // binary content so fold-image still has a blob to lay out.
+            const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+            const bin = Uint8Array.from(atob(pngBase64), c => c.charCodeAt(0));
+            for (let i = 0; i < 50; i++) {
+                const fh = await mediaDir.getFileHandle(`img-${i}.png`, {create: true});
+                const w = await fh.createWritable();
+                await w.write(bin);
+                await w.close();
+            }
+            const fh = await root.getFileHandle('Images.md', {create: true});
+            const w = await fh.createWritable();
+            let buf = '';
+            for (let i = 0; i < 50; i++) {
+                buf += `Image ${i}: ![](media/img-${i}.png)\n\n`;
+            }
+            await w.write(buf);
+            await w.close();
+            return root;
+        };
+    });
+    await page.evaluate(() => init(document.getElementById("editor")));
+    await page.waitForTimeout(500);
+
+    const samples = [];
+    for (let i = 0; i < RUNS; i++) {
+        const ms = await page.evaluate(async () => {
+            const t = performance.now();
+            await openFile('/Images.md');
+            return performance.now() - t;
+        });
+        samples.push(ms);
+        await page.evaluate(async () => {
+            await openFile('/🪴 Welcome.md').catch(() => {});
+        });
+        await page.waitForTimeout(50);
+    }
+
+    console.log(`Images.md: ${median(samples).toFixed(1)} ms (samples: ${samples.map(s => s.toFixed(0)).join(', ')})`);
+});
