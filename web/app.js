@@ -511,6 +511,10 @@ function showEditor2() {
 }
 
 function hideEditor2() {
+    if (typeof editor2 === 'undefined') {
+        return
+    }
+
     const editor2Container = document.getElementById('editor2-container');
 
     editor2Container.classList.remove('show');
@@ -520,7 +524,9 @@ function hideEditor2() {
     // doesn't take the isSameFile short-circuit (which skips re-init and
     // would leave the panel visually empty after editor1 re-init nuked
     // editor2's wrapper).
-    if (typeof editor2 !== 'undefined') editor2.path = undefined;
+    editor2.path = undefined;
+    currentEditor = editor;
+    renderSidebar();
 
     setTimeout(() => {
         editor2Container.style.display = 'none';
@@ -534,7 +540,6 @@ function isChrome() {
 
     var isChromium = window.chrome;
     var isOpera = typeof window.opr !== "undefined";
-    var isFirefox = winNav.userAgent.indexOf("Firefox") > -1;
     var isIEedge = winNav.userAgent.indexOf("Edg") > -1;
     var isIOSChrome = winNav.userAgent.match("CriOS");
     var isGoogleChrome = isChromium !== null
