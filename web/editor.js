@@ -80,12 +80,14 @@ function initEditor(el) {
         }
 
         if (/^(?!http|https|\[).+\.md$/.test(path)) {
+            const isMobile = window.matchMedia('(max-width: 670px)').matches;
+            const target = isMobile ? 'editor-textarea' : 'editor2-textarea';
             let parts = path.split('/');
             if (parts.length === 1) {
-                openFile('', path, true, 'editor2-textarea');
+                openFile('', path, true, target);
                 return;
             }
-            openFile(parts[0], parts[1], true, 'editor2-textarea');
+            openFile(parts[0], parts[1], true, target);
             return path;
         }
 
@@ -136,8 +138,14 @@ function initEditor(el) {
 
         path += '.md';
 
+        // Phones don't have the room for the split-view editor2 -
+        // route link follows into the main editor instead.
+        const target = window.matchMedia('(max-width: 670px)').matches
+            ? 'editor-textarea'
+            : 'editor2-textarea';
+
         if (getMemFile(path) !== null) {
-            openFile(path, true, 'editor2-textarea')
+            openFile(path, true, target)
             return;
         }
 
@@ -149,7 +157,7 @@ function initEditor(el) {
             }
 
             if (toFilename(path) === filename) {
-                openFile(path, true, 'editor2-textarea');
+                openFile(path, true, target);
                 return false;
             }
         });
