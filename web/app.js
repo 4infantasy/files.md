@@ -73,6 +73,11 @@ async function init() {
         isMemFS = true;
     }
 
+    // Let's create local-first like experience by preloading images.
+    if (isMemFS) {
+        prefetchWelcomeImages();
+    }
+
     // Alert if there's no "Allow on every visit" check.
     if (isChrome() && hasSavedLocalDir) {
         const permission = await (await getRootDirHandle()).queryPermission({ mode: 'readwrite' });

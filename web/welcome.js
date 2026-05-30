@@ -191,6 +191,17 @@ class MemDir {
     }
 }
 
+function prefetchWelcomeImages() {
+    const urls = ['img/slipbox.webp', 'img/tomas_sanchez.jpg'];
+    for (const url of urls) {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'image';
+        link.href = url;
+        document.head.appendChild(link);
+    }
+}
+
 const WELCOME_FILES = {
     "brain/": {
         "We think that we understand, but in reality we just know.md": {
