@@ -21,11 +21,9 @@ const (
 	StatusUpdatedOnServer = "updatedOnServer"
 	StatusMerged          = "merged"
 
-	MaxTextSize           = 5 << 20   // 5 MB
-	MaxFilenamesSize      = 10 << 20  // 10 MB
-	MaxMediaSize          = 30 << 20  // 30 MB
-	MaxMediaFilenamesSize = 512 << 10 // 512 KB
-	MaxTokenSize          = 4 << 10   // 4 KB
+	MaxTextSize      = 5 << 20  // 5 MB
+	MaxFilenamesSize = 10 << 20 // 10 MB
+	MaxTokenSize     = 4 << 10  // 4 KB
 )
 
 var OnChatUpdate = func(userID int64) {}
@@ -47,11 +45,12 @@ type syncRequest struct {
 }
 
 type syncResponse struct {
-	Status     string            `json:"status"`     // Status
-	Files      []file            `json:"files"`      // Files with content that need syncing
-	Timestamps map[string]int64  `json:"timestamps"` // Current server timestamps in Unix format
-	Renames    map[string]string `json:"renames"`    // What files to rename on client
-	Deleted    map[string]int64  `json:"deleted"`    // path -> deletedAt; client drops local copies older than this
+	Status     string            `json:"status"`          // Status
+	Error      string            `json:"error,omitempty"` // Server-side reason for a 4xx/5xx so the client can log it
+	Files      []file            `json:"files"`           // Files with content that need syncing
+	Timestamps map[string]int64  `json:"timestamps"`      // Current server timestamps in Unix format
+	Renames    map[string]string `json:"renames"`         // What files to rename on client
+	Deleted    map[string]int64  `json:"deleted"`         // path -> deletedAt; client drops local copies older than this
 }
 
 // SyncFilenames sync texts between client and server.
@@ -61,8 +60,10 @@ type syncResponse struct {
 // 3) Based on known client dirs timestamps, send newly updated or created files
 // 4) Respond with last modification timestamps for every dir
 func SyncFilenames(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		_ = json.NewEncoder(w).Encode(syncResponse{Status: "error", Error: "Method not allowed"})
 		return
 	}
 
@@ -70,7 +71,8 @@ func SyncFilenames(w http.ResponseWriter, r *http.Request) {
 
 	var request syncRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid syncMediasRequest JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(syncResponse{Status: "error", Error: fmt.Sprintf("Invalid syncFilenames JSON: %v", err)})
 		return
 	}
 

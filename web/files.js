@@ -513,7 +513,9 @@ async function syncMediaFiles() {
                     }),
                 });
                 if (!response.ok) {
-                    logError(`Failed to sync media file ${mediaFilename}: ${response.status}`);
+                    let body = '';
+                    try { body = await response.text(); } catch (_) {}
+                    logError(`Failed to sync media file ${mediaFilename}: ${response.status} ${response.statusText}: ${body}`.trim());
                 } else {
                     markServerOk();
                     server['media'][mediaFilename] = {
@@ -654,6 +656,13 @@ async function collectModifiedAndDeletedFiles() {
         }
 
         if (path.startsWith('/media/') || path === LOG_PATH) {
+            return;
+        }
+        // Binary media files (images, video) anywhere in the tree must not
+        // go through the text sync path - file.text() corrupts them and the
+        // JSON-escaped string can balloon past MaxFilenamesSize, returning
+        // 400 from syncFilenames. They sync via syncMediaFile when in /media/.
+        if (/\.(png|jpg|jpeg|gif|webp|mp4|webm|mov)$/i.test(path)) {
             return;
         }
 

@@ -12,6 +12,11 @@ import (
 	"github.com/zakirullin/files.md/server/fs"
 )
 
+const (
+	MaxMediaSize          = 30 << 20  // 30 MB
+	MaxMediaFilenamesSize = 512 << 10 // 512 KB
+)
+
 var syncMediasRequest struct {
 	Timestamp     int64  `json:"timestamp"`
 	FilenamesHash string `json:"filenamesHash"`
