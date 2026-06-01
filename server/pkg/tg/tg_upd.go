@@ -23,6 +23,11 @@ var (
 		"image/tiff",
 		"image/webp",
 	}
+	videoMimeTypes = []string{
+		"video/mp4",
+		"video/webm",
+		"video/quicktime",
+	}
 )
 
 // TGUpd is a simple wrapper over Telegram Update object
@@ -216,6 +221,11 @@ func (u *TGUpd) PhotoOrImageID() (string, bool) {
 		return imageID, true
 	}
 
+	videoID, found := u.videoID()
+	if found {
+		return videoID, true
+	}
+
 	return "", false
 }
 
@@ -267,6 +277,31 @@ func (u *TGUpd) imageID() (string, bool) {
 	}
 
 	if slices.Contains(imageMimeTypes, message.Document.MimeType) {
+		return message.Document.FileID, true
+	}
+
+	return "", false
+}
+
+// videoID returns the FileID of a video attached to the message - either as a
+// native Telegram video, an animation (GIF / silent mp4), or a Document with a
+// video MIME type. The bot saves the bytes via DownloadFile and the client
+// renders them inline via fold-image.js's mp4/webm/mov detection.
+func (u *TGUpd) videoID() (string, bool) {
+	message := u.raw.Message
+	if message == nil {
+		return "", false
+	}
+
+	if message.Video != nil {
+		return message.Video.FileID, true
+	}
+
+	if message.Animation != nil {
+		return message.Animation.FileID, true
+	}
+
+	if message.Document != nil && slices.Contains(videoMimeTypes, message.Document.MimeType) {
 		return message.Document.FileID, true
 	}
 

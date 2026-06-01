@@ -87,7 +87,7 @@ That's it. Full bot's functionality:
 
 Don't worry - it's much simpler than that by default.
 
-[Telegram Bot](https://t.me/FilesMDBot). **Other messengers will follow**.
+[Telegram Bot](https://t.me/FilesMDBot). *Other messengers will follow...*
 
 ## How to think deeply 
 **Connect ideas. Let them compound. Think through.**
