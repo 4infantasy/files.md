@@ -389,17 +389,6 @@ a:hover {
     border-radius: 8px;
 }
 
-.CodeMirror .HyperMD-list-line-1 {
-    padding-left: 25px !important;
-}
-
-.CodeMirror .HyperMD-list-line-2 {
-    padding-left: 55px !important;
-}
-
-.CodeMirror .HyperMD-list-line-3 {
-    padding-left: 85px !important;
-}
 
 
 /*.cm-formatting-list-ul::before {*/
@@ -439,9 +428,14 @@ a:hover {
     color: var(--col-tx-alt) !important;
 }
 
-/*Hide bulletpoints when tasks*/
+/*Hide bulletpoints when tasks. Also drop the list-marker margin so checklist
+  items don't inherit the bullet shift - they sit flush with the doc-body
+  edge whether folded (rendered checkbox) or unfolded (raw `- [ ] text`). */
 .cm-formatting-list-ul:has(+ .cm-formatting-task) {
     width: 0;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line span.cm-formatting-list-ul:has(+ .cm-formatting-task) {
+    margin-left: 0;
 }
 
 /* Hide the list formatting only when task formatting IS hidden */
@@ -455,7 +449,9 @@ a:hover {
 }
 
 .cm-formatting-list-ul:has(+ .cm-formatting-task.hmd-hidden-token) + .cm-formatting-task.hmd-hidden-token {
-    margin-left: -24px;
+    width: 1em;
+    overflow: hidden;
+    margin-right: 2px;
 }
 
 /*For some reason ``` in code aren't hidden*/
@@ -894,13 +890,6 @@ pre.HyperMD-codeblock-end {
     padding-inline-start: 24px !important;
 }
 
-.HyperMD-list-line:has(.cm-formatting-task) {
-    padding-left: 30px !important;
-}
-
-.HyperMD-list-line:has(.cm-formatting-task.hmd-hidden-token) {
-    text-indent: -5px !important;
-}
 
 .cm-formatting-task.cm-property ~ .cm-list-1 {
     text-decoration: line-through;

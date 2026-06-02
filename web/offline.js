@@ -5,6 +5,7 @@
 const urlsToCache = [
     '/',
     '/favicon.ico',
+    '/favicon.svg',
     '/img/icon.png',
     '/img/icon_small.png',
     '/manifest.json',
@@ -99,7 +100,7 @@ self.addEventListener('install', event => {
         for (let url of urlsToCache) {
             // KaTeX fonts are referenced by katex.min.css with no version param,
             // so the cache key must match (no hash appended either).
-            const shouldAddRevisionHash = url !== "/" && url !== 'favicon.ico' && !url.startsWith('/img/') && !url.endsWith('.woff2');
+            const shouldAddRevisionHash = url !== "/" && url !== 'favicon.ico' && url !== 'favicon.svg' && !url.startsWith('/img/') && !url.endsWith('.woff2');
             if (shouldAddRevisionHash) {
                 url = url + COMMIT_HASH;
             }
