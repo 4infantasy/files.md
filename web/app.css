@@ -254,6 +254,69 @@ td {
     padding: 0;
 }
 
+.table-plus {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    z-index: 7;
+    background: var(--color-neo-orange, #e8912d);
+    border: 1px solid #999;
+    color: var(--col-bg);
+    font-size: 9px;
+    line-height: 1;
+    user-select: none;
+    border-radius: 4px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.12s ease, visibility 0s 0.12s;
+}
+
+.table-plus.show {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.12s ease 0.1s, visibility 0s 0.1s;
+}
+
+.table-plus:hover {
+    filter: brightness(1.1);
+}
+
+.table-plus-col {
+    width: 16px;
+    cursor: e-resize;
+}
+
+.table-plus-row {
+    height: 16px;
+    cursor: s-resize;
+}
+
+/* Reserve a strip below each table for the add-row plank, so hovering
+   there doesn't land on the next text line. */
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row:not(:has(+ pre.HyperMD-table-row)) {
+    padding-bottom: 18px;
+}
+
+/* Rounded table corners. The last real column is either followed by the
+   trailing pipe separator + dummy column (normal tables) or is the last
+   child itself (tables without outer pipes). */
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row.HyperMD-table-row-0 .hmd-table-column[data-column="0"] {
+    border-top-left-radius: 5px;
+}
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row.HyperMD-table-row-0 .hmd-table-column:has(+ span.cm-hmd-table-sep + .hmd-table-column-dummy:last-child),
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row.HyperMD-table-row-0 .hmd-table-column:not(.hmd-table-column-dummy):last-child {
+    border-top-right-radius: 5px;
+}
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row:not(:has(+ pre.HyperMD-table-row)) .hmd-table-column[data-column="0"] {
+    border-bottom-left-radius: 5px;
+}
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row:not(:has(+ pre.HyperMD-table-row)) .hmd-table-column:has(+ span.cm-hmd-table-sep + .hmd-table-column-dummy:last-child),
+.CodeMirror.cm-s-hypermd-light pre.HyperMD-table-row:not(:has(+ pre.HyperMD-table-row)) .hmd-table-column:not(.hmd-table-column-dummy):last-child {
+    border-bottom-right-radius: 5px;
+}
+
 a {
     color: var(--col-tx) !important;
     text-decoration: underline;
