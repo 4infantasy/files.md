@@ -2784,6 +2784,18 @@
     }
     var atLeft = x - bestBox.left < bestBox.right - x;
     var ch = skipExtendingChars(lineObj.text, best + (atLeft ? 0 : 1), 1);
+    // PATCHED: snap the cursor past the padding spaces around the cell's
+    // pipes, so clicking a cell never leaves the cursor glued to a "|".
+    var text = lineObj.text;
+    var cellStart = text.lastIndexOf("|", Math.max(ch - 1, 0)) + 1;
+    var cellEnd = text.indexOf("|", ch);
+    if (cellEnd < 0) { cellEnd = text.length; }
+    var lo = cellStart, hi = cellEnd;
+    while (lo < hi && text.charAt(lo) === " ") { lo++; }
+    while (hi > lo && text.charAt(hi - 1) === " ") { hi--; }
+    if (lo === hi) { lo = hi = Math.min(cellStart + 1, cellEnd); } // all-space cell
+    if (ch < lo) { ch = lo; }
+    else if (ch > hi) { ch = hi; }
     var baseX = atLeft ? bestBox.left : bestBox.right;
     var outside = y < bestBox.top + widgetHeight ? -1 : y >= bestBox.bottom + widgetHeight ? 1 : 0;
     return PosWithInfo(lineNo, ch, atLeft ? "after" : "before", outside, x - baseX)
