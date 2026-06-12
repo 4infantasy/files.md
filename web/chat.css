@@ -371,7 +371,7 @@
 
 #chat-input {
     background: var(--col-bg-alt);
-    border: 1px solid transparent;
+    border: 1px solid color-mix(in srgb, var(--col-tx), transparent 96%);
     border-radius: 25px !important;
     padding: 14px 64px 14px 22px;
     font-size: 16px;
@@ -382,11 +382,12 @@
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.4;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 #chat-input:focus {
     outline: none;
-    border: 1px solid var(--col-border);
+    border-color: color-mix(in srgb, var(--col-tx), transparent 92%);
 }
 
 #send-chat {
