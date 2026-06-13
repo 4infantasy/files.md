@@ -941,7 +941,7 @@ async function renderMessages() {
         chat.innerHTML = `
             <div class="empty-state">
                 <img class="empty-icon" src="img/icon.png" alt="">
-                <div class="empty-title">Free your head</div>
+                <div class="empty-title">Free your mind</div>
             </div>
         `;
         return;
