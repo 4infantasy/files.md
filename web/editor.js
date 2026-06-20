@@ -22,6 +22,9 @@ function initEditor(el) {
     let newEditor = HyperMD.fromTextArea(el, {
         dragDrop: false,
         viewportMargin: 10,
+        // Keep the cursor off the viewport edge when it scrolls into view, so
+        // Cmd-Down  leaves breathing room.
+        cursorScrollMargin: 300,
         mode: {
             name: 'hypermd',
             math: true,
